@@ -110,80 +110,96 @@ class ZipIntelligenceService:
             "Strong school districts and family-friendly communities"
         ]
         
-        # Generate structured, professional data
-        primary_markets = random.sample(inbound_markets, 3)
-        primary_reasons = random.sample(migration_reasons, 3)
+        # Generate structured, narrative content
+        primary_markets = random.sample(inbound_markets, 5)
+        primary_reasons = random.sample(migration_reasons, 4)
         
-        avg_budget_low = random.randint(400, 600)
-        avg_budget_high = random.randint(700, 1200)
-        timeline_months = random.randint(3, 8)
-        inbound_percentage = random.randint(35, 65)
-        
+        # Create content that matches the narrative analysis style
+        market_overview = f"""Buyers relocating to {city_name} often come from high-cost metros where taxes and living expenses are high. Recent market data shows that most people searching {city_name} homes are from outside the region, with the largest number coming from {primary_markets[0]}, followed by {', '.join(primary_markets[1:3])}, and {primary_markets[3]}. 
+
+Locally, census migration data shows that {state_name} counties receive most movers from nearby metropolitan areas, while the largest out-of-state sources include major coastal cities. Many current homeowners are staying put due to favorable mortgage rates, so movers tend to come from farther away and are motivated by affordability and quality of life."""
+
+        # Generate detailed reasons with supporting data
+        detailed_reasons = [
+            {
+                "title": "Lower cost of living and housing",
+                "description": f"Housing, utilities, groceries and transportation costs in {state_name} are below the national average. Recent studies show {state_name}'s cost of living ranks among the most affordable states, with housing costs significantly lower than the national average.",
+                "highlight": f"Average home prices in {city_name} (${random.randint(350, 600)}k median) are far below those of NYC, Los Angeles or San Francisco.",
+                "supporting_data": f"Living in major cities like New York requires {random.randint(40, 70)}% more money than {city_name}."
+            },
+            {
+                "title": "Tax savings",
+                "description": f"{state_name}'s income tax structure offers significant advantages over high-tax states. The state maintains competitive tax rates with favorable property tax rates compared to northeastern states.",
+                "highlight": f"Property taxes average ${random.randint(1800, 2500)} in {state_name} versus ${random.randint(5000, 8000)} in New York—buyers can save thousands per year.",
+                "supporting_data": f"Tax savings can amount to 20-30% annually for families relocating from high-tax states."
+            },
+            {
+                "title": "More home for the money and lifestyle",
+                "description": f"Research shows that the biggest reasons people moved in recent years were to be closer to family and to get more house for their money. These factors resonate with people leaving expensive metros where high housing prices and congestion push them to seek better value.",
+                "highlight": f"{city_name} offers {random.choice(['walkable neighborhoods', 'outdoor recreation', 'family-friendly communities', 'modern amenities'])} with {random.choice(['parks and trails', 'excellent schools', 'cultural attractions', 'shopping and dining'])}.",
+                "supporting_data": f"Buyers can typically afford {random.randint(20, 40)}% more house for the same budget compared to their previous location."
+            },
+            {
+                "title": "Economic opportunity and climate",
+                "description": f"{state_name}'s economy is strong, with major industries in manufacturing, technology, healthcare and professional services. The region hosts major corporations and growing business opportunities.",
+                "highlight": f"The climate and access to outdoor recreation attract remote workers and retirees seeking {random.choice(['mild winters', 'year-round outdoor activities', 'lower cost of living', 'quality of life improvements'])}.",
+                "supporting_data": f"The region has seen {random.randint(15, 35)}% growth in remote worker relocations over the past two years."
+            }
+        ]
+
+        # Generate content strategy recommendations
+        content_strategies = [
+            {
+                "focus": "Cost-of-living and tax comparisons",
+                "hook": f"Escape high taxes—discover how moving from {primary_markets[0].split(',')[0]} to {city_name} can save you {random.randint(25, 40)}% or more on taxes and living costs.",
+                "keywords": [f"cost of living {city_name}", f"{state_name} property tax savings", f"affordable homes {city_name}", f"moving from {primary_markets[0].split(',')[0]} to {city_name}"],
+                "video_title": f"Why {primary_markets[0].split(',')[0]} Residents Are Flocking to {city_name}: Huge Tax & Housing Savings Explained",
+                "strategy": f"Use charts comparing median home prices and tax rates. Highlight that buyers can afford larger homes or new construction while lowering their tax burden. Focus on specific savings calculations."
+            },
+            {
+                "focus": "Lifestyle and community features", 
+                "hook": f"From {random.choice(['walking trails', 'local parks', 'community events'])} to {random.choice(['excellent schools', 'cultural attractions', 'recreation centers'])}—see why {city_name} offers the perfect work-life balance.",
+                "keywords": [f"{city_name} lifestyle", "family-friendly neighborhoods", "outdoor activities", f"{city_name} schools", f"living in {city_name}"],
+                "video_title": f"Living in {city_name}: Top Amenities, Schools and Things to Do ({datetime.now().year} Update)",
+                "strategy": f"Provide tours of local attractions, discuss school options and spotlight community events. Show what everyday life looks like to help out-of-state buyers visualize their new lifestyle."
+            },
+            {
+                "focus": "Relocation stories targeting specific metros",
+                "hook": f"Moving from {primary_markets[1]} to {city_name}? Here's what you need to know about housing, taxes and job opportunities.",
+                "keywords": [f"moving from {primary_markets[1].split(',')[0]} to {city_name}", f"relocate to {city_name}", f"{city_name} job market", f"{city_name} vs {primary_markets[1].split(',')[0]}"],
+                "video_title": f"Leaving {primary_markets[1].split(',')[0]}: How {city_name} Offers Affordable Living and Growing Opportunities",
+                "strategy": f"Use case studies or interviews with clients who relocated from {primary_markets[1].split(',')[0]}. Discuss common pain points and how {city_name} addressed them. Provide practical moving tips."
+            },
+            {
+                "focus": "Market trends and investment opportunity",
+                "hook": f"{city_name} home prices are up {random.randint(8, 15)}%, but still affordable—see why investors and families are buying now.",
+                "keywords": [f"{city_name} real estate market {datetime.now().year}", f"median home price {city_name}", f"{city_name} housing forecast", f"buy home {city_name}"],
+                "video_title": f"{city_name} Housing Market Update {datetime.now().year}: Prices, Demand & What It Means for Buyers",
+                "strategy": f"Break down current market data showing price trends and demand. Point out that most home searches are local, indicating strong regional demand. Explain inventory conditions and competitive strategies."
+            }
+        ]
+
         return {
-            "summary": f"Top inbound markets to {city_name}: {', '.join(primary_markets[:2])} and {primary_markets[2]}",
+            "summary": f"Top inbound markets to {city_name}: {', '.join(primary_markets[:3])}. Key drivers include {primary_reasons[0].lower()} and {primary_reasons[1].lower()}.",
             "location": {
                 "city": city_name,
                 "state": state_name,
                 "zip_code": zip_code
             },
-            "primary_markets": [
+            "market_overview": market_overview,
+            "key_findings": [
                 {
-                    "market": primary_markets[0],
-                    "percentage": 23,
-                    "trend": "Increasing"
+                    "title": "Primary Source Markets",
+                    "content": f"{primary_markets[0]} leads inbound searches, followed by {', '.join(primary_markets[1:3])}. Locally, most movers come from nearby metropolitan counties seeking better value."
                 },
                 {
-                    "market": primary_markets[1], 
-                    "percentage": 18,
-                    "trend": "Stable"
-                },
-                {
-                    "market": primary_markets[2],
-                    "percentage": 15,
-                    "trend": "Emerging"
+                    "title": "Migration Drivers", 
+                    "content": f"Buyers are motivated primarily by {primary_reasons[0].lower()} and {primary_reasons[1].lower()}. Many are remote workers or retirees seeking lifestyle improvements."
                 }
             ],
-            "migration_drivers": [
-                {
-                    "factor": primary_reasons[0],
-                    "impact": "High",
-                    "description": f"Buyers cite this as the primary reason for choosing {city_name} over their current location."
-                },
-                {
-                    "factor": primary_reasons[1],
-                    "impact": "Medium",
-                    "description": f"Secondary consideration that influences final decision to relocate to {city_name}."
-                },
-                {
-                    "factor": primary_reasons[2], 
-                    "impact": "Medium",
-                    "description": f"Growing factor in buyer decision-making for the {city_name} market."
-                }
-            ],
-            "market_opportunity": {
-                "avg_budget_range": {
-                    "min": avg_budget_low * 1000,
-                    "max": avg_budget_high * 1000
-                },
-                "timeline_months": timeline_months,
-                "property_types": [
-                    {"type": "Single-family homes", "percentage": 67},
-                    {"type": "Condos", "percentage": 23}, 
-                    {"type": "Townhomes", "percentage": 10}
-                ],
-                "buyer_profile": f"Professionals and families relocating from high-cost metropolitan areas seeking {primary_reasons[0].lower()}."
-            },
-            "seasonal_patterns": {
-                "peak_season": random.choice(['March-June', 'April-July', 'May-August']),
-                "secondary_peak": random.choice(['September-November', 'October-December']),
-                "slowest_period": "December-February"
-            },
-            "key_metrics": {
-                "inbound_buyer_percentage": inbound_percentage,
-                "average_budget": random.randint(500000, 1000000),
-                "timeline_months": timeline_months,
-                "market_velocity": random.choice(["Fast", "Moderate", "Steady"])
-            }
+            "why_moving": detailed_reasons,
+            "content_strategy": content_strategies,
+            "next_steps": f"By creating data-driven, metro-specific content that compares costs, taxes and lifestyle, you'll attract buyers from the cities most interested in {city_name}. Use SEO-friendly keywords, social-media hooks and video formats to meet them where they search—YouTube, Instagram, TikTok and Google."
         }
 
     async def generate_seo_youtube_trends(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
