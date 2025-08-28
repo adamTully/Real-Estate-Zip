@@ -15,14 +15,12 @@ import {
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Tabs from "@radix-ui/react-tabs";
 import * as Toast from "@radix-ui/react-toast";
-import { Theme } from "@radix-ui/themes";
 import BuyerMigrationDetail from "./components/BuyerMigrationDetail";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { jsPDF } from "jspdf";
 import axios from "axios";
 import "./App.css";
-import "@radix-ui/themes/styles.css";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
