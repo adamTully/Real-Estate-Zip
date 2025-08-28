@@ -497,7 +497,8 @@ export default function ZipIntelApp() {
           </Card>
         </div>
       )}
-    </div>
+      </div>
+    </Theme>
   );
 }
 
