@@ -407,12 +407,14 @@ export default function ZipIntelApp() {
               onViewAsset={setAssetDetail}
               onSetStage={setStage}
             />
+          ) : detailView.key === "buyer_migration" ? (
+            <BuyerMigrationDetail data={detailView.data} />
           ) : (
             <Card>
               <CardContent>
                 <div className="prose prose-neutral max-w-none">
                   <pre className="whitespace-pre-wrap text-sm font-mono bg-neutral-50 p-6 rounded-xl">
-                    {detailView.data?.detailed_analysis || "No detailed analysis available"}
+                    {detailView.data?.detailed_analysis || JSON.stringify(detailView.data, null, 2)}
                   </pre>
                 </div>
                 
