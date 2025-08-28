@@ -97,7 +97,8 @@ class ZipIntelligenceService:
         # Simulate realistic migration data
         inbound_markets = [
             "New York, NY", "Los Angeles, CA", "San Francisco, CA", 
-            "Washington, DC", "Boston, MA", "Chicago, IL"
+            "Washington, DC", "Boston, MA", "Chicago, IL", "Seattle, WA",
+            "Austin, TX", "Denver, CO", "Portland, OR", "Miami, FL"
         ]
         
         migration_reasons = [
@@ -109,39 +110,79 @@ class ZipIntelligenceService:
             "Strong school districts and family-friendly communities"
         ]
         
+        # Generate structured, professional data
+        primary_markets = random.sample(inbound_markets, 3)
+        primary_reasons = random.sample(migration_reasons, 3)
+        
+        avg_budget_low = random.randint(400, 600)
+        avg_budget_high = random.randint(700, 1200)
+        timeline_months = random.randint(3, 8)
+        inbound_percentage = random.randint(35, 65)
+        
         return {
-            "summary": f"Top inbound markets to {city_name}, {state_name}: {', '.join(random.sample(inbound_markets, 3))}",
-            "detailed_analysis": f"""
-# Buyer Migration Analysis for {zip_code}
-
-## Primary Inbound Markets
-The {city_name} area is attracting buyers primarily from high-cost metropolitan areas:
-
-**Top 3 Source Markets:**
-1. **{random.choice(inbound_markets)}** - 23% of inbound buyers
-2. **{random.choice(inbound_markets)}** - 18% of inbound buyers  
-3. **{random.choice(inbound_markets)}** - 15% of inbound buyers
-
-## Migration Drivers
-Key factors attracting buyers to {city_name}:
-
-• **{random.choice(migration_reasons)}**
-• **{random.choice(migration_reasons)}**
-• **{random.choice(migration_reasons)}**
-
-## Market Opportunity
-- Average buyer budget from out-of-state: ${random.randint(400, 800)}K-${random.randint(800, 1200)}K
-- Typical timeline: {random.randint(3, 8)} months from initial search to purchase
-- Primary property types: Single-family homes (67%), Condos (23%), Townhomes (10%)
-
-## Seasonal Patterns
-Peak migration months: {random.choice(['March-June', 'April-July', 'May-August'])}
-Secondary peak: {random.choice(['September-November', 'October-December'])}
-            """.strip(),
+            "summary": f"Top inbound markets to {city_name}: {', '.join(primary_markets[:2])} and {primary_markets[2]}",
+            "location": {
+                "city": city_name,
+                "state": state_name,
+                "zip_code": zip_code
+            },
+            "primary_markets": [
+                {
+                    "market": primary_markets[0],
+                    "percentage": 23,
+                    "trend": "Increasing"
+                },
+                {
+                    "market": primary_markets[1], 
+                    "percentage": 18,
+                    "trend": "Stable"
+                },
+                {
+                    "market": primary_markets[2],
+                    "percentage": 15,
+                    "trend": "Emerging"
+                }
+            ],
+            "migration_drivers": [
+                {
+                    "factor": primary_reasons[0],
+                    "impact": "High",
+                    "description": f"Buyers cite this as the primary reason for choosing {city_name} over their current location."
+                },
+                {
+                    "factor": primary_reasons[1],
+                    "impact": "Medium",
+                    "description": f"Secondary consideration that influences final decision to relocate to {city_name}."
+                },
+                {
+                    "factor": primary_reasons[2], 
+                    "impact": "Medium",
+                    "description": f"Growing factor in buyer decision-making for the {city_name} market."
+                }
+            ],
+            "market_opportunity": {
+                "avg_budget_range": {
+                    "min": avg_budget_low * 1000,
+                    "max": avg_budget_high * 1000
+                },
+                "timeline_months": timeline_months,
+                "property_types": [
+                    {"type": "Single-family homes", "percentage": 67},
+                    {"type": "Condos", "percentage": 23}, 
+                    {"type": "Townhomes", "percentage": 10}
+                ],
+                "buyer_profile": f"Professionals and families relocating from high-cost metropolitan areas seeking {primary_reasons[0].lower()}."
+            },
+            "seasonal_patterns": {
+                "peak_season": random.choice(['March-June', 'April-July', 'May-August']),
+                "secondary_peak": random.choice(['September-November', 'October-December']),
+                "slowest_period": "December-February"
+            },
             "key_metrics": {
-                "inbound_buyer_percentage": random.randint(35, 65),
+                "inbound_buyer_percentage": inbound_percentage,
                 "average_budget": random.randint(500000, 1000000),
-                "timeline_months": random.randint(3, 8)
+                "timeline_months": timeline_months,
+                "market_velocity": random.choice(["Fast", "Moderate", "Steady"])
             }
         }
 
