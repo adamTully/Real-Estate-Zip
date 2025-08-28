@@ -229,7 +229,8 @@ export default function ZipIntelApp() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100">
+    <Theme>
+      <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100">
       {/* Toast Notifications */}
       <Toast.Provider swipeDirection="right">
         {success && (
