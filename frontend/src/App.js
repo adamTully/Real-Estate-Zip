@@ -16,6 +16,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Tabs from "@radix-ui/react-tabs";
 import * as Toast from "@radix-ui/react-toast";
 import BuyerMigrationDetail from "./components/BuyerMigrationDetail";
+import SeoYouTubeDetail from "./components/SeoYouTubeDetail";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { jsPDF } from "jspdf";
