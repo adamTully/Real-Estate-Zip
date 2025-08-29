@@ -412,6 +412,12 @@ export default function ZipIntelApp() {
             <BuyerMigrationDetail data={detailView.data} />
           ) : detailView.key === "seo_youtube_trends" ? (
             <SeoYouTubeDetail data={detailView.data} />
+          ) : detailView.key === "content_strategy" ? (
+            <ContentStrategyDetail data={detailView.data} />
+          ) : detailView.key === "hidden_listings" ? (
+            <MarketResearchDetail data={detailView.data} />
+          ) : detailView.key === "content_assets" ? (
+            <ContentCreationDetail data={detailView.data} />
           ) : (
             <Card>
               <CardContent>
