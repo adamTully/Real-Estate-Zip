@@ -202,29 +202,6 @@ export default function ZipIntelApp() {
     runAnalysis();
   }
 
-  function openDetail(stepKey, title) {
-    if (!analysisData) return;
-    
-    const data = analysisData[stepKey];
-    setDetailView({
-      key: stepKey,
-      title,
-      data: data
-    });
-    setStage("detail");
-  }
-
-  function openAssetsDetail() {
-    if (!analysisData?.content_assets) return;
-    
-    setDetailView({
-      key: "content_assets",
-      title: "Content Assets",
-      data: analysisData.content_assets
-    });
-    setStage("detail");
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100">
       {/* Toast Notifications */}
