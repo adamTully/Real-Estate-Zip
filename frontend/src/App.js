@@ -299,85 +299,15 @@ export default function ZipIntelApp() {
         </div>
       )}
 
-      {/* Pipeline Stage */}
+      {/* Intelligence Dashboard */}
       {stage === "pipeline" && analysisData && (
-        <div className="mx-auto max-w-6xl px-6 py-10">
-          <div className="mb-8">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setStage("home");
-                setAnalysisData(null);
-                setZip("");
-              }}
-              className="mb-4"
-            >
-              <ArrowLeft size={16} />
-              New Analysis
-            </Button>
-            
-            <h1 className="text-3xl font-bold text-neutral-900 mb-2">
-              Market Intelligence for {zip}
-            </h1>
-            <p className="text-neutral-600">
-              Generated on {new Date(analysisData.created_at).toLocaleDateString()}
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <ResultCard
-              title="Buyer Migration Intel"
-              value={analysisData.buyer_migration?.summary}
-              onOpen={() => openDetail("buyer_migration", "Buyer Migration Intelligence")}
-              icon={MapPin}
-            />
-            
-            <ResultCard
-              title="SEO & YouTube Trends"
-              value={analysisData.seo_youtube_trends?.summary}
-              onOpen={() => openDetail("seo_youtube_trends", "SEO & YouTube Trends")}
-              icon={Sparkles}
-            />
-            
-            <ResultCard
-              title="Content Strategy"
-              value={analysisData.content_strategy?.summary}
-              onOpen={() => openDetail("content_strategy", "Content Strategy")}
-              icon={Wand2}
-            />
-            
-            <ResultCard
-              title="Hidden Listings Analysis"
-              value={analysisData.hidden_listings?.summary}
-              onOpen={() => openDetail("hidden_listings", "Hidden Listings Analysis")}
-              onDownload={downloadPDF}
-              icon={FileText}
-            />
-            
-            <ResultCard
-              title="Market Hooks & Titles"
-              value={analysisData.market_hooks?.summary}
-              onOpen={() => openDetail("market_hooks", "Market Hooks & Titles")}
-              icon={Mail}
-            />
-            
-            <Card className="md:col-span-2">
-              <CardContent>
-                <div className="flex items-center gap-3 mb-3">
-                  <Download className="w-5 h-5 text-neutral-600" />
-                  <h3 className="font-semibold text-lg">Content Assets</h3>
-                </div>
-                <p className="text-neutral-600 mb-4">
-                  {analysisData.content_assets?.summary}
-                </p>
-                <Button onClick={openAssetsDetail} variant="outline">
-                  View All Assets
-                  <ExternalLink size={14} />
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <IntelligenceDashboard 
+          analysisData={analysisData}
+          onViewDetail={(key, title, data) => {
+            setDetailView({ key, title, data });
+            setStage("detail");
+          }}
+        />
       )}
 
       {/* Detail Stage */}
