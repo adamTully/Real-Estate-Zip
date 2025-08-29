@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { 
+  MapPin, 
+  Sparkles, 
+  Wand2, 
+  FileText, 
+  Download, 
+  ExternalLink, 
   CheckCircle2,
   Clock,
   ArrowRight,
   Calendar,
-  Target,
-  FileText,
-  Sparkles
+  Target
 } from "lucide-react";
 import IntelligenceSidebar from "./IntelligenceSidebar";
 
