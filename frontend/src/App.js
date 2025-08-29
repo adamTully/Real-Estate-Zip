@@ -15,7 +15,7 @@ import {
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Tabs from "@radix-ui/react-tabs";
 import * as Toast from "@radix-ui/react-toast";
-import BuyerMigrationDetail from "./components/BuyerMigrationDetail";
+import BuyerMigrationDetailView from "./components/BuyerMigrationDetail";
 import SeoYouTubeDetail from "./components/SeoYouTubeDetail";
 import ContentStrategyDetail from "./components/ContentStrategyDetail";
 import MarketResearchDetail from "./components/MarketResearchDetail";
@@ -230,6 +230,7 @@ export default function ZipIntelApp() {
             <p className="text-lg text-neutral-600">
               Generate comprehensive real estate market intelligence for any ZIP code
             </p>
+            <p className="text-xs text-neutral-400">Build: app-v2</p>
           </div>
 
           <Card>
@@ -307,7 +308,7 @@ export default function ZipIntelApp() {
           
           <div className="flex-1 p-8">
             {detailView.key === "buyer_migration" ? (
-              <BuyerMigrationDetail data={detailView.data} />
+              <BuyerMigrationDetailView data={detailView.data} />
             ) : detailView.key === "seo_youtube_trends" ? (
               <SeoYouTubeDetail data={detailView.data} />
             ) : detailView.key === "content_strategy" ? (

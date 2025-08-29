@@ -40,7 +40,7 @@ const Highlight = ({ children, color = "blue" }) => {
   );
 };
 
-const BuyerMigrationDetail = ({ data }) => {
+function BuyerMigrationDetailView({ data }) {
   if (!data) return null;
 
   // Handle both real ChatGPT responses and structured data
@@ -63,6 +63,8 @@ const BuyerMigrationDetail = ({ data }) => {
         <p className="text-neutral-600 max-w-2xl mx-auto leading-relaxed">
           {isRealData ? "Real-time market analysis powered by ChatGPT GPT-5" : "Analysis of buyer migration patterns and market opportunities for targeted marketing campaigns."}
         </p>
+        {/* Build version badge for cache-busting visibility */}
+        <div className="text-xs text-neutral-500">Build: bmd-v2</div>
         
         {/* Data Source Badge */}
         {isRealData && (
@@ -206,6 +208,6 @@ const BuyerMigrationDetail = ({ data }) => {
       )}
     </div>
   );
-};
+}
 
-export default BuyerMigrationDetail;
+export default BuyerMigrationDetailView;
