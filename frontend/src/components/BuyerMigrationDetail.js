@@ -42,6 +42,10 @@ const Highlight = ({ children, color = "blue" }) => {
 const BuyerMigrationDetail = ({ data }) => {
   if (!data) return null;
 
+  // Handle both real ChatGPT responses and structured data
+  const content = data.analysis_content || data.market_overview || "No analysis available";
+  const isRealData = !!data.analysis_content;
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
@@ -56,123 +60,174 @@ const BuyerMigrationDetail = ({ data }) => {
           </span>
         </div>
         <p className="text-neutral-600 max-w-2xl mx-auto leading-relaxed">
-          Analysis of buyer migration patterns and market opportunities for targeted marketing campaigns.
+          {isRealData ? "Real-time market analysis powered by ChatGPT GPT-5" : "Analysis of buyer migration patterns and market opportunities for targeted marketing campaigns."}
         </p>
-      </div>
-
-      {/* Market Overview */}
-      <Section title="Market Overview" icon={TrendingUp}>
-        <ContentBlock>
-          <p className="text-neutral-700 leading-relaxed text-lg">
-            {data.market_overview}
-          </p>
-        </ContentBlock>
         
-        {data.key_findings && (
-          <div className="grid md:grid-cols-2 gap-4">
-            {data.key_findings.map((finding, index) => (
-              <Highlight key={index} color={index === 0 ? "blue" : "green"}>
-                <h3 className="font-semibold mb-2">{finding.title}</h3>
-                <p className="text-sm leading-relaxed">{finding.content}</p>
-              </Highlight>
-            ))}
+        {/* Data Source Badge */}
+        {isRealData && (
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
+            <Sparkles className="w-3 h-3" />
+            Generated with {data.generated_with} • {new Date(data.timestamp).toLocaleDateString()}
           </div>
         )}
-      </Section>
+      </div>
 
-      {/* Why Buyers Are Moving */}
-      {data.why_moving && (
-        <Section title={`Why Buyers Are Moving to ${data.location?.city}`} icon={Target}>
-          <div className="space-y-6">
-            {data.why_moving.map((reason, index) => (
-              <ContentBlock key={index} className="space-y-4">
-                <h3 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-bold">
-                    {index + 1}
-                  </span>
-                  {reason.title}
-                </h3>
-                
-                <p className="text-neutral-700 leading-relaxed">
-                  {reason.description}
-                </p>
-                
-                <Highlight color="orange">
-                  <div className="flex items-start gap-2">
-                    <Quote className="w-4 h-4 mt-1 flex-shrink-0" />
-                    <p className="text-sm font-medium leading-relaxed">
-                      {reason.highlight}
-                    </p>
-                  </div>
-                </Highlight>
-
-                {reason.supporting_data && (
-                  <div className="bg-neutral-50 p-3 rounded-lg">
-                    <p className="text-sm text-neutral-600 leading-relaxed">
-                      <strong>Key Insight:</strong> {reason.supporting_data}
-                    </p>
-                  </div>
-                )}
-              </ContentBlock>
-            ))}
+      {/* Real ChatGPT Content */}
+      {isRealData ? (
+        <ContentBlock>
+          <div className="prose prose-lg prose-neutral max-w-none">
+            <div 
+              className="leading-relaxed text-neutral-800"
+              style={{ whiteSpace: 'pre-wrap' }}
+              dangerouslySetInnerHTML={{ 
+                __html: content
+                  .replace(/\n\n/g, '</p><p class="mb-4">')
+                  .replace(/^/, '<p class="mb-4">')
+                  .replace(/$/, '</p>')
+                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                  .replace(/### (.*?)\n/g, '<h3 class="text-xl font-semibold text-neutral-900 mt-8 mb-4">$1</h3>')
+                  .replace(/## (.*?)\n/g, '<h2 class="text-2xl font-bold text-neutral-900 mt-8 mb-6">$1</h2>')
+                  .replace(/# (.*?)\n/g, '<h1 class="text-3xl font-bold text-neutral-900 mt-8 mb-6">$1</h1>')
+                  .replace(/\* \*\*(.*?)\*\* – (.*?)(\n|$)/g, '<div class="bg-blue-50 p-4 rounded-lg border-l-4 border-l-blue-400 my-4"><h4 class="font-semibold text-blue-900 mb-2">$1</h4><p class="text-blue-800 text-sm leading-relaxed">$2</p></div>')
+                  .replace(/\* (.*?)(\n|$)/g, '<li class="ml-4 mb-2">$1</li>')
+              }}
+            />
           </div>
-        </Section>
-      )}
+        </ContentBlock>
+      ) : (
+        /* Fallback structured content display */
+        <>
+          {/* Market Overview */}
+          <Section title="Market Overview" icon={TrendingUp}>
+            <ContentBlock>
+              <p className="text-neutral-700 leading-relaxed text-lg">
+                {data.market_overview}
+              </p>
+            </ContentBlock>
+            
+            {data.key_findings && (
+              <div className="grid md:grid-cols-2 gap-4">
+                {data.key_findings.map((finding, index) => (
+                  <Highlight key={index} color={index === 0 ? "blue" : "green"}>
+                    <h3 className="font-semibold mb-2">{finding.title}</h3>
+                    <p className="text-sm leading-relaxed">{finding.content}</p>
+                  </Highlight>
+                ))}
+              </div>
+            )}
+          </Section>
 
-      {/* Content Strategy Recommendations */}
-      {data.content_strategy && (
-        <Section title="Content Strategy to Attract These Buyers" icon={Lightbulb}>
-          <div className="space-y-6">
-            {data.content_strategy.map((strategy, index) => (
-              <ContentBlock key={index} className="space-y-4">
-                <h3 className="text-lg font-semibold text-neutral-900">
-                  {index + 1}. {strategy.focus}
-                </h3>
-                
-                {/* Hook */}
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border-l-4 border-l-blue-400">
-                  <p className="font-medium text-neutral-800">
-                    <span className="text-blue-600 font-semibold">Hook: </span>
-                    "{strategy.hook}"
-                  </p>
-                </div>
-
-                {/* Keywords */}
-                <div>
-                  <p className="text-sm font-semibold text-neutral-600 mb-2">Target Keywords:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {strategy.keywords.map((keyword, idx) => (
-                      <span key={idx} className="px-3 py-1 bg-neutral-100 text-neutral-700 text-sm rounded-full">
-                        {keyword}
+          {/* Why Buyers Are Moving */}
+          {data.why_moving && (
+            <Section title={`Why Buyers Are Moving to ${data.location?.city}`} icon={Target}>
+              <div className="space-y-6">
+                {data.why_moving.map((reason, index) => (
+                  <ContentBlock key={index} className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
+                      <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-bold">
+                        {index + 1}
                       </span>
-                    ))}
-                  </div>
-                </div>
+                      {reason.title}
+                    </h3>
+                    
+                    <p className="text-neutral-700 leading-relaxed">
+                      {reason.description}
+                    </p>
+                    
+                    <Highlight color="orange">
+                      <div className="flex items-start gap-2">
+                        <Quote className="w-4 h-4 mt-1 flex-shrink-0" />
+                        <p className="text-sm font-medium leading-relaxed">
+                          {reason.highlight}
+                        </p>
+                      </div>
+                    </Highlight>
 
-                {/* Video Title */}
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <p className="text-sm font-semibold text-green-700 mb-1">Suggested Video Title:</p>
-                  <p className="font-medium text-green-800">"{strategy.video_title}"</p>
-                </div>
+                    {reason.supporting_data && (
+                      <div className="bg-neutral-50 p-3 rounded-lg">
+                        <p className="text-sm text-neutral-600 leading-relaxed">
+                          <strong>Key Insight:</strong> {reason.supporting_data}
+                        </p>
+                      </div>
+                    )}
+                  </ContentBlock>
+                ))}
+              </div>
+            </Section>
+          )}
 
-                {/* Strategy */}
-                <div className="bg-neutral-50 p-4 rounded-lg">
-                  <p className="text-sm font-semibold text-neutral-600 mb-2">Implementation Strategy:</p>
-                  <p className="text-neutral-700 leading-relaxed">{strategy.strategy}</p>
-                </div>
-              </ContentBlock>
-            ))}
-          </div>
-        </Section>
+          {/* Content Strategy Recommendations */}
+          {data.content_strategy && (
+            <Section title="Content Strategy to Attract These Buyers" icon={Lightbulb}>
+              <div className="space-y-6">
+                {data.content_strategy.map((strategy, index) => (
+                  <ContentBlock key={index} className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-900">
+                      {index + 1}. {strategy.focus}
+                    </h3>
+                    
+                    {/* Hook */}
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border-l-4 border-l-blue-400">
+                      <p className="font-medium text-neutral-800">
+                        <span className="text-blue-600 font-semibold">Hook: </span>
+                        "{strategy.hook}"
+                      </p>
+                    </div>
+
+                    {/* Keywords */}
+                    <div>
+                      <p className="text-sm font-semibold text-neutral-600 mb-2">Target Keywords:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {strategy.keywords.map((keyword, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-neutral-100 text-neutral-700 text-sm rounded-full">
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Video Title */}
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                      <p className="text-sm font-semibold text-green-700 mb-1">Suggested Video Title:</p>
+                      <p className="font-medium text-green-800">"{strategy.video_title}"</p>
+                    </div>
+
+                    {/* Strategy */}
+                    <div className="bg-neutral-50 p-4 rounded-lg">
+                      <p className="text-sm font-semibold text-neutral-600 mb-2">Implementation Strategy:</p>
+                      <p className="text-neutral-700 leading-relaxed">{strategy.strategy}</p>
+                    </div>
+                  </ContentBlock>
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {/* Next Steps */}
+          {data.next_steps && (
+            <ContentBlock className="bg-gradient-to-r from-neutral-50 to-blue-50 border-blue-200">
+              <h3 className="text-lg font-semibold text-neutral-900 mb-3">Next Steps</h3>
+              <p className="text-neutral-700 leading-relaxed">
+                {data.next_steps}
+              </p>
+            </ContentBlock>
+          )}
+        </>
       )}
 
-      {/* Next Steps */}
-      {data.next_steps && (
-        <ContentBlock className="bg-gradient-to-r from-neutral-50 to-blue-50 border-blue-200">
-          <h3 className="text-lg font-semibold text-neutral-900 mb-3">Next Steps</h3>
-          <p className="text-neutral-700 leading-relaxed">
-            {data.next_steps}
-          </p>
+      {/* Error Handling */}
+      {data.error && (
+        <ContentBlock className="bg-red-50 border-red-200">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 mt-1 flex-shrink-0" />
+            <div>
+              <h3 className="text-lg font-semibold text-red-900 mb-2">Analysis Temporarily Unavailable</h3>
+              <p className="text-red-800 leading-relaxed">
+                We're experiencing temporary issues generating real-time analysis. Please try again in a few moments.
+              </p>
+              <p className="text-xs text-red-600 mt-2">Error: {data.error}</p>
+            </div>
+          </div>
         </ContentBlock>
       )}
     </div>
