@@ -266,7 +266,7 @@ const IntelligenceDashboard = ({ analysisData, onViewDetail }) => {
                   icon={category.icon}
                   label={category.title}
                   isActive={activeCategory === category.id}
-                  onClick={() => setActiveCategory(category.id)}
+                  onClick={() => onViewDetail(category.id, category.title, category.data)}
                   status={category.status}
                 />
               ))}
