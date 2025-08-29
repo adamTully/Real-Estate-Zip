@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FileText, Download, Mail, PresentationChart, Video, Calendar, CheckCircle2, FolderOpen } from "lucide-react";
+import { FileText, Download, Mail, BarChart3, Video, Calendar, CheckCircle2, FolderOpen } from "lucide-react";
 
 // Reusable UI components
 const Card = ({ className = "", children, ...props }) => (
