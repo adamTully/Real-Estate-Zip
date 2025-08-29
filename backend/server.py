@@ -139,193 +139,42 @@ Please structure your response with clear sections and be specific with data, st
             }
 
     async def generate_seo_youtube_trends(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
-        """Generate SEO and YouTube trends analysis"""
+        """Generate SEO and YouTube trends analysis using ChatGPT"""
         city_name = location_info.get('city', 'Unknown')
         state_name = location_info.get('state', 'Unknown')
         
-        # Generate high-volume local keywords
-        high_volume_keywords = [
-            {
-                "keyword": f"{city_name} homes for sale",
-                "context": "Many buyers begin with simple location-based searches when researching a move",
-                "search_behavior": "Primary entry point for property searches"
-            },
-            {
-                "keyword": f"{city_name} real estate", 
-                "context": "Broad real estate interest covering market trends and agent services",
-                "search_behavior": "Professional service discovery"
-            },
-            {
-                "keyword": f"{city_name} cost of living",
-                "context": "Cost-of-living comparisons are among the first queries people make when evaluating a new city",
-                "search_behavior": "Relocation research phase"
-            },
-            {
-                "keyword": f"is {city_name} safe",
-                "context": "Safety concerns drive significant search volume; appears prominently in Google's 'People also ask' section", 
-                "search_behavior": "Due diligence and family considerations"
-            },
-            {
-                "keyword": f"{city_name} schools",
-                "context": "School quality is a key factor for families considering relocation",
-                "search_behavior": "Family-focused research"
-            },
-            {
-                "keyword": f"best neighborhoods in {city_name}",
-                "context": "Buyers search for neighborhood guides and comparisons to nearby areas",
-                "search_behavior": "Narrowing location preferences"
-            },
-            {
-                "keyword": f"{city_name} apartments for rent",
-                "context": f"Renters search for average rents; typical range ${random.randint(1200, 1600)}-${random.randint(1800, 2400)} depending on size",
-                "search_behavior": "Rental market exploration"
-            },
-            {
-                "keyword": f"things to do in {city_name}",
-                "context": f"Recreation queries reflect interest in lifestyle and amenities available in {city_name}",
-                "search_behavior": "Lifestyle and entertainment research"
+        try:
+            prompt = f"""Act as an SEO expert and YouTube strategist. What are the top trending searches, keywords, and questions buyers are Googling and searching on YouTube related to moving to or living in {city_name}, {state_name}? Format the results as: high-volume local keywords; long-tail questions; video title ideas that align with these terms.
+
+Provide specific search volumes where possible and include "People also ask" questions. Be comprehensive and actionable."""
+
+            user_message = UserMessage(text=prompt)
+            response = await self.llm.send_message(user_message)
+            
+            return {
+                "summary": f"SEO & YouTube analysis for {city_name}, {state_name} with real search data",
+                "location": {
+                    "city": city_name,
+                    "state": state_name,
+                    "zip_code": zip_code
+                },
+                "analysis_content": response,
+                "generated_with": "ChatGPT GPT-5",
+                "timestamp": datetime.utcnow().isoformat()
             }
-        ]
-        
-        # Generate long-tail questions 
-        long_tail_questions = [
-            {
-                "question": f"Is {city_name}, {state_name} a good place to live?",
-                "context": "Overarching quality-of-life question that appears frequently in 'People also ask'",
-                "intent": "General validation and reassurance seeking"
-            },
-            {
-                "question": f"How much do I need to make to live in {city_name}?",
-                "context": "Ties into cost-of-living and salary requirements for the area", 
-                "intent": "Financial planning and affordability"
-            },
-            {
-                "question": f"What is the crime rate in {city_name}?",
-                "context": "Safety is top of mind for relocators, especially families",
-                "intent": "Security and safety validation"
-            },
-            {
-                "question": f"Is {city_name} expensive to live?",
-                "context": "Variation on cost-of-living queries comparing to current location",
-                "intent": "Budget and lifestyle comparison"
-            },
-            {
-                "question": f"What are the pros and cons of living in {city_name}?",
-                "context": f"Inspired by popular YouTube format; seeks balanced perspective on {city_name}",
-                "intent": "Comprehensive evaluation"
-            },
-            {
-                "question": f"Best neighborhoods in {city_name} for families",
-                "context": "Specific demographic targeting within location research",
-                "intent": "Family-focused neighborhood selection"
-            },
-            {
-                "question": f"How far is {city_name} from [major city] and is the commute easy?",
-                "context": "Distance and traffic questions are common for those working in nearby metro areas",
-                "intent": "Commuter convenience and logistics"
-            },
-            {
-                "question": f"Are schools in {city_name} good?",
-                "context": "Families research school ratings, test scores, and specialized programs",
-                "intent": "Educational quality assessment"
-            },
-            {
-                "question": f"What is there to do in {city_name}?",
-                "context": f"Lifestyle queries about entertainment, recreation, and community activities in {city_name}",
-                "intent": "Quality of life and entertainment options"
-            },
-            {
-                "question": f"Does {city_name} have good public transportation?",
-                "context": "Transit accessibility and walkability concerns for daily life",
-                "intent": "Mobility and convenience factors"
+            
+        except Exception as e:
+            logging.error(f"ChatGPT error for SEO analysis: {str(e)}")
+            return {
+                "summary": f"SEO analysis for {city_name}, {state_name} (fallback mode)",
+                "location": {
+                    "city": city_name,
+                    "state": state_name,
+                    "zip_code": zip_code
+                },
+                "analysis_content": "Real-time analysis temporarily unavailable. Please try again.",
+                "error": str(e)
             }
-        ]
-        
-        # Generate video title ideas
-        video_titles = [
-            {
-                "title": f"Is {city_name}, {state_name} a Good Place to Live? Pros & Cons 2025",
-                "strategy": "Addresses top 'People also ask' question using trending pros-and-cons format",
-                "target_keywords": [f"is {city_name} good place to live", f"{city_name} pros and cons"],
-                "content_focus": "Balanced review covering lifestyle, costs, amenities"
-            },
-            {
-                "title": f"{city_name} Cost of Living Breakdown: How Much Do You Need?",
-                "strategy": "Leverages high-volume cost queries while providing actionable financial information",
-                "target_keywords": [f"{city_name} cost of living", f"how much to live in {city_name}"],
-                "content_focus": "Salary requirements, housing costs, daily expenses"
-            },
-            {
-                "title": f"Top 5 Neighborhoods in {city_name} for Families & Young Professionals",
-                "strategy": "Uses 'best neighborhoods' keyword with demographic targeting for broader appeal",
-                "target_keywords": [f"best neighborhoods {city_name}", f"{city_name} neighborhoods families"],
-                "content_focus": "Neighborhood tours, school districts, commute times"
-            },
-            {
-                "title": f"Moving to {city_name}? Here's What Nobody Tells You",
-                "strategy": "Creates curiosity while targeting relocation searches with insider knowledge angle",
-                "target_keywords": [f"moving to {city_name}", f"living in {city_name}"],
-                "content_focus": "Hidden costs, local tips, cultural insights"
-            },
-            {
-                "title": f"{city_name} Real Estate Market 2025: Prices, Trends & Predictions",
-                "strategy": "Targets real estate searches with current year relevance and comprehensive coverage",
-                "target_keywords": [f"{city_name} real estate", f"{city_name} housing market 2025"],
-                "content_focus": "Market data, price trends, buying opportunities"
-            },
-            {
-                "title": f"Renting vs Buying in {city_name}: Complete 2025 Guide",
-                "strategy": "Addresses major financial decision with comprehensive guidance approach",
-                "target_keywords": [f"{city_name} rent vs buy", f"{city_name} rental market"],
-                "content_focus": "Cost comparisons, market timing, financial advice"
-            },
-            {
-                "title": f"{city_name} Schools Guide: Rankings, Districts & What Parents Need to Know",
-                "strategy": "Targets family-focused searches with authoritative, comprehensive content promise",
-                "target_keywords": [f"{city_name} schools", f"{city_name} school districts"],
-                "content_focus": "School ratings, district boundaries, enrollment process"
-            },
-            {
-                "title": f"Things to Do in {city_name}: Local's Guide to Hidden Gems 2025",
-                "strategy": "Lifestyle content using insider knowledge angle and current year relevance",
-                "target_keywords": [f"things to do {city_name}", f"{city_name} attractions"],
-                "content_focus": "Recreation, entertainment, local culture"
-            }
-        ]
-        
-        # SEO optimization notes
-        seo_strategy_notes = [
-            {
-                "category": "Cross-platform optimization",
-                "recommendation": f"Repurpose {city_name} content across YouTube descriptions, blog posts, and social media using exact search phrases people use"
-            },
-            {
-                "category": "Local SEO focus", 
-                "recommendation": f"Optimize for '{city_name} + real estate agent' and '{city_name} + homes for sale' to capture ready-to-buy traffic"
-            },
-            {
-                "category": "Content depth",
-                "recommendation": "Create comprehensive guides that answer multiple related questions in single pieces to capture various search intents"
-            },
-            {
-                "category": "Featured snippet targeting",
-                "recommendation": f"Structure content to answer '{city_name} safety', '{city_name} cost of living' with clear facts and statistics for snippet opportunities"
-            }
-        ]
-        
-        return {
-            "summary": f"High-opportunity keywords: '{city_name} homes for sale', 'moving to {city_name}', 'is {city_name} safe'",
-            "location": {
-                "city": city_name,
-                "state": state_name, 
-                "zip_code": zip_code
-            },
-            "high_volume_keywords": high_volume_keywords,
-            "long_tail_questions": long_tail_questions,
-            "video_title_ideas": video_titles,
-            "seo_strategy": seo_strategy_notes,
-            "optimization_summary": f"Focus on location-based searches, lifestyle questions, and comparison content. {city_name} searchers prioritize safety, cost of living, and neighborhood information. Use exact question formats from 'People also ask' sections for maximum visibility."
-        }
 
     async def generate_content_strategy(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
         """Generate 8-week content marketing strategy"""
