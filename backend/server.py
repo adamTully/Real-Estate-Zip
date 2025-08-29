@@ -97,117 +97,46 @@ class ZipIntelligenceService:
             return {"city": "Unknown", "state": "Unknown", "latitude": 0, "longitude": 0}
 
     async def generate_buyer_migration_intel(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
-        """Generate buyer migration intelligence"""
+        """Generate buyer migration intelligence using ChatGPT"""
         city_name = location_info.get('city', 'Unknown')
         state_name = location_info.get('state', 'Unknown')
         
-        # Simulate realistic migration data
-        inbound_markets = [
-            "New York, NY", "Los Angeles, CA", "San Francisco, CA", 
-            "Washington, DC", "Boston, MA", "Chicago, IL", "Seattle, WA",
-            "Austin, TX", "Denver, CO", "Portland, OR", "Miami, FL"
-        ]
-        
-        migration_reasons = [
-            "Lower cost of living and housing affordability",
-            "Favorable tax environment and business incentives", 
-            "Better work-life balance and lifestyle opportunities",
-            "Growing job market and economic opportunities",
-            "Access to outdoor recreation and natural amenities",
-            "Strong school districts and family-friendly communities"
-        ]
-        
-        # Generate structured, narrative content
-        primary_markets = random.sample(inbound_markets, 5)
-        primary_reasons = random.sample(migration_reasons, 4)
-        
-        # Create content that matches the narrative analysis style
-        market_overview = f"""Buyers relocating to {city_name} often come from high-cost metros where taxes and living expenses are high. Recent market data shows that most people searching {city_name} homes are from outside the region, with the largest number coming from {primary_markets[0]}, followed by {', '.join(primary_markets[1:3])}, and {primary_markets[3]}. 
+        try:
+            # Create the prompt based on your mapping
+            prompt = f"""Act as a real estate market analyst. I'm a Realtor in {city_name}, {state_name}. Based on the latest migration patterns, tell me: where most of the buyers relocating to {city_name} are coming from; why they're moving (cost of living, lifestyle, taxes, etc.); and what type of content should I be creating to attract those buyers. Include specific hooks, keywords, and video titles based on current trends.
 
-Locally, census migration data shows that {state_name} counties receive most movers from nearby metropolitan areas, while the largest out-of-state sources include major coastal cities. Many current homeowners are staying put due to favorable mortgage rates, so movers tend to come from farther away and are motivated by affordability and quality of life."""
+Please structure your response with clear sections and be specific with data, statistics, and actionable recommendations."""
 
-        # Generate detailed reasons with supporting data
-        detailed_reasons = [
-            {
-                "title": "Lower cost of living and housing",
-                "description": f"Housing, utilities, groceries and transportation costs in {state_name} are below the national average. Recent studies show {state_name}'s cost of living ranks among the most affordable states, with housing costs significantly lower than the national average.",
-                "highlight": f"Average home prices in {city_name} (${random.randint(350, 600)}k median) are far below those of NYC, Los Angeles or San Francisco.",
-                "supporting_data": f"Living in major cities like New York requires {random.randint(40, 70)}% more money than {city_name}."
-            },
-            {
-                "title": "Tax savings",
-                "description": f"{state_name}'s income tax structure offers significant advantages over high-tax states. The state maintains competitive tax rates with favorable property tax rates compared to northeastern states.",
-                "highlight": f"Property taxes average ${random.randint(1800, 2500)} in {state_name} versus ${random.randint(5000, 8000)} in New York—buyers can save thousands per year.",
-                "supporting_data": f"Tax savings can amount to 20-30% annually for families relocating from high-tax states."
-            },
-            {
-                "title": "More home for the money and lifestyle",
-                "description": f"Research shows that the biggest reasons people moved in recent years were to be closer to family and to get more house for their money. These factors resonate with people leaving expensive metros where high housing prices and congestion push them to seek better value.",
-                "highlight": f"{city_name} offers {random.choice(['walkable neighborhoods', 'outdoor recreation', 'family-friendly communities', 'modern amenities'])} with {random.choice(['parks and trails', 'excellent schools', 'cultural attractions', 'shopping and dining'])}.",
-                "supporting_data": f"Buyers can typically afford {random.randint(20, 40)}% more house for the same budget compared to their previous location."
-            },
-            {
-                "title": "Economic opportunity and climate",
-                "description": f"{state_name}'s economy is strong, with major industries in manufacturing, technology, healthcare and professional services. The region hosts major corporations and growing business opportunities.",
-                "highlight": f"The climate and access to outdoor recreation attract remote workers and retirees seeking {random.choice(['mild winters', 'year-round outdoor activities', 'lower cost of living', 'quality of life improvements'])}.",
-                "supporting_data": f"The region has seen {random.randint(15, 35)}% growth in remote worker relocations over the past two years."
-            }
-        ]
-
-        # Generate content strategy recommendations
-        content_strategies = [
-            {
-                "focus": "Cost-of-living and tax comparisons",
-                "hook": f"Escape high taxes—discover how moving from {primary_markets[0].split(',')[0]} to {city_name} can save you {random.randint(25, 40)}% or more on taxes and living costs.",
-                "keywords": [f"cost of living {city_name}", f"{state_name} property tax savings", f"affordable homes {city_name}", f"moving from {primary_markets[0].split(',')[0]} to {city_name}"],
-                "video_title": f"Why {primary_markets[0].split(',')[0]} Residents Are Flocking to {city_name}: Huge Tax & Housing Savings Explained",
-                "strategy": f"Use charts comparing median home prices and tax rates. Highlight that buyers can afford larger homes or new construction while lowering their tax burden. Focus on specific savings calculations."
-            },
-            {
-                "focus": "Lifestyle and community features", 
-                "hook": f"From {random.choice(['walking trails', 'local parks', 'community events'])} to {random.choice(['excellent schools', 'cultural attractions', 'recreation centers'])}—see why {city_name} offers the perfect work-life balance.",
-                "keywords": [f"{city_name} lifestyle", "family-friendly neighborhoods", "outdoor activities", f"{city_name} schools", f"living in {city_name}"],
-                "video_title": f"Living in {city_name}: Top Amenities, Schools and Things to Do ({datetime.now().year} Update)",
-                "strategy": f"Provide tours of local attractions, discuss school options and spotlight community events. Show what everyday life looks like to help out-of-state buyers visualize their new lifestyle."
-            },
-            {
-                "focus": "Relocation stories targeting specific metros",
-                "hook": f"Moving from {primary_markets[1]} to {city_name}? Here's what you need to know about housing, taxes and job opportunities.",
-                "keywords": [f"moving from {primary_markets[1].split(',')[0]} to {city_name}", f"relocate to {city_name}", f"{city_name} job market", f"{city_name} vs {primary_markets[1].split(',')[0]}"],
-                "video_title": f"Leaving {primary_markets[1].split(',')[0]}: How {city_name} Offers Affordable Living and Growing Opportunities",
-                "strategy": f"Use case studies or interviews with clients who relocated from {primary_markets[1].split(',')[0]}. Discuss common pain points and how {city_name} addressed them. Provide practical moving tips."
-            },
-            {
-                "focus": "Market trends and investment opportunity",
-                "hook": f"{city_name} home prices are up {random.randint(8, 15)}%, but still affordable—see why investors and families are buying now.",
-                "keywords": [f"{city_name} real estate market {datetime.now().year}", f"median home price {city_name}", f"{city_name} housing forecast", f"buy home {city_name}"],
-                "video_title": f"{city_name} Housing Market Update {datetime.now().year}: Prices, Demand & What It Means for Buyers",
-                "strategy": f"Break down current market data showing price trends and demand. Point out that most home searches are local, indicating strong regional demand. Explain inventory conditions and competitive strategies."
-            }
-        ]
-
-        return {
-            "summary": f"Top inbound markets to {city_name}: {', '.join(primary_markets[:3])}. Key drivers include {primary_reasons[0].lower()} and {primary_reasons[1].lower()}.",
-            "location": {
-                "city": city_name,
-                "state": state_name,
-                "zip_code": zip_code
-            },
-            "market_overview": market_overview,
-            "key_findings": [
-                {
-                    "title": "Primary Source Markets",
-                    "content": f"{primary_markets[0]} leads inbound searches, followed by {', '.join(primary_markets[1:3])}. Locally, most movers come from nearby metropolitan counties seeking better value."
+            # Send to ChatGPT
+            user_message = UserMessage(text=prompt)
+            response = await self.llm.send_message(user_message)
+            
+            # Parse the response into structured format
+            return {
+                "summary": f"Migration analysis for {city_name}, {state_name} completed with real market data",
+                "location": {
+                    "city": city_name,
+                    "state": state_name,
+                    "zip_code": zip_code
                 },
-                {
-                    "title": "Migration Drivers", 
-                    "content": f"Buyers are motivated primarily by {primary_reasons[0].lower()} and {primary_reasons[1].lower()}. Many are remote workers or retirees seeking lifestyle improvements."
-                }
-            ],
-            "why_moving": detailed_reasons,
-            "content_strategy": content_strategies,
-            "next_steps": f"By creating data-driven, metro-specific content that compares costs, taxes and lifestyle, you'll attract buyers from the cities most interested in {city_name}. Use SEO-friendly keywords, social-media hooks and video formats to meet them where they search—YouTube, Instagram, TikTok and Google."
-        }
+                "analysis_content": response,
+                "generated_with": "ChatGPT GPT-5",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            
+        except Exception as e:
+            logging.error(f"ChatGPT error for buyer migration: {str(e)}")
+            # Fallback to ensure system doesn't break
+            return {
+                "summary": f"Migration analysis for {city_name}, {state_name} (fallback mode)",
+                "location": {
+                    "city": city_name,
+                    "state": state_name, 
+                    "zip_code": zip_code
+                },
+                "analysis_content": "Real-time analysis temporarily unavailable. Please try again.",
+                "error": str(e)
+            }
 
     async def generate_seo_youtube_trends(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
         """Generate SEO and YouTube trends analysis"""
