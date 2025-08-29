@@ -306,7 +306,7 @@ Best regards,
       {/* Content Overview */}
       <ContentBlock className="bg-gradient-to-r from-neutral-50 to-blue-50 border-blue-200">
         <div className="flex items-start gap-3">
-          <PresentationChart className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
+          <BarChart3 className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
           <div>
             <h3 className="text-lg font-semibold text-neutral-900 mb-2">Content Library Overview</h3>
             <div className="grid md:grid-cols-3 gap-4 text-sm">
@@ -315,7 +315,7 @@ Best regards,
                 <span className="text-blue-800"><strong>10 Blog Posts</strong> • SEO-optimized articles</span>
               </div>
               <div className="flex items-center gap-2">
-                <PresentationChart className="w-4 h-4 text-green-600" />
+                <BarChart3 className="w-4 h-4 text-green-600" />
                 <span className="text-green-800"><strong>8 Lead Magnets</strong> • High-converting PDFs</span>
               </div>
               <div className="flex items-center gap-2">
