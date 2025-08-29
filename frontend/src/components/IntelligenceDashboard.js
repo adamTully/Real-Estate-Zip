@@ -119,22 +119,6 @@ const IntelligenceCard = ({
   </Card>
 );
 
-const SidebarNavItem = ({ icon: Icon, label, isActive, onClick, status }) => (
-  <button
-    onClick={onClick}
-    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all duration-200 ${
-      isActive 
-        ? 'bg-blue-100 text-blue-900 border-blue-200' 
-        : 'text-neutral-700 hover:bg-neutral-100'
-    }`}
-  >
-    <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-neutral-500'}`} />
-    <span className="font-medium text-sm flex-1">{label}</span>
-    {status === 'complete' && <CheckCircle2 className="w-4 h-4 text-green-600" />}
-    {status === 'processing' && <Clock className="w-4 h-4 text-orange-500" />}
-  </button>
-);
-
 const IntelligenceDashboard = ({ analysisData, onViewDetail }) => {
   const [activeCategory, setActiveCategory] = useState('overview');
 
