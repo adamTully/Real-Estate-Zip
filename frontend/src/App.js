@@ -21,6 +21,7 @@ import ContentStrategyDetail from "./components/ContentStrategyDetail";
 import MarketResearchDetail from "./components/MarketResearchDetail";
 import ContentCreationDetail from "./components/ContentCreationDetail";
 import IntelligenceDashboard from "./components/IntelligenceDashboard";
+import IntelligenceSidebar from "./components/IntelligenceSidebar";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { jsPDF } from "jspdf";
