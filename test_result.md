@@ -101,3 +101,48 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+## user_problem_statement: "Frontend needs to render real LLM narrative text (Markdown) instead of simulated structures for detail pages. Integrate markdown renderer on Buyer Migration, SEO/YouTube, Content Strategy, Market Research without breaking existing flows."
+
+## backend:
+  - task: "Real LLM integration via emergentintegrations (GPT-5)"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Previously completed; endpoints return narrative strings at analysis_content."
+
+## frontend:
+  - task: "Add Markdown renderer and wire to detail components"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/MarkdownRenderer.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "main"
+        -comment: "Introduced dynamic import MarkdownRenderer using react-markdown + remark-gfm with fallback. Updated BuyerMigrationDetail, SeoYouTubeDetail, ContentStrategyDetail, MarketResearchDetail to render analysis_content as Markdown and fallback to prior structured UI."
+
+## metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+## test_plan:
+  current_focus:
+    - "Verify frontend can display Markdown narrative for all 4 detail pages"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+## agent_communication:
+    -agent: "main"
+    -message: "Please test backend quickly for zip-analysis happy path to ensure schema unchanged; then I will ask user to greenlight frontend automated testing." 
