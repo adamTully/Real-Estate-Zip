@@ -306,9 +306,7 @@ export default function ZipIntelApp() {
           />
           
           <div className="flex-1 p-8">
-            {detailView.key === "content_assets" ? (
-              <ContentCreationDetail data={detailView.data} />
-            ) : detailView.key === "buyer_migration" ? (
+            {detailView.key === "buyer_migration" ? (
               <BuyerMigrationDetail data={detailView.data} />
             ) : detailView.key === "seo_youtube_trends" ? (
               <SeoYouTubeDetail data={detailView.data} />
@@ -323,22 +321,9 @@ export default function ZipIntelApp() {
                 <CardContent>
                   <div className="prose prose-neutral max-w-none">
                     <pre className="whitespace-pre-wrap text-sm font-mono bg-neutral-50 p-6 rounded-xl">
-                      {detailView.data?.detailed_analysis || JSON.stringify(detailView.data, null, 2)}
+                      {JSON.stringify(detailView, null, 2)}
                     </pre>
                   </div>
-                  
-                  {detailView.key === "hidden_listings" && (
-                    <div className="mt-6 pt-6 border-t">
-                      <Button onClick={downloadPDF} disabled={loading}>
-                        {loading ? (
-                          <Loader2 className="animate-spin" size={16} />
-                        ) : (
-                          <Download size={16} />
-                        )}
-                        Download PDF Report
-                      </Button>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             )}
