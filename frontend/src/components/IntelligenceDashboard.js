@@ -224,55 +224,17 @@ const IntelligenceDashboard = ({ analysisData, onViewDetail }) => {
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100">
       <div className="flex">
         {/* Sidebar Navigation */}
-        <div className="w-80 bg-white border-r border-neutral-200 min-h-screen">
-          <div className="p-6">
-            {/* Territory Header */}
-            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Crown className="w-4 h-4 text-blue-600" />
-                <span className="text-xs font-semibold text-blue-800">EXCLUSIVE TERRITORY</span>
-              </div>
-              <h2 className="text-lg font-bold text-neutral-900">
-                ZIP {analysisData.zip_code}
-              </h2>
-              <p className="text-sm text-neutral-600">
-                {analysisData.buyer_migration?.location?.city}, {analysisData.buyer_migration?.location?.state}
-              </p>
-              <div className="flex items-center gap-2 mt-2 text-xs text-green-700">
-                <CheckCircle2 className="w-3 h-3" />
-                <span>License Active • 6 months remaining</span>
-              </div>
-            </div>
-
-            {/* Navigation Menu */}
-            <div className="space-y-1">
-              <SidebarNavItem
-                icon={Target}
-                label="Intelligence Overview"
-                isActive={activeCategory === 'overview'}
-                onClick={() => setActiveCategory('overview')}
-                status="complete"
-              />
-              
-              <div className="pt-3 pb-2">
-                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide px-3">
-                  Intelligence Categories
-                </p>
-              </div>
-              
-              {categories.map((category) => (
-                <SidebarNavItem
-                  key={category.id}
-                  icon={category.icon}
-                  label={category.title}
-                  isActive={activeCategory === category.id}
-                  onClick={() => onViewDetail(category.id, category.title, category.data)}
-                  status={category.status}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+        <IntelligenceSidebar
+          analysisData={analysisData}
+          activeCategory={activeCategory}
+          onNavigate={(type, title, data) => {
+            if (type === 'overview') {
+              setActiveCategory('overview');
+            } else {
+              onViewDetail(data.key, title, data.data);
+            }
+          }}
+        />
 
         {/* Main Content Area */}
         <div className="flex-1 p-8">
