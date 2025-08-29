@@ -1,5 +1,5 @@
 import React from "react";
-import { MapPin, TrendingUp, Target, Lightbulb, Quote, Sparkles, AlertCircle } from "lucide-react";
+import { MapPin, TrendingUp, Target, Lightbulb, Quote, AlertCircle } from "lucide-react";
 import MarkdownRenderer from "./MarkdownRenderer";
 
 // Typography-focused components
