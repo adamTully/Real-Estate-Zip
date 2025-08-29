@@ -1,18 +1,14 @@
 import React, { useState } from "react";
 import { 
-  MapPin, 
-  Sparkles, 
-  Wand2, 
-  FileText, 
-  Download, 
-  ExternalLink, 
   CheckCircle2,
   Clock,
   ArrowRight,
-  Crown,
   Calendar,
-  Target
+  Target,
+  FileText,
+  Sparkles
 } from "lucide-react";
+import IntelligenceSidebar from "./IntelligenceSidebar";
 
 // UI Components
 const Card = ({ className = "", children, ...props }) => (
