@@ -119,19 +119,13 @@ export default function ZipIntelApp() {
       },
       { 
         id: "hidden_listings", 
-        label: "Hidden Listings (PDF)", 
+        label: "Market Research", 
         icon: FileText,
         key: "hidden_listings" 
       },
       { 
-        id: "market_hooks", 
-        label: "Market Hooks & Titles", 
-        icon: Mail,
-        key: "market_hooks" 
-      },
-      { 
         id: "content_assets", 
-        label: "Content Assets", 
+        label: "Content Creation", 
         icon: Download,
         key: "content_assets" 
       },
