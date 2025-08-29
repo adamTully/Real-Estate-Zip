@@ -77,7 +77,7 @@ const MicroAreaCard = ({ area }) => (
 
       {/* Opportunity Driver */}
       <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-l-blue-400">
-        <p className="text-sm font-medium text-blue-900 mb-1">Why This Area Matters:        
+        <p className="text-sm font-medium text-blue-900 mb-1">Why This Area Matters:</p>        
         <p className="text-blue-800 text-sm leading-relaxed">{area.opportunity_driver}</p>
       </div>
 
