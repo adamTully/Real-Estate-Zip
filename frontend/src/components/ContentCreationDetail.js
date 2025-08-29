@@ -340,7 +340,7 @@ Best regards,
         title="Lead Magnets & Gated Content"
         description="High-converting lead magnets based on your 8-week content strategy. Each PDF is designed to capture leads at different stages of the buyer journey."
         items={leadMagnets}
-        icon={PresentationChart}
+        icon={BarChart3}
       />
 
       {/* Email Campaigns Section */}
