@@ -288,63 +288,61 @@ export default function ZipIntelApp() {
         />
       )}
 
-      {/* Detail Stage */}
+      {/* Detail Stage with Sidebar */}
       {stage === "detail" && detailView && (
-        <div className="mx-auto max-w-4xl px-6 py-10">
-          <Button
-            variant="ghost"
-            onClick={() => setStage("pipeline")}
-            className="mb-6"
-          >
-            <ArrowLeft size={16} />
-            Back to Overview
-          </Button>
-
-          <h1 className="text-2xl font-bold text-neutral-900 mb-6">
-            {detailView.title}
-          </h1>
-
-          {detailView.key === "content_assets" ? (
-            <ContentAssetsTabs 
-              assets={detailView.data}
-              onDownload={downloadContentAsset}
-              onViewAsset={setAssetDetail}
-              onSetStage={setStage}
-            />
-          ) : detailView.key === "buyer_migration" ? (
-            <BuyerMigrationDetail data={detailView.data} />
-          ) : detailView.key === "seo_youtube_trends" ? (
-            <SeoYouTubeDetail data={detailView.data} />
-          ) : detailView.key === "content_strategy" ? (
-            <ContentStrategyDetail data={detailView.data} />
-          ) : detailView.key === "hidden_listings" ? (
-            <MarketResearchDetail data={detailView.data} />
-          ) : detailView.key === "content_assets" ? (
-            <ContentCreationDetail data={detailView.data} />
-          ) : (
-            <Card>
-              <CardContent>
-                <div className="prose prose-neutral max-w-none">
-                  <pre className="whitespace-pre-wrap text-sm font-mono bg-neutral-50 p-6 rounded-xl">
-                    {detailView.data?.detailed_analysis || JSON.stringify(detailView.data, null, 2)}
-                  </pre>
-                </div>
-                
-                {detailView.key === "hidden_listings" && (
-                  <div className="mt-6 pt-6 border-t">
-                    <Button onClick={downloadPDF} disabled={loading}>
-                      {loading ? (
-                        <Loader2 className="animate-spin" size={16} />
-                      ) : (
-                        <Download size={16} />
-                      )}
-                      Download PDF Report
-                    </Button>
+        <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex">
+          <IntelligenceSidebar
+            analysisData={analysisData}
+            activeCategory={detailView.key}
+            onNavigate={(type, title, data) => {
+              if (type === 'overview') {
+                setStage("pipeline");
+              } else {
+                setDetailView(data);
+                setStage("detail");
+              }
+            }}
+            onBackToDashboard={() => setStage("pipeline")}
+          />
+          
+          <div className="flex-1 p-8">
+            {detailView.key === "content_assets" ? (
+              <ContentCreationDetail data={detailView.data} />
+            ) : detailView.key === "buyer_migration" ? (
+              <BuyerMigrationDetail data={detailView.data} />
+            ) : detailView.key === "seo_youtube_trends" ? (
+              <SeoYouTubeDetail data={detailView.data} />
+            ) : detailView.key === "content_strategy" ? (
+              <ContentStrategyDetail data={detailView.data} />
+            ) : detailView.key === "hidden_listings" ? (
+              <MarketResearchDetail data={detailView.data} />
+            ) : detailView.key === "content_assets" ? (
+              <ContentCreationDetail data={detailView.data} />
+            ) : (
+              <Card>
+                <CardContent>
+                  <div className="prose prose-neutral max-w-none">
+                    <pre className="whitespace-pre-wrap text-sm font-mono bg-neutral-50 p-6 rounded-xl">
+                      {detailView.data?.detailed_analysis || JSON.stringify(detailView.data, null, 2)}
+                    </pre>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+                  
+                  {detailView.key === "hidden_listings" && (
+                    <div className="mt-6 pt-6 border-t">
+                      <Button onClick={downloadPDF} disabled={loading}>
+                        {loading ? (
+                          <Loader2 className="animate-spin" size={16} />
+                        ) : (
+                          <Download size={16} />
+                        )}
+                        Download PDF Report
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       )}
 
