@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Calendar, Video, FileText, Mail, Target, Lightbulb, Users, TrendingUp, CheckCircle2 } from "lucide-react";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 // Reusable UI components
 const Card = ({ className = "", children, ...props }) => (
@@ -105,7 +106,7 @@ const WeekDetailView = ({ weekData }) => (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <Target className="w-5 h-5 text-green-500" />
-        <h4 className="font-semibold text-neutral-900">Lead Magnet & CTA</h4>
+        <h4 className="font-semibold text-neutral-900">Lead Magnet &amp; CTA</h4>
       </div>
       <div className="bg-green-50 p-4 rounded-lg border-l-4 border-l-green-400">
         <p className="text-green-900 leading-relaxed">{weekData.lead_magnet}</p>
@@ -116,7 +117,7 @@ const WeekDetailView = ({ weekData }) => (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <Mail className="w-5 h-5 text-purple-500" />
-        <h4 className="font-semibold text-neutral-900">Email & Retargeting Theme</h4>
+        <h4 className="font-semibold text-neutral-900">Email &amp; Retargeting Theme</h4>
       </div>
       <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-l-purple-400">
         <p className="text-purple-900 leading-relaxed">{weekData.email_theme}</p>
@@ -136,6 +137,9 @@ const ContentStrategyDetail = ({ data }) => {
   const [activeWeek, setActiveWeek] = useState(1);
 
   if (!data) return null;
+
+  const hasNarrative = !!data.analysis_content;
+  const narrative = data.analysis_content;
 
   const currentWeek = data.weekly_roadmap?.find(week => week.week === activeWeek);
 
@@ -157,95 +161,103 @@ const ContentStrategyDetail = ({ data }) => {
         </p>
       </div>
 
-      {/* Success Metrics Overview */}
-      {data.success_metrics && (
-        <ContentBlock className="bg-gradient-to-r from-neutral-50 to-blue-50 border-blue-200">
-          <div className="flex items-start gap-3">
-            <TrendingUp className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
-            <div>
-              <h3 className="text-lg font-semibold text-neutral-900 mb-3">Strategy Goals</h3>
-              <div className="grid md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="font-medium text-blue-900 mb-1">Content Goals:</p>
-                  <p className="text-blue-800 leading-relaxed">{data.success_metrics.content_goals}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-blue-900 mb-1">Lead Generation:</p>
-                  <p className="text-blue-800 leading-relaxed">{data.success_metrics.lead_generation}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+      {hasNarrative ? (
+        <ContentBlock>
+          <MarkdownRenderer content={narrative} className="prose-lg" />
         </ContentBlock>
-      )}
-
-      {/* 8-Week Roadmap */}
-      {data.weekly_roadmap && (
-        <Section title="8-Week Content Roadmap" icon={Calendar}>
-          {/* Week Navigation */}
-          <div className="grid md:grid-cols-4 gap-4 mb-6">
-            {data.weekly_roadmap.map((week) => (
-              <WeekCard
-                key={week.week}
-                week={week.week}
-                theme={week.theme}
-                shortForm={week.short_form}
-                longForm={week.long_form}
-                leadMagnet={week.lead_magnet}
-                emailTheme={week.email_theme}
-                isActive={activeWeek === week.week}
-                onClick={() => setActiveWeek(week.week)}
-              />
-            ))}
-          </div>
-
-          {/* Active Week Details */}
-          {currentWeek && <WeekDetailView weekData={currentWeek} />}
-        </Section>
-      )}
-
-      {/* Implementation Strategy */}
-      {data.implementation_strategy && (
-        <Section title="Implementation Strategy & Best Practices" icon={Lightbulb}>
-          <div className="space-y-4">
-            {data.implementation_strategy.map((insight, index) => (
-              <StrategyInsight
-                key={index}
-                category={insight.category}
-                recommendation={insight.recommendation}
-              />
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* Quick Reference Guide */}
-      <ContentBlock className="bg-gradient-to-r from-neutral-50 to-green-50 border-green-200">
-        <div className="flex items-start gap-3">
-          <Users className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
-          <div>
-            <h3 className="text-lg font-semibold text-neutral-900 mb-3">Execution Checklist</h3>
-            <div className="space-y-2 text-sm text-green-800">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Schedule all 8 weeks of content in advance using the roadmap</span>
+      ) : (
+        <>
+          {/* Success Metrics Overview */}
+          {data.success_metrics && (
+            <ContentBlock className="bg-gradient-to-r from-neutral-50 to-blue-50 border-blue-200">
+              <div className="flex items-start gap-3">
+                <TrendingUp className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900 mb-3">Strategy Goals</h3>
+                  <div className="grid md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="font-medium text-blue-900 mb-1">Content Goals:</p>
+                      <p className="text-blue-800 leading-relaxed">{data.success_metrics.content_goals}</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-blue-900 mb-1">Lead Generation:</p>
+                      <p className="text-blue-800 leading-relaxed">{data.success_metrics.lead_generation}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Set up lead magnet landing pages and email sequences for each week</span>
+            </ContentBlock>
+          )}
+
+          {/* 8-Week Roadmap */}
+          {data.weekly_roadmap && (
+            <Section title="8-Week Content Roadmap" icon={Calendar}>
+              {/* Week Navigation */}
+              <div className="grid md:grid-cols-4 gap-4 mb-6">
+                {data.weekly_roadmap.map((week) => (
+                  <WeekCard
+                    key={week.week}
+                    week={week.week}
+                    theme={week.theme}
+                    shortForm={week.short_form}
+                    longForm={week.long_form}
+                    leadMagnet={week.lead_magnet}
+                    emailTheme={week.email_theme}
+                    isActive={activeWeek === week.week}
+                    onClick={() => setActiveWeek(week.week)}
+                  />
+                ))}
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Create retargeting audiences for each content type and theme</span>
+
+              {/* Active Week Details */}
+              {currentWeek && <WeekDetailView weekData={currentWeek} />}
+            </Section>
+          )}
+
+          {/* Implementation Strategy */}
+          {data.implementation_strategy && (
+            <Section title="Implementation Strategy &amp; Best Practices" icon={Lightbulb}>
+              <div className="space-y-4">
+                {data.implementation_strategy.map((insight, index) => (
+                  <StrategyInsight
+                    key={index}
+                    category={insight.category}
+                    recommendation={insight.recommendation}
+                  />
+                ))}
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Track engagement metrics and adjust content based on performance</span>
+            </Section>
+          )}
+
+          {/* Quick Reference Guide */}
+          <ContentBlock className="bg-gradient-to-r from-neutral-50 to-green-50 border-green-200">
+            <div className="flex items-start gap-3">
+              <Users className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="text-lg font-semibold text-neutral-900 mb-3">Execution Checklist</h3>
+                <div className="space-y-2 text-sm text-green-800">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Schedule all 8 weeks of content in advance using the roadmap</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Set up lead magnet landing pages and email sequences for each week</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Create retargeting audiences for each content type and theme</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Track engagement metrics and adjust content based on performance</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </ContentBlock>
+          </ContentBlock>
+        </>
+      )}
     </div>
   );
 };

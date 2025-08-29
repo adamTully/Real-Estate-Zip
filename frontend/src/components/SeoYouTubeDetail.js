@@ -1,5 +1,6 @@
 import React from "react";
-import { Search, Youtube, TrendingUp, Target, Lightbulb, Eye, MessageSquare, BarChart3 } from "lucide-react";
+import { Search, Youtube, TrendingUp, Target, Lightbulb, MessageSquare, BarChart3 } from "lucide-react";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 // Reusable UI components
 const Card = ({ className = "", children, ...props }) => (
@@ -110,6 +111,9 @@ const StrategyInsight = ({ category, recommendation }) => (
 const SeoYouTubeDetail = ({ data }) => {
   if (!data) return null;
 
+  const hasNarrative = !!data.analysis_content;
+  const narrative = data.analysis_content;
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Header */}
@@ -128,127 +132,135 @@ const SeoYouTubeDetail = ({ data }) => {
         </p>
       </div>
 
-      {/* Optimization Summary */}
-      {data.optimization_summary && (
-        <ContentBlock className="bg-gradient-to-r from-neutral-50 to-blue-50 border-blue-200">
-          <div className="flex items-start gap-3">
-            <TrendingUp className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
-            <div>
-              <h3 className="text-lg font-semibold text-neutral-900 mb-2">Market Search Insights</h3>
-              <p className="text-neutral-700 leading-relaxed">{data.optimization_summary}</p>
-            </div>
-          </div>
+      {hasNarrative ? (
+        <ContentBlock>
+          <MarkdownRenderer content={narrative} className="prose-lg" />
         </ContentBlock>
-      )}
+      ) : (
+        <>
+          {/* Optimization Summary */}
+          {data.optimization_summary && (
+            <ContentBlock className="bg-gradient-to-r from-neutral-50 to-blue-50 border-blue-200">
+              <div className="flex items-start gap-3">
+                <TrendingUp className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900 mb-2">Market Search Insights</h3>
+                  <p className="text-neutral-700 leading-relaxed">{data.optimization_summary}</p>
+                </div>
+              </div>
+            </ContentBlock>
+          )}
 
-      {/* High-Volume Keywords */}
-      {data.high_volume_keywords && (
-        <Section title="High-Volume Local Keywords" icon={BarChart3}>
-          <ContentBlock>
-            <p className="text-neutral-700 mb-6 leading-relaxed">
-              These are common short phrases that capture broad interest and high search volume. 
-              Focus your primary content and landing pages around these terms.
-            </p>
-          </ContentBlock>
-          
-          <div className="grid md:grid-cols-2 gap-4">
-            {data.high_volume_keywords.map((item, index) => (
-              <KeywordCard
-                key={index}
-                keyword={item.keyword}
-                context={item.context}
-                searchBehavior={item.search_behavior}
-              />
-            ))}
-          </div>
-        </Section>
-      )}
+          {/* High-Volume Keywords */}
+          {data.high_volume_keywords && (
+            <Section title="High-Volume Local Keywords" icon={BarChart3}>
+              <ContentBlock>
+                <p className="text-neutral-700 mb-6 leading-relaxed">
+                  These are common short phrases that capture broad interest and high search volume. 
+                  Focus your primary content and landing pages around these terms.
+                </p>
+              </ContentBlock>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                {data.high_volume_keywords.map((item, index) => (
+                  <KeywordCard
+                    key={index}
+                    keyword={item.keyword}
+                    context={item.context}
+                    searchBehavior={item.search_behavior}
+                  />
+                ))}
+              </div>
+            </Section>
+          )}
 
-      {/* Long-Tail Questions */}
-      {data.long_tail_questions && (
-        <Section title="Long-Tail Questions" icon={MessageSquare}>
-          <ContentBlock>
-            <p className="text-neutral-700 mb-6 leading-relaxed">
-              These longer queries reflect specific concerns and often appear in Google's "People also ask" section. 
-              Use these exact phrases as blog post titles and video topics.
-            </p>
-          </ContentBlock>
-          
-          <div className="grid md:grid-cols-2 gap-4">
-            {data.long_tail_questions.map((item, index) => (
-              <QuestionCard
-                key={index}
-                question={item.question}
-                context={item.context}
-                intent={item.intent}
-              />
-            ))}
-          </div>
-        </Section>
-      )}
+          {/* Long-Tail Questions */}
+          {data.long_tail_questions && (
+            <Section title="Long-Tail Questions" icon={MessageSquare}>
+              <ContentBlock>
+                <p className="text-neutral-700 mb-6 leading-relaxed">
+                  These longer queries reflect specific concerns and often appear in Google's "People also ask" section. 
+                  Use these exact phrases as blog post titles and video topics.
+                </p>
+              </ContentBlock>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                {data.long_tail_questions.map((item, index) => (
+                  <QuestionCard
+                    key={index}
+                    question={item.question}
+                    context={item.context}
+                    intent={item.intent}
+                  />
+                ))}
+              </div>
+            </Section>
+          )}
 
-      {/* Video Title Ideas */}
-      {data.video_title_ideas && (
-        <Section title="Video Content Strategy" icon={Youtube}>
-          <ContentBlock>
-            <p className="text-neutral-700 mb-6 leading-relaxed">
-              Strategic video titles that align with search behavior and YouTube best practices. 
-              These titles are optimized for both YouTube search and Google discovery.
-            </p>
-          </ContentBlock>
-          
-          <div className="space-y-4">
-            {data.video_title_ideas.map((item, index) => (
-              <VideoTitleCard
-                key={index}
-                title={item.title}
-                strategy={item.strategy}
-                targetKeywords={item.target_keywords}
-                contentFocus={item.content_focus}
-              />
-            ))}
-          </div>
-        </Section>
-      )}
+          {/* Video Title Ideas */}
+          {data.video_title_ideas && (
+            <Section title="Video Content Strategy" icon={Youtube}>
+              <ContentBlock>
+                <p className="text-neutral-700 mb-6 leading-relaxed">
+                  Strategic video titles that align with search behavior and YouTube best practices. 
+                  These titles are optimized for both YouTube search and Google discovery.
+                </p>
+              </ContentBlock>
+              
+              <div className="space-y-4">
+                {data.video_title_ideas.map((item, index) => (
+                  <VideoTitleCard
+                    key={index}
+                    title={item.title}
+                    strategy={item.strategy}
+                    targetKeywords={item.target_keywords}
+                    contentFocus={item.content_focus}
+                  />
+                ))}
+              </div>
+            </Section>
+          )}
 
-      {/* SEO Strategy Recommendations */}
-      {data.seo_strategy && (
-        <Section title="SEO Strategy & Implementation" icon={Target}>
-          <div className="space-y-4">
-            {data.seo_strategy.map((insight, index) => (
-              <StrategyInsight
-                key={index}
-                category={insight.category}
-                recommendation={insight.recommendation}
-              />
-            ))}
-          </div>
-        </Section>
-      )}
+          {/* SEO Strategy Recommendations */}
+          {data.seo_strategy && (
+            <Section title="SEO Strategy &amp; Implementation" icon={Target}>
+              <div className="space-y-4">
+                {data.seo_strategy.map((insight, index) => (
+                  <StrategyInsight
+                    key={index}
+                    category={insight.category}
+                    recommendation={insight.recommendation}
+                  />
+                ))}
+              </div>
+            </Section>
+          )}
 
-      {/* Implementation Guidelines */}
-      <ContentBlock className="bg-gradient-to-r from-neutral-50 to-green-50 border-green-200">
-        <div className="flex items-start gap-3">
-          <Lightbulb className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
-          <div>
-            <h3 className="text-lg font-semibold text-neutral-900 mb-3">Implementation Tips</h3>
-            <div className="space-y-2 text-neutral-700">
-              <p className="text-sm">
-                <strong>Content Calendar:</strong> Use 2-3 high-volume keywords per week as primary content themes
-              </p>
-              <p className="text-sm">
-                <strong>Blog Strategy:</strong> Answer one long-tail question per blog post with comprehensive, local context
-              </p>
-              <p className="text-sm">
-                <strong>Video Optimization:</strong> Include exact keyword phrases in titles, descriptions, and first 15 seconds of video
-              </p>
-              <p className="text-sm">
-                <strong>Local SEO:</strong> Optimize Google Business Profile and local citations with these exact search terms
-              </p>
+          {/* Implementation Guidelines */}
+          <ContentBlock className="bg-gradient-to-r from-neutral-50 to-green-50 border-green-200">
+            <div className="flex items-start gap-3">
+              <Lightbulb className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="text-lg font-semibold text-neutral-900 mb-3">Implementation Tips</h3>
+                <div className="space-y-2 text-neutral-700">
+                  <p className="text-sm">
+                    <strong>Content Calendar:</strong> Use 2-3 high-volume keywords per week as primary content themes
+                  </p>
+                  <p className="text-sm">
+                    <strong>Blog Strategy:</strong> Answer one long-tail question per blog post with comprehensive, local context
+                  </p>
+                  <p className="text-sm">
+                    <strong>Video Optimization:</strong> Include exact keyword phrases in titles, descriptions, and first 15 seconds of video
+                  </p>
+                  <p className="text-sm">
+                    <strong>Local SEO:</strong> Optimize Google Business Profile and local citations with these exact search terms
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </ContentBlock>
+          </ContentBlock>
+        </>
+      )}
     </div>
   );
 };

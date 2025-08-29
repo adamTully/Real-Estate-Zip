@@ -1,5 +1,6 @@
 import React from "react";
-import { MapPin, TrendingUp, Target, Lightbulb, Quote } from "lucide-react";
+import { MapPin, TrendingUp, Target, Lightbulb, Quote, Sparkles, AlertCircle } from "lucide-react";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 // Typography-focused components
 const Card = ({ className = "", children, ...props }) => (
@@ -67,32 +68,15 @@ const BuyerMigrationDetail = ({ data }) => {
         {isRealData && (
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
             <Sparkles className="w-3 h-3" />
-            Generated with {data.generated_with} • {new Date(data.timestamp).toLocaleDateString()}
+            Generated with {data.generated_with} • {data.timestamp ? new Date(data.timestamp).toLocaleDateString() : ""}
           </div>
         )}
       </div>
 
-      {/* Real ChatGPT Content */}
+      {/* Real ChatGPT Content (Markdown) */}
       {isRealData ? (
         <ContentBlock>
-          <div className="prose prose-lg prose-neutral max-w-none">
-            <div 
-              className="leading-relaxed text-neutral-800"
-              style={{ whiteSpace: 'pre-wrap' }}
-              dangerouslySetInnerHTML={{ 
-                __html: content
-                  .replace(/\n\n/g, '</p><p class="mb-4">')
-                  .replace(/^/, '<p class="mb-4">')
-                  .replace(/$/, '</p>')
-                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/### (.*?)\n/g, '<h3 class="text-xl font-semibold text-neutral-900 mt-8 mb-4">$1</h3>')
-                  .replace(/## (.*?)\n/g, '<h2 class="text-2xl font-bold text-neutral-900 mt-8 mb-6">$1</h2>')
-                  .replace(/# (.*?)\n/g, '<h1 class="text-3xl font-bold text-neutral-900 mt-8 mb-6">$1</h1>')
-                  .replace(/\* \*\*(.*?)\*\* – (.*?)(\n|$)/g, '<div class="bg-blue-50 p-4 rounded-lg border-l-4 border-l-blue-400 my-4"><h4 class="font-semibold text-blue-900 mb-2">$1</h4><p class="text-blue-800 text-sm leading-relaxed">$2</p></div>')
-                  .replace(/\* (.*?)(\n|$)/g, '<li class="ml-4 mb-2">$1</li>')
-              }}
-            />
-          </div>
+          <MarkdownRenderer content={content} className="prose-lg" />
         </ContentBlock>
       ) : (
         /* Fallback structured content display */
@@ -201,16 +185,6 @@ const BuyerMigrationDetail = ({ data }) => {
                 ))}
               </div>
             </Section>
-          )}
-
-          {/* Next Steps */}
-          {data.next_steps && (
-            <ContentBlock className="bg-gradient-to-r from-neutral-50 to-blue-50 border-blue-200">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-3">Next Steps</h3>
-              <p className="text-neutral-700 leading-relaxed">
-                {data.next_steps}
-              </p>
-            </ContentBlock>
           )}
         </>
       )}

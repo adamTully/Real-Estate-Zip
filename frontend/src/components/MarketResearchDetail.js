@@ -1,5 +1,6 @@
 import React from "react";
 import { MapPin, TrendingUp, Users, Target, Lightbulb, BarChart3, Home, Clock, DollarSign } from "lucide-react";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 // Reusable UI components
 const Card = ({ className = "", children, ...props }) => (
@@ -76,7 +77,7 @@ const MicroAreaCard = ({ area }) => (
 
       {/* Opportunity Driver */}
       <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-l-blue-400">
-        <p className="text-sm font-medium text-blue-900 mb-1">Why This Area Matters:</p>
+        <p className="text-sm font-medium text-blue-900 mb-1">Why This Area Matters:</n>        
         <p className="text-blue-800 text-sm leading-relaxed">{area.opportunity_driver}</p>
       </div>
 
@@ -182,6 +183,9 @@ const TacticsList = ({ category, tactics }) => (
 const MarketResearchDetail = ({ data }) => {
   if (!data) return null;
 
+  const hasNarrative = !!data.analysis_content;
+  const narrative = data.analysis_content;
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -214,136 +218,144 @@ const MarketResearchDetail = ({ data }) => {
         </p>
       </div>
 
-      {/* Market Snapshot */}
-      {data.market_snapshot && (
-        <Section title="Market Snapshot" icon={BarChart3}>
-          <div className="grid md:grid-cols-4 gap-4">
-            <MetricCard
-              icon={DollarSign}
-              label="Median Price"
-              value={formatCurrency(data.market_snapshot.median_price)}
-              change={formatPercent(data.market_snapshot.yoy_change)}
-              color="green"
-            />
-            <MetricCard
-              icon={Clock}
-              label="Days on Market"
-              value={`${data.market_snapshot.dom_current} days`}
-              change={`vs ${data.market_snapshot.dom_last_year} last year`}
-              color="blue"
-            />
-            <MetricCard
-              icon={Home}
-              label="Months Inventory"
-              value={`${data.market_snapshot.months_inventory.toFixed(1)} months`}
-              color="purple"
-            />
-            <MetricCard
-              icon={TrendingUp}
-              label="Mortgage Rate"
-              value={`${data.market_snapshot.mortgage_rate.toFixed(2)}%`}
-              color="red"
-            />
-          </div>
+      {hasNarrative ? (
+        <ContentBlock>
+          <MarkdownRenderer content={narrative} className="prose-lg" />
+        </ContentBlock>
+      ) : (
+        <>
+          {/* Market Snapshot */}
+          {data.market_snapshot && (
+            <Section title="Market Snapshot" icon={BarChart3}>
+              <div className="grid md:grid-cols-4 gap-4">
+                <MetricCard
+                  icon={DollarSign}
+                  label="Median Price"
+                  value={formatCurrency(data.market_snapshot.median_price)}
+                  change={formatPercent(data.market_snapshot.yoy_change)}
+                  color="green"
+                />
+                <MetricCard
+                  icon={Clock}
+                  label="Days on Market"
+                  value={`${data.market_snapshot.dom_current} days`}
+                  change={`vs ${data.market_snapshot.dom_last_year} last year`}
+                  color="blue"
+                />
+                <MetricCard
+                  icon={Home}
+                  label="Months Inventory"
+                  value={`${data.market_snapshot.months_inventory.toFixed(1)} months`}
+                  color="purple"
+                />
+                <MetricCard
+                  icon={TrendingUp}
+                  label="Mortgage Rate"
+                  value={`${data.market_snapshot.mortgage_rate.toFixed(2)}%`}
+                  color="red"
+                />
+              </div>
 
-          {data.market_context && (
-            <ContentBlock className="bg-gradient-to-r from-neutral-50 to-orange-50 border-orange-200">
-              <div className="flex items-start gap-3">
-                <Lightbulb className="w-5 h-5 text-orange-600 mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="text-lg font-semibold text-neutral-900 mb-2">Market Context</h3>
-                  <p className="text-neutral-700 leading-relaxed">{data.market_context}</p>
+              {data.market_context && (
+                <ContentBlock className="bg-gradient-to-r from-neutral-50 to-orange-50 border-orange-200">
+                  <div className="flex items-start gap-3">
+                    <Lightbulb className="w-5 h-5 text-orange-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-neutral-900 mb-2">Market Context</h3>
+                      <p className="text-neutral-700 leading-relaxed">{data.market_context}</p>
+                    </div>
+                  </div>
+                </ContentBlock>
+              )}
+            </Section>
+          )}
+
+          {/* Micro-Areas Analysis */}
+          {data.micro_areas && (
+            <Section title="High-Opportunity Micro-Areas" icon={MapPin}>
+              <ContentBlock>
+                <p className="text-neutral-700 mb-6 leading-relaxed">
+                  Geographic areas with potential seller activity that other agents may be overlooking. 
+                  Focus your prospecting efforts on these specific corridors and neighborhoods.
+                </p>
+              </ContentBlock>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {data.micro_areas.map((area, index) => (
+                  <MicroAreaCard key={index} area={area} />
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {/* Seller Profiles */}
+          {data.seller_profiles && (
+            <Section title="Seller Profiles Most Likely to List" icon={Users}>
+              <ContentBlock>
+                <p className="text-neutral-700 mb-6 leading-relaxed">
+                  Target seller segments based on current market conditions, lifecycle timing, and motivational factors. 
+                  Tailor your approach and messaging to each profile's specific needs.
+                </p>
+              </ContentBlock>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {data.seller_profiles.map((profile, index) => (
+                  <SellerProfileCard key={index} profile={profile} />
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {/* Actionable Takeaways */}
+          {data.actionable_takeaways && (
+            <Section title="Actionable Takeaways" icon={Target}>
+              <ContentBlock>
+                <p className="text-neutral-700 mb-6 leading-relaxed">
+                  Specific tactics you can implement immediately for prospecting, content creation, and local marketing. 
+                  Organized by channel for easy implementation and tracking.
+                </p>
+              </ContentBlock>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {data.actionable_takeaways.map((category, index) => (
+                  <TacticsList
+                    key={index}
+                    category={category.category}
+                    tactics={category.tactics}
+                  />
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {/* Implementation Guide */}
+          <ContentBlock className="bg-gradient-to-r from-neutral-50 to-green-50 border-green-200">
+            <div className="flex items-start gap-3">
+              <Lightbulb className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="text-lg font-semibold text-neutral-900 mb-3">Next Steps</h3>
+                <p className="text-neutral-700 leading-relaxed mb-4">
+                  {data.next_steps}
+                </p>
+                <div className="space-y-2 text-sm text-green-800">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    <span>Start with one micro-area for focused testing and optimization</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    <span>Develop seller consultation packages for each profile type</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    <span>Track response rates and adjust messaging based on results</span>
+                  </div>
                 </div>
               </div>
-            </ContentBlock>
-          )}
-        </Section>
-      )}
-
-      {/* Micro-Areas Analysis */}
-      {data.micro_areas && (
-        <Section title="High-Opportunity Micro-Areas" icon={MapPin}>
-          <ContentBlock>
-            <p className="text-neutral-700 mb-6 leading-relaxed">
-              Geographic areas with potential seller activity that other agents may be overlooking. 
-              Focus your prospecting efforts on these specific corridors and neighborhoods.
-            </p>
-          </ContentBlock>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {data.micro_areas.map((area, index) => (
-              <MicroAreaCard key={index} area={area} />
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* Seller Profiles */}
-      {data.seller_profiles && (
-        <Section title="Seller Profiles Most Likely to List" icon={Users}>
-          <ContentBlock>
-            <p className="text-neutral-700 mb-6 leading-relaxed">
-              Target seller segments based on current market conditions, lifecycle timing, and motivational factors. 
-              Tailor your approach and messaging to each profile's specific needs.
-            </p>
-          </ContentBlock>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {data.seller_profiles.map((profile, index) => (
-              <SellerProfileCard key={index} profile={profile} />
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* Actionable Takeaways */}
-      {data.actionable_takeaways && (
-        <Section title="Actionable Takeaways" icon={Target}>
-          <ContentBlock>
-            <p className="text-neutral-700 mb-6 leading-relaxed">
-              Specific tactics you can implement immediately for prospecting, content creation, and local marketing. 
-              Organized by channel for easy implementation and tracking.
-            </p>
-          </ContentBlock>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            {data.actionable_takeaways.map((category, index) => (
-              <TacticsList
-                key={index}
-                category={category.category}
-                tactics={category.tactics}
-              />
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* Implementation Guide */}
-      <ContentBlock className="bg-gradient-to-r from-neutral-50 to-green-50 border-green-200">
-        <div className="flex items-start gap-3">
-          <Lightbulb className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
-          <div>
-            <h3 className="text-lg font-semibold text-neutral-900 mb-3">Next Steps</h3>
-            <p className="text-neutral-700 leading-relaxed mb-4">
-              {data.next_steps}
-            </p>
-            <div className="space-y-2 text-sm text-green-800">
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                <span>Start with one micro-area for focused testing and optimization</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                <span>Develop seller consultation packages for each profile type</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                <span>Track response rates and adjust messaging based on results</span>
-              </div>
             </div>
-          </div>
-        </div>
-      </ContentBlock>
+          </ContentBlock>
+        </>
+      )}
     </div>
   );
 };
