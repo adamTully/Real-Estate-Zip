@@ -20,6 +20,7 @@ import SeoYouTubeDetail from "./components/SeoYouTubeDetail";
 import ContentStrategyDetail from "./components/ContentStrategyDetail";
 import MarketResearchDetail from "./components/MarketResearchDetail";
 import ContentCreationDetail from "./components/ContentCreationDetail";
+import IntelligenceDashboard from "./components/IntelligenceDashboard";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { jsPDF } from "jspdf";
