@@ -335,27 +335,42 @@ Be specific about {city_name}, {state_name} and include actionable prospecting s
         }
 
     async def generate_content_assets(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
-        """Generate content assets (Content Creation)"""
+        """Generate content assets using ChatGPT"""
         city_name = location_info.get('city', 'Unknown')
         state_name = location_info.get('state', 'Unknown')
         
-        return {
-            "summary": f"Generated comprehensive content library for {city_name} market including blogs, lead magnets, and email campaigns",
-            "location": {
-                "city": city_name,
-                "state": state_name,
-                "zip_code": zip_code
-            },
-            "content_overview": {
-                "blog_posts": 10,
-                "lead_magnets": 8,
-                "email_campaigns": 8,
-                "total_files": 26
-            },
-            "delivery_format": "Individual downloadable files organized by content type",
-            "usage_instructions": f"All content is optimized for {city_name} market and ready for immediate use with your branding customization.",
-            "implementation_timeline": "Content can be scheduled and deployed immediately following your 8-week content strategy roadmap."
-        }
+        try:
+            prompt = f"""Based on your findings, please produce the following for me: - 10 full article blog post using the SEO findings. Use things like the "Long-tail questions" and other local keywords for {city_name}, {state_name}. Make all of these individual downloadable files. - Based on the content strategy, please generate a Lead Magnet. Please make those individual pdf's I can download. - Also based on the content strategy, please create an email for each week. Also, make those individually downloadable.
+
+Create comprehensive, ready-to-use content that I can implement immediately."""
+
+            user_message = UserMessage(text=prompt)
+            response = await self.llm.send_message(user_message)
+            
+            return {
+                "summary": f"Content library generated for {city_name}, {state_name} including blogs, lead magnets, and email campaigns",
+                "location": {
+                    "city": city_name,
+                    "state": state_name,
+                    "zip_code": zip_code
+                },
+                "analysis_content": response,
+                "generated_with": "ChatGPT GPT-5",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            
+        except Exception as e:
+            logging.error(f"ChatGPT error for content creation: {str(e)}")
+            return {
+                "summary": f"Content creation for {city_name}, {state_name} (fallback mode)",
+                "location": {
+                    "city": city_name,
+                    "state": state_name,
+                    "zip_code": zip_code
+                },
+                "analysis_content": "Real-time analysis temporarily unavailable. Please try again.",
+                "error": str(e)
+            }
 
 # Initialize service
 zip_intel_service = ZipIntelligenceService()
