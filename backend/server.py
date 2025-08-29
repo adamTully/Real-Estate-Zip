@@ -69,6 +69,12 @@ class ContentAsset(BaseModel):
 class ZipIntelligenceService:
     def __init__(self):
         self.geolocator = Nominatim(user_agent="zip-intel-generator")
+        # Initialize ChatGPT with gpt-5 and your API key
+        self.llm = LlmChat(
+            api_key=os.environ.get('OPENAI_API_KEY'),
+            session_id=f"zipintel-{uuid.uuid4()}",
+            system_message="You are an expert real estate market analyst. Provide comprehensive, data-driven insights based on the user's requests. Always be specific, actionable, and professional in your responses."
+        ).with_model("openai", "gpt-5")
         
     async def get_location_info(self, zip_code: str) -> Dict[str, Any]:
         """Get basic location information for ZIP code"""
