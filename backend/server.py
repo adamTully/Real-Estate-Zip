@@ -508,77 +508,159 @@ Locally, census migration data shows that {state_name} counties receive most mov
         }
 
     async def generate_hidden_listings_analysis(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
-        """Generate hidden listing opportunities analysis"""
+        """Generate hidden listing opportunities analysis (Market Research)"""
         city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        
+        # Generate market snapshot
+        median_price = random.randint(350000, 650000)
+        yoy_change = random.uniform(-5.0, 8.0)
+        dom_current = random.randint(25, 65)
+        dom_last_year = random.randint(20, 45)
+        months_inventory = random.uniform(2.5, 5.2)
+        
+        market_snapshot = {
+            "zip_code": zip_code,
+            "median_price": median_price,
+            "yoy_change": yoy_change,
+            "dom_current": dom_current,
+            "dom_last_year": dom_last_year,
+            "months_inventory": months_inventory,
+            "mortgage_rate": random.uniform(6.5, 7.5),
+            "demographics": {
+                "population": random.randint(25000, 75000),
+                "median_income": random.randint(45000, 85000)
+            }
+        }
+        
+        # Generate micro-areas with opportunities
+        micro_areas = [
+            {
+                "name": f"{random.choice(['Riverside', 'Historic District', 'Downtown', 'Park View', 'Mill Creek'])} corridor",
+                "location_context": f"Near {random.choice(['Main St & Oak Ave', 'Highway 20 & First St', 'River Road corridor', 'Downtown district', 'Park entrance'])}",
+                "opportunity_driver": random.choice([
+                    "Infrastructure improvements lifting amenity value",
+                    "Transit and trail investments increasing accessibility", 
+                    "Mixed-use development creating repositioning opportunities",
+                    "School district boundary changes affecting desirability",
+                    "Commercial development driving residential interest"
+                ]),
+                "likely_sellers": [
+                    f"Long-time owners in {random.choice(['1950s-80s', '1960s-90s', '1970s-2000s'])} homes",
+                    f"{random.choice(['Early-phase', 'First-wave', 'Recent'])} townhome/condo owners from {random.randint(2018, 2022)} cohorts",
+                    f"Small landlords along {random.choice(['industrial-residential', 'commercial-residential', 'mixed-use'])} transition areas"
+                ],
+                "pain_points": [
+                    f"Rising {random.choice(['HOA fees', 'insurance costs', 'property taxes', 'maintenance costs'])}",
+                    f"{random.choice(['Aging', 'Deferred'])} {random.choice(['roof/HVAC', 'electrical/plumbing', 'foundation'])} needs",
+                    f"Near-term {random.choice(['construction', 'development', 'infrastructure'])} disruptions"
+                ],
+                "prospecting_strategy": f"'{random.choice(['Equity Checkup', 'Market Update', 'Opportunity Analysis'])} near {random.choice(['the trails', 'downtown', 'new development'])}' mailer + {random.choice(['pre-inspection offer', 'CMA service', 'renovation consultation'])}",
+                "content_ideas": [
+                    f"Short video: '{city_name} {random.choice(['before/after', 'transformation', 'development update'])}'",
+                    f"Blog post: 'What ${random.randint(400, 700)}K buys in {city_name} today'"
+                ]
+            }
+            for _ in range(4)  # Generate 4 micro-areas
+        ]
+        
+        # Generate seller profiles
+        seller_profiles = [
+            {
+                "profile": "Move-up families",
+                "characteristics": f"Families in {random.choice(['1990s/2000s', '1980s/90s', '2000s/10s'])} subdivisions hitting major capital expenditure cycles",
+                "motivations": [
+                    f"Avoiding ${random.randint(15, 35)}K+ roof/HVAC replacements",
+                    "Desire for newer floor plans and home office space",
+                    "School district preferences for growing children"
+                ],
+                "timing": f"Peak selling season: {random.choice(['Spring/Summer', 'March-July', 'April-August'])}",
+                "approach": "Focus on 'avoid two moves' strategy and move-up financing options"
+            },
+            {
+                "profile": "Empty-nesters/retirees", 
+                "characteristics": f"Ages {random.randint(55, 65)}-{random.randint(70, 80)} seeking single-level, low-maintenance living",
+                "motivations": [
+                    "Reducing home maintenance responsibilities",
+                    "Accessing equity for retirement planning", 
+                    "Moving closer to amenities and healthcare"
+                ],
+                "timing": f"Often sell in {random.choice(['fall/winter', 'late summer/fall', 'winter/spring'])} to avoid moving stress",
+                "approach": "Emphasize lifestyle simplification and equity optimization"
+            },
+            {
+                "profile": "Relocators",
+                "characteristics": "Job changes, remote work transitions, or family circumstances",
+                "motivations": [
+                    f"Corporate relocations to {random.choice(['Atlanta', 'Charlotte', 'Nashville', 'Tampa'])} metro",
+                    "Remote work enabling lifestyle geography changes",
+                    "Family situations requiring proximity changes"
+                ],
+                "timing": "Often compressed timelines (30-60 days)",
+                "approach": "Stress convenience, speed, and full-service support"
+            },
+            {
+                "profile": "Small landlords & heirs",
+                "characteristics": f"1-3 property owners and estate property inheritors",
+                "motivations": [
+                    f"Rising carry costs and {random.choice(['maintenance', 'vacancy', 'regulation'])} challenges",
+                    "Estate settlement and asset simplification",
+                    "Capital reallocation to other investments"
+                ],
+                "timing": "Year-round but often tax-driven (Q4/Q1)",
+                "approach": "Focus on net proceeds, convenience, and as-is options"
+            }
+        ]
+        
+        # Generate actionable takeaways
+        actionable_takeaways = [
+            {
+                "category": "Digital Marketing",
+                "tactics": [
+                    f"Create micro-area landing pages with development/amenity maps",
+                    f"Capture emails via '{city_name} Relocation Starter Pack'",
+                    f"Retarget visitors viewing 2+ neighborhood pages with consultation scheduler"
+                ]
+            },
+            {
+                "category": "Direct Mail & Prospecting",
+                "tactics": [
+                    f"Target homes 22-28 years old with roof/HVAC messaging",
+                    f"Circle prospect around new developments and infrastructure",
+                    f"Send 'quiet market' letters to high-equity homeowners"
+                ]
+            },
+            {
+                "category": "Content Strategy",
+                "tactics": [
+                    f"Weekly market updates on corridor developments",
+                    f"'What ${median_price//1000}K buys' video series",
+                    f"Landlord exit strategy content and calculators"
+                ]
+            },
+            {
+                "category": "Partnership Opportunities", 
+                "tactics": [
+                    "Build relationships with estate attorneys for probate leads",
+                    "Partner with contractors for pre-inspection services",
+                    "Connect with 1031 exchange facilitators for investor exits"
+                ]
+            }
+        ]
         
         return {
             "summary": f"PDF analysis of off-market opportunities in {city_name} micro-markets",
-            "detailed_analysis": f"""
-# Hidden Listing Opportunities - {city_name} Market Analysis
-
-## Off-Market Property Sources
-
-### 1. Pre-Market Listings
-**Opportunity:** Properties coming to market in next 30-60 days
-- **Target Areas:** Historic district, waterfront properties, new developments
-- **Strategy:** Direct outreach to listing agents
-- **Potential Volume:** {random.randint(15, 45)} properties/month
-
-### 2. Pocket Listings  
-**Opportunity:** Agent-to-agent exclusive networks
-- **Focus Neighborhoods:** Premium subdivisions, luxury communities
-- **Network Strategy:** MLS agent relationships, referral partnerships
-- **Estimated Access:** {random.randint(8, 25)} exclusive listings/month
-
-### 3. FSBO Conversion Opportunities
-**Opportunity:** For Sale By Owner properties needing professional assistance
-- **Target Profile:** Properties on market 60+ days, first-time sellers
-- **Conversion Strategy:** Educational approach, market analysis offers
-- **Monthly Leads:** {random.randint(5, 20)} potential conversions
-
-### 4. Expired/Withdrawn Listings
-**Opportunity:** Previously listed properties with motivated sellers
-- **Target Timeline:** Properties expired within last 90 days
-- **Approach Strategy:** Fresh perspective, new marketing plan
-- **Success Rate:** {random.randint(15, 35)}% re-listing conversion
-
-## Geographic Micro-Markets
-
-### High-Opportunity Zones:
-1. **{city_name} Historic District** - Unique properties, limited inventory
-2. **Waterfront/Scenic Areas** - Premium locations, seasonal availability  
-3. **New Development Areas** - Pre-construction and phase releases
-4. **Established Neighborhoods** - Quiet turnover, relationship-dependent
-
-## Implementation Strategy
-
-### Month 1: Network Building
-- Establish agent relationships
-- Create FSBO outreach system
-- Develop expired listing follow-up process
-
-### Month 2-3: System Optimization  
-- Refine targeting criteria
-- Automate lead generation
-- Track conversion metrics
-
-### Month 4+: Scale and Expand
-- Expand geographic coverage
-- Develop referral incentive programs
-- Create exclusive buyer databases
-
-## Success Metrics
-- **Target:** Access to {random.randint(25, 75)} off-market opportunities/month
-- **Conversion Goal:** {random.randint(10, 25)}% of leads to qualified prospects
-- **Revenue Impact:** ${random.randint(50000, 150000)} additional commission potential/quarter
-            """.strip(),
-            "opportunity_types": [
-                "Pre-market listings",
-                "Pocket listings", 
-                "FSBO conversions",
-                "Expired listings"
-            ],
-            "target_volume": random.randint(25, 75)
+            "location": {
+                "city": city_name,
+                "state": state_name,
+                "zip_code": zip_code
+            },
+            "market_snapshot": market_snapshot,
+            "micro_areas": micro_areas,
+            "seller_profiles": seller_profiles,
+            "actionable_takeaways": actionable_takeaways,
+            "market_context": f"In a ~{months_inventory:.1f}-month supply market, some sellers are reconsidering timing while buyers seek updated, move-in-ready homes. Focus on convenience and speed for motivated sellers.",
+            "next_steps": f"Implement micro-targeted campaigns for each area, develop seller consultation packages, and track conversion metrics by seller profile and geographic focus."
         }
 
     async def generate_market_hooks_titles(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
