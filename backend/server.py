@@ -394,79 +394,116 @@ Locally, census migration data shows that {state_name} counties receive most mov
     async def generate_content_strategy(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
         """Generate 8-week content marketing strategy"""
         city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        
+        # Generate 8-week content roadmap
+        weekly_roadmap = []
+        
+        themes = [
+            {
+                "week": 1,
+                "theme": "Cost-of-living & taxes",
+                "short_form": f"Create 3 vertical videos comparing {city_name}'s housing costs and taxes to New York or California. Use quick charts showing median home price (${random.randint(350, 600)}k vs. $1M+) and {state_name}'s tax advantages. End with CTA to download 'Cost of Living Checklist.'",
+                "long_form": f"Publish blog post + 8-10 min YouTube video titled '{city_name} Cost of Living vs. NYC & LA' with detailed breakdowns and case studies. Include infographics and mention local rent averages (${random.randint(1200, 1800)}-${random.randint(1900, 2500)}).",
+                "lead_magnet": f"'2025 {city_name} Cost-of-Living & Tax Comparison Guide' - Printable PDF with salary requirements, median housing costs and tax comparisons. Use gated landing page with opt-in form.",
+                "email_theme": f"Email #1 ('Welcome + Savings') - deliver the cost-of-living guide, highlight savings potential and invite recipients to schedule consultation. Retarget website visitors with ads emphasizing tax and housing savings."
+            },
+            {
+                "week": 2, 
+                "theme": "Neighborhoods & lifestyle",
+                "short_form": f"Post reels/shorts touring local landmarks and recreational areas—emphasize walkability, parks and community features. Use trending audio and quick 'day in the life' scenes showcasing {city_name}'s lifestyle.",
+                "long_form": f"Long-form video/podcast episode: 'Top 5 Neighborhoods in {city_name} for Families & Young Professionals.' Discuss features, commute times and average home prices. Blog version optimized for 'best neighborhoods in {city_name}'.",
+                "lead_magnet": f"Interactive '{city_name} Neighborhood Matcher' quiz. After answering lifestyle and budget questions, users receive personalized report with neighborhood suggestions.",
+                "email_theme": f"Email #2 ('Find Your Fit') - deliver quiz results, include mini-profiles of recommended neighborhoods and invite recipients to join virtual home-tour webinar. Retargeting ads show neighborhood highlights."
+            },
+            {
+                "week": 3,
+                "theme": "Schools & safety", 
+                "short_form": f"Short videos answering FAQs: 'Are schools in {city_name} good?', 'How safe is {city_name}?' Use stats from local school ratings and safety data with on-screen text.",
+                "long_form": f"Publish blog post and 12-min video: '{city_name} Schools & Safety Guide.' Interview local parents or school administrator. Discuss public vs. private options, ratings and community safety features.",
+                "lead_magnet": f"Downloadable 'Family Relocation Checklist' with school comparison charts, enrollment tips and safety resources specific to {city_name}.",
+                "email_theme": f"Email #3 ('Family Focus') - share the checklist and link to schools video. Retarget those who viewed school content with ads promoting family-friendly neighborhoods and open houses."
+            },
+            {
+                "week": 4,
+                "theme": "Buying process & market update",
+                "short_form": f"Two-part short series: (1) 'What ${random.randint(400, 700)}k gets you in {city_name} vs. New York'; (2) 'Top 3 Mistakes Out-of-State Buyers Make.' Offer quick tips and direct to full video.",
+                "long_form": f"Long-form content: '{city_name} Housing Market Update 2025: Prices, Demand & How to Win' covering median price trends, days on market and inventory. Provide actionable advice on pre-approval and negotiating.",
+                "lead_magnet": f"'{city_name} Home-Buyer Toolkit' - packet with pre-approval checklist, timeline, local lender contacts and links to current listings.",
+                "email_theme": f"Email #4 ('Market Insider') - deliver toolkit and include summary of current market stats. Retarget users who viewed home-tour pages with ads featuring new listings."
+            },
+            {
+                "week": 5,
+                "theme": "Remote workers & relocators",
+                "short_form": f"Create reels/shorts: 'Remote Worker's Day in {city_name}' showing home office setups, coffee shops and co-working spaces; highlight outdoor breaks and lifestyle flexibility.",
+                "long_form": f"Long-form podcast or video: 'Why Remote Workers Are Choosing {city_name} Over NYC & SF.' Discuss remote-work migration trends and affordability; interview someone who relocated.",
+                "lead_magnet": f"'Remote Work Relocation Guide' - includes cost calculators, tips for setting up home office in {city_name} and tax deductions for remote workers.",
+                "email_theme": f"Email #5 ('Remote Work Ready') - share guide, emphasize lifestyle benefits, invite to virtual Q&A about remote-work relocation. Retarget with ads focused on home office spaces."
+            },
+            {
+                "week": 6,
+                "theme": "Renting & investing",
+                "short_form": f"Short tips: 'Average Rent in {city_name}' (highlighting ${random.randint(1200, 1600)} studio to ${random.randint(1900, 2800)} 3-bedroom) and 'Top 3 Tips for Investors in {city_name}.'",
+                "long_form": f"Publish blog + video: 'Renting vs. Buying in {city_name}: What Makes Sense in 2025?' Compare costs, average rent vs. mortgage, and forecast returns; include investment opportunities segment.",
+                "lead_magnet": f"'{city_name} Rental Market Report' with rent trends, ROI calculators and investment opportunity analysis for the local market.",
+                "email_theme": f"Email #6 ('Rent vs. Buy') - deliver report, encourage consultation for investors and renters ready to buy. Retarget with ads promoting new construction and investment properties."
+            },
+            {
+                "week": 7,
+                "theme": "Moving logistics & personal stories",
+                "short_form": f"Record short testimonials from recent buyers who relocated to {city_name}. Use captions summarizing why they moved (taxes, space, schools, lifestyle).",
+                "long_form": f"Long-form interview: 'How We Moved to {city_name}' featuring client story. Cover decision-making process, moving costs, surprises and practical advice for relocators.",
+                "lead_magnet": f"'Relocation Planner Spreadsheet' - Google Sheet template for budgeting movers, travel, temporary housing and closing costs specific to {city_name} moves.",
+                "email_theme": f"Email #7 ('Your Move Simplified') - deliver planner and encourage one-on-one planning session. Retarget with ads offering moving checklists and local mover partnerships."
+            },
+            {
+                "week": 8,
+                "theme": "Community & lifestyle wrap-up", 
+                "short_form": f"Short-form 'Top 5 Things to Do in {city_name} This Season' and 'Hidden Gems in {city_name}' to maintain engagement and showcase local lifestyle.",
+                "long_form": f"Long-form content: seasonally relevant vlog or podcast summarizing {city_name} community events, new developments and Q&A session answering subscriber questions.",
+                "lead_magnet": f"'{city_name} Community Calendar' - monthly PDF of festivals, farmers markets, local events and seasonal activities throughout the year.",
+                "email_theme": f"Email #8 ('Stay Connected') - share calendar and invite to local meet-ups or open houses. Retarget everyone who downloaded previous lead magnets with final nudge to schedule property tour."
+            }
+        ]
+        
+        # Additional strategy recommendations
+        implementation_notes = [
+            {
+                "category": "Cross-platform promotion",
+                "recommendation": f"Repurpose clips from long-form videos into reels/shorts and drive viewers to YouTube channel or blog for depth. Use Instagram Stories polls about {city_name} neighborhoods to boost engagement."
+            },
+            {
+                "category": "SEO & keywords", 
+                "recommendation": f"Optimize blog posts and video descriptions for high-volume keywords ('{city_name} cost of living,' 'best neighborhoods in {city_name},' 'pros and cons of living in {city_name}')."
+            },
+            {
+                "category": "Lead nurturing",
+                "recommendation": f"Tag leads by interest (cost of living, schools, investment) so follow-up emails and retargeting ads speak to their motivations. Use testimonials from similar relocators to build trust."
+            },
+            {
+                "category": "Retargeting strategy",
+                "recommendation": f"Set up custom audiences for website visitors, video viewers and lead magnet downloaders. Serve ads highlighting next step (webinar, consultation, new listing). Use carousel ads showcasing different {city_name} neighborhoods."
+            },
+            {
+                "category": "Community partnerships",
+                "recommendation": f"Co-create content with local {city_name} businesses, schools and community organizations. Adds authenticity and extends reach through their audiences."
+            }
+        ]
         
         return {
             "summary": f"8-week content plan: blogs, social media, lead magnets focused on {city_name} market",
-            "detailed_analysis": f"""
-# 8-Week Content Marketing Strategy - {city_name} Market
-
-## Week 1-2: Market Foundation
-**Blog Posts:**
-- "{city_name} Real Estate Market Report - Q1 2025"
-- "Top 5 Reasons People Are Moving to {city_name}"
-
-**Social Media:**
-- Instagram Stories: Daily neighborhood highlights
-- Facebook: Market statistics and buyer testimonials
-- YouTube: "{city_name} Market Overview" video
-
-**Lead Magnet:** "{city_name} Buyer's Guide PDF"
-
-## Week 3-4: Neighborhood Deep Dives  
-**Blog Posts:**
-- "Best Family Neighborhoods in {city_name}"
-- "{city_name} School District Analysis"
-
-**Social Media:**
-- Neighborhood spotlight reels
-- Local business features
-- Community event coverage
-
-**Lead Magnet:** "Neighborhood Comparison Checklist"
-
-## Week 5-6: Lifestyle Content
-**Blog Posts:**
-- "Cost of Living: {city_name} vs. Major Cities"
-- "Recreation and Entertainment in {city_name}"
-
-**Social Media:**
-- Local restaurant and activity features
-- Resident interview videos
-- Recreation spot highlights
-
-**Lead Magnet:** "{city_name} Lifestyle Guide"
-
-## Week 7-8: Call to Action
-**Blog Posts:**
-- "How to Buy Your First Home in {city_name}"
-- "Investment Opportunities in {city_name}"
-
-**Social Media:**
-- Success stories and testimonials
-- Market predictions and analysis
-- Call-to-action posts for consultations
-
-**Lead Magnet:** "Home Buying Timeline Checklist"
-
-## Content Distribution Schedule
-- **Monday:** Blog post publication
-- **Tuesday:** LinkedIn market insights
-- **Wednesday:** Instagram neighborhood features  
-- **Thursday:** Facebook community engagement
-- **Friday:** YouTube video release
-- **Weekend:** Social media engagement and community building
-            """.strip(),
-            "content_pillars": [
-                "Market Analysis",
-                "Neighborhood Guides", 
-                "Lifestyle Content",
-                "Buyer Education"
-            ],
-            "posting_schedule": {
-                "blogs": "2 per week",
-                "social_media": "Daily",
-                "videos": "Weekly",
-                "newsletters": "Bi-weekly"
+            "location": {
+                "city": city_name,
+                "state": state_name,
+                "zip_code": zip_code
+            },
+            "weekly_roadmap": themes,
+            "implementation_strategy": implementation_notes,
+            "success_metrics": {
+                "content_goals": f"Position yourself as the go-to resource for anyone considering a move to {city_name}",
+                "engagement_targets": "2-3 pieces of content per week across all channels",
+                "lead_generation": "1 new lead magnet per week, building comprehensive nurture sequence",
+                "conversion_focus": "Move leads from awareness to consultation through value-driven content"
             }
         }
 
