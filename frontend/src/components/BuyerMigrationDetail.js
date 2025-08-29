@@ -67,7 +67,7 @@ const BuyerMigrationDetail = ({ data }) => {
         {/* Data Source Badge */}
         {isRealData && (
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
-            <Sparkles className="w-3 h-3" />
+            <MapPin className="w-3 h-3" />
             Generated with {data.generated_with} • {data.timestamp ? new Date(data.timestamp).toLocaleDateString() : ""}
           </div>
         )}
