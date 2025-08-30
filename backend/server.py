@@ -180,8 +180,7 @@ Please structure your response with clear sections and be specific with data, st
 
 Provide specific search volumes where possible and include "People also ask" questions. Be comprehensive and actionable."""
 
-            user_message = UserMessage(text=prompt)
-            response = await self.llm.send_message(user_message)
+            response_text = await self._safe_send(prompt)
             
             return {
                 "summary": f"SEO & YouTube analysis for {city_name}, {state_name} with real search data",
@@ -190,7 +189,7 @@ Provide specific search volumes where possible and include "People also ask" que
                     "state": state_name,
                     "zip_code": zip_code
                 },
-                "analysis_content": response,
+                "analysis_content": response_text,
                 "generated_with": "ChatGPT GPT-5",
                 "timestamp": datetime.utcnow().isoformat()
             }
