@@ -217,8 +217,7 @@ Provide specific search volumes where possible and include "People also ask" que
 
 Create an 8-week detailed plan with specific content ideas, hooks, and CTAs."""
 
-            user_message = UserMessage(text=prompt)
-            response = await self.llm.send_message(user_message)
+            response_text = await self._safe_send(prompt)
             
             return {
                 "summary": f"8-week content strategy for {city_name}, {state_name} market",
@@ -227,7 +226,7 @@ Create an 8-week detailed plan with specific content ideas, hooks, and CTAs."""
                     "state": state_name,
                     "zip_code": zip_code
                 },
-                "analysis_content": response,
+                "analysis_content": response_text,
                 "generated_with": "ChatGPT GPT-5",
                 "timestamp": datetime.utcnow().isoformat()
             }
