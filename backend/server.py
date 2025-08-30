@@ -373,8 +373,7 @@ Be specific about {city_name}, {state_name} and include actionable prospecting s
 
 Create comprehensive, ready-to-use content that I can implement immediately."""
 
-            user_message = UserMessage(text=prompt)
-            response = await self.llm.send_message(user_message)
+            response_text = await self._safe_send(prompt)
             
             return {
                 "summary": f"Content library generated for {city_name}, {state_name} including blogs, lead magnets, and email campaigns",
@@ -383,7 +382,7 @@ Create comprehensive, ready-to-use content that I can implement immediately."""
                     "state": state_name,
                     "zip_code": zip_code
                 },
-                "analysis_content": response,
+                "analysis_content": response_text,
                 "generated_with": "ChatGPT GPT-5",
                 "timestamp": datetime.utcnow().isoformat()
             }
