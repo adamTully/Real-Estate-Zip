@@ -111,7 +111,7 @@
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         -working: true
         -agent: "main"
@@ -119,6 +119,9 @@
         -working: true
         -agent: "testing"
         -comment: "COMPREHENSIVE BACKEND TESTING COMPLETED: All 18 tests passed for ZIP 94105. ✅ POST /api/zip-analysis returns MarketIntelligence with all required keys (buyer_migration, seo_youtube_trends, content_strategy, hidden_listings, market_hooks, content_assets). ✅ Each category includes analysis_content as string. ✅ market_hooks includes detailed_analysis string. ✅ GET /api/zip-analysis/{zip} returns same record. ✅ CORS properly configured. ✅ /api prefix respected. ✅ Response types JSON serializable. ✅ IDs are UUID strings. ✅ created_at/updated_at present. ✅ Invalid ZIP formats correctly rejected with 422. Backend API fully meets all requirements and is production-ready."
+        -working: "NA"
+        -agent: "user"
+        -comment: "User added OpenAI funds; previous rate-limit/quota errors should be cleared. Requesting backend retest."
 
 ## frontend:
   - task: "Add Markdown renderer and wire to detail components"
