@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { 
   MapPin, 
   Sparkles, 
@@ -36,6 +36,16 @@ const Badge = ({ children, variant = "default" }) => {
   );
 };
 
+const ProgressBar = ({ percent = 0 }) => (
+  <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
+    <div className="h-2 bg-blue-600 transition-all" style={{ width: `${percent}%` }} />
+  </div>
+);
+
+const Skeleton = ({ className = "" }) => (
+  <div className={`animate-pulse bg-neutral-100 rounded ${className}`} />
+);
+
 const IntelligenceCard = ({ 
   category, 
   title, 
@@ -46,9 +56,11 @@ const IntelligenceCard = ({
   onViewDetails, 
   onQuickAction,
   icon: Icon,
-  isActive 
+  isActive,
+  loading = false,
+  task = null
 }) => (
-  <Card className={`p-6 hover:shadow-md transition-all duration-200 ${isActive ? 'ring-2 ring-blue-500' : ''}`}>
+  <Card className={`p-6 transition-all duration-200 ${isActive ? 'ring-2 ring-blue-500' : ''}`}>
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-start justify-between">
@@ -62,13 +74,13 @@ const IntelligenceCard = ({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {status === 'complete' && (
+          {!loading && status === 'complete' && (
             <Badge variant="success">
               <CheckCircle2 className="w-3 h-3 mr-1" />
               Complete
             </Badge>
           )}
-          {status === 'processing' && (
+          {loading && (
             <Badge variant="warning">
               <Clock className="w-3 h-3 mr-1" />
               Processing
@@ -77,52 +89,85 @@ const IntelligenceCard = ({
         </div>
       </div>
 
-      {/* Summary */}
-      {summary && (
-        <div className="bg-neutral-50 p-3 rounded-lg">
-          <p className="text-sm text-neutral-700 leading-relaxed">{summary}</p>
-        </div>
-      )}
-
-      {/* Preview Data */}
-      {previewData && (
-        <div className="space-y-2">
-          {previewData.map((item, index) => (
-            <div key={index} className="flex items-center gap-2 text-sm text-neutral-600">
-              <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
-              <span>{item}</span>
+      {/* Loading State with Task Progress */}
+      {loading ? (
+        <div className="space-y-4">
+          {task && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs text-neutral-600">
+                <span>{task.title}</span>
+                <span>{task.percent}%</span>
+              </div>
+              <ProgressBar percent={task.percent} />
             </div>
-          ))}
+          )}
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-5/6" />
+          <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
+            <button
+              disabled
+              className="flex items-center gap-2 text-neutral-400 text-sm font-medium cursor-not-allowed"
+            >
+              View Full Analysis
+              <ExternalLink className="w-3 h-3" />
+            </button>
+            <button
+              disabled
+              className="px-3 py-1 bg-neutral-100 text-neutral-400 text-xs rounded-lg cursor-not-allowed"
+            >
+              Quick Action
+            </button>
+          </div>
         </div>
-      )}
+      ) : (
+        <>
+          {/* Summary */}
+          {summary && (
+            <div className="bg-neutral-50 p-3 rounded-lg">
+              <p className="text-sm text-neutral-700 leading-relaxed">{summary}</p>
+            </div>
+          )}
 
-      {/* Actions */}
-      <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
-        <button
-          onClick={onViewDetails}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
-        >
-          View Full Analysis
-          <ExternalLink className="w-3 h-3" />
-        </button>
-        
-        {onQuickAction && (
-          <button
-            onClick={onQuickAction}
-            className="px-3 py-1 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Quick Action
-          </button>
-        )}
-      </div>
+          {/* Preview Data */}
+          {previewData && (
+            <div className="space-y-2">
+              {previewData.map((item, index) => (
+                <div key={index} className="flex items-center gap-2 text-sm text-neutral-600">
+                  <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
+            <button
+              onClick={onViewDetails}
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
+            >
+              View Full Analysis
+              <ExternalLink className="w-3 h-3" />
+            </button>
+            
+            {onQuickAction && (
+              <button
+                onClick={onQuickAction}
+                className="px-3 py-1 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Quick Action
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   </Card>
 );
 
-const IntelligenceDashboard = ({ analysisData, onViewDetail }) => {
-  const [activeCategory, setActiveCategory] = useState('overview');
-
-  if (!analysisData) return null;
+const IntelligenceDashboard = ({ analysisData, onViewDetail, loading = false, taskProgress = {}, overallProgress = 0 }) => {
+  const activeCategory = 'overview';
 
   const categories = [
     {
@@ -130,7 +175,7 @@ const IntelligenceDashboard = ({ analysisData, onViewDetail }) => {
       title: 'Buyer Migration Intel',
       description: 'Migration patterns and buyer motivations',
       icon: MapPin,
-      data: analysisData.buyer_migration,
+      data: analysisData?.buyer_migration,
       status: 'complete'
     },
     {
@@ -138,7 +183,7 @@ const IntelligenceDashboard = ({ analysisData, onViewDetail }) => {
       title: 'SEO & YouTube Trends',
       description: 'Keyword research and content opportunities',
       icon: Sparkles,
-      data: analysisData.seo_youtube_trends,
+      data: analysisData?.seo_youtube_trends,
       status: 'complete'
     },
     {
@@ -146,7 +191,7 @@ const IntelligenceDashboard = ({ analysisData, onViewDetail }) => {
       title: 'Content Strategy', 
       description: '8-week marketing roadmap',
       icon: Wand2,
-      data: analysisData.content_strategy,
+      data: analysisData?.content_strategy,
       status: 'complete'
     },
     {
@@ -154,7 +199,7 @@ const IntelligenceDashboard = ({ analysisData, onViewDetail }) => {
       title: 'Market Research',
       description: 'Hidden opportunities and seller profiles', 
       icon: FileText,
-      data: analysisData.hidden_listings,
+      data: analysisData?.hidden_listings,
       status: 'complete'
     },
     {
@@ -162,43 +207,24 @@ const IntelligenceDashboard = ({ analysisData, onViewDetail }) => {
       title: 'Content Creation',
       description: 'Downloadable marketing materials',
       icon: Download, 
-      data: analysisData.content_assets,
+      data: analysisData?.content_assets,
       status: 'complete'
     }
   ];
 
   const getPreviewData = (category, data) => {
+    if (!data) return null;
     switch (category.id) {
       case 'buyer_migration':
-        return [
-          `Top sources: ${data?.primary_markets?.map(m => m.market).slice(0, 2).join(', ') || 'New York, Los Angeles'}`,
-          `Key driver: ${data?.migration_drivers?.[0]?.factor || 'Lower cost of living'}`,
-          `${data?.key_metrics?.inbound_buyer_percentage || '45'}% inbound buyers`
-        ];
+        return [data?.summary];
       case 'seo_youtube_trends':
-        return [
-          `${data?.high_volume_keywords?.length || 8} high-volume keywords identified`,
-          `${data?.long_tail_questions?.length || 10} long-tail opportunities`,
-          `${data?.video_title_ideas?.length || 8} video content strategies`
-        ];
+        return [data?.summary];
       case 'content_strategy':
-        return [
-          `8-week multi-channel roadmap`,
-          `${data?.weekly_roadmap?.length || 8} weeks of planned content`,
-          `Lead magnets, blogs, and email sequences`
-        ];
+        return [data?.summary];
       case 'hidden_listings':
-        return [
-          `${data?.micro_areas?.length || 4} micro-areas identified`,
-          `${data?.seller_profiles?.length || 4} seller profiles analyzed`,
-          `${data?.actionable_takeaways?.length || 4} action categories`
-        ];
+        return [data?.summary];
       case 'content_assets':
-        return [
-          `10 SEO-optimized blog posts`,
-          `8 lead magnets and guides`,  
-          `8 email campaign templates`
-        ];
+        return [data?.summary];
       default:
         return [];
     }
@@ -211,145 +237,98 @@ const IntelligenceDashboard = ({ analysisData, onViewDetail }) => {
         <IntelligenceSidebar
           analysisData={analysisData}
           activeCategory={activeCategory}
-          onNavigate={(type, title, data) => {
-            if (type === 'overview') {
-              setActiveCategory('overview');
-            } else {
-              onViewDetail(data.key, title, data.data);
-            }
-          }}
+          loading={loading}
+          onNavigate={() => {}}
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 p-8">
-          {activeCategory === 'overview' ? (
-            // Overview Dashboard
-            <div className="space-y-8">
-              {/* Header */}
-              <div>
-                <h1 className="text-3xl font-bold text-neutral-900 mb-2">
-                  Market Intelligence Dashboard
-                </h1>
-                <p className="text-neutral-600">
-                  Complete territorial intelligence for {analysisData.buyer_migration?.location?.city}, {analysisData.buyer_migration?.location?.state}
-                </p>
-              </div>
+        <div className="flex-1 p-8 space-y-8">
+          {/* Header */}
+          <div>
+            <h1 className="text-3xl font-bold text-neutral-900 mb-2">
+              Market Intelligence Dashboard
+            </h1>
+            <p className="text-neutral-600">
+              {analysisData?.buyer_migration?.location?.city && analysisData?.buyer_migration?.location?.state
+                ? `Complete territorial intelligence for ${analysisData.buyer_migration.location.city}, ${analysisData.buyer_migration.location.state}`
+                : 'Generating intelligence for your territory...'}
+            </p>
+          </div>
 
-              {/* Quick Stats */}
-              <div className="grid md:grid-cols-4 gap-4">
-                <Card className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-50 rounded-lg">
-                      <CheckCircle2 className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-neutral-600">Completed</p>
-                      <p className="text-xl font-bold text-neutral-900">5/5</p>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-50 rounded-lg">
-                      <FileText className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-neutral-600">Content Pieces</p>
-                      <p className="text-xl font-bold text-neutral-900">26</p>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-50 rounded-lg">
-                      <Sparkles className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-neutral-600">Keywords Found</p>
-                      <p className="text-xl font-bold text-neutral-900">{analysisData.seo_youtube_trends?.high_volume_keywords?.length || 15}</p>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-orange-50 rounded-lg">
-                      <Calendar className="w-5 h-5 text-orange-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-neutral-600">Content Weeks</p>
-                      <p className="text-xl font-bold text-neutral-900">8</p>
-                    </div>
-                  </div>
-                </Card>
+          {/* Overall Progress */}
+          {loading && (
+            <Card className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-neutral-700">Overall Progress</p>
+                <p className="text-sm text-neutral-600">{overallProgress}%</p>
               </div>
+              <ProgressBar percent={overallProgress} />
+            </Card>
+          )}
 
-              {/* Intelligence Cards Grid */}
-              <div className="grid md:grid-cols-2 gap-6">
-                {categories.map((category) => (
-                  <IntelligenceCard
-                    key={category.id}
-                    category={category.id}
-                    title={category.title}
-                    description={category.description}
-                    summary={category.data?.summary}
-                    status={category.status}
-                    previewData={getPreviewData(category, category.data)}
-                    onViewDetails={() => onViewDetail(category.id, category.title, category.data)}
-                    icon={category.icon}
-                    isActive={false}
-                  />
-                ))}
-              </div>
-
-              {/* Next Steps */}
-              <Card className="p-6 bg-gradient-to-r from-neutral-50 to-green-50 border-green-200">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <ArrowRight className="w-5 h-5 text-green-600" />
+          {/* Tasks Readout */}
+          {loading && (
+            <div className="grid md:grid-cols-2 gap-4">
+              {Object.keys(taskProgress).map((key) => (
+                <Card key={key} className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-neutral-800">{taskProgress[key].title}</p>
+                    <Badge variant={taskProgress[key].status === 'done' ? 'success' : 'warning'}>
+                      {taskProgress[key].status === 'done' ? 'Done' : taskProgress[key].status === 'running' ? 'In Progress' : 'Pending'}
+                    </Badge>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-neutral-900 mb-2">Recommended Next Steps</h3>
-                    <div className="space-y-2 text-sm text-neutral-700">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-600" />
-                        <span>Download and customize your content library</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-600" />
-                        <span>Begin Week 1 of your content strategy</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-600" />
-                        <span>Start prospecting in identified micro-areas</span>
-                      </div>
+                  <ProgressBar percent={taskProgress[key].percent} />
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Intelligence Cards Grid */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {categories.map((category) => (
+              <IntelligenceCard
+                key={category.id}
+                category={category.id}
+                title={category.title}
+                description={category.description}
+                summary={!loading ? category.data?.summary : undefined}
+                status={category.status}
+                previewData={!loading ? getPreviewData(category, category.data) : undefined}
+                onViewDetails={() => onViewDetail && onViewDetail(category.id, category.title, category.data)}
+                icon={category.icon}
+                isActive={false}
+                loading={loading}
+                task={loading ? taskProgress[category.id] : null}
+              />
+            ))}
+          </div>
+
+          {!loading && (
+            // Next Steps
+            <Card className="p-6 bg-gradient-to-r from-neutral-50 to-green-50 border-green-200">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <ArrowRight className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-neutral-900 mb-2">Recommended Next Steps</h3>
+                  <div className="space-y-2 text-sm text-neutral-700">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                      <span>Download and customize your content library</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                      <span>Begin Week 1 of your content strategy</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                      <span>Start prospecting in identified micro-areas</span>
                     </div>
                   </div>
                 </div>
-              </Card>
-            </div>
-          ) : (
-            // Individual Category View
-            <div className="space-y-6">
-              {(() => {
-                const category = categories.find(c => c.id === activeCategory);
-                return (
-                  <IntelligenceCard
-                    category={category.id}
-                    title={category.title}
-                    description={category.description}
-                    summary={category.data?.summary}
-                    status={category.status}
-                    previewData={getPreviewData(category, category.data)}
-                    onViewDetails={() => onViewDetail(category.id, category.title, category.data)}
-                    icon={category.icon}
-                    isActive={true}
-                  />
-                );
-              })()}
-            </div>
+              </div>
+            </Card>
           )}
         </div>
       </div>

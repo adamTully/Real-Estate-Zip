@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { 
   Loader2, 
   MapPin, 
@@ -89,6 +89,32 @@ const Alert = ({ variant = "default", children }) => {
   );
 };
 
+// Task plan for progress simulation and UI
+const TASK_PLAN = [
+  { id: "location", title: "Task 1 - ZIP Code Analysis", range: [0, 10] },
+  { id: "buyer_migration", title: "Task 2 - Buyer Migration Intelligence", range: [10, 30] },
+  { id: "seo_youtube_trends", title: "Task 3 - SEO & YouTube Trends", range: [30, 50] },
+  { id: "content_strategy", title: "Task 4 - Content Strategy", range: [50, 70] },
+  { id: "hidden_listings", title: "Task 5 - Market Research", range: [70, 85] },
+  { id: "market_hooks", title: "Task 6 - Market Hooks & Titles", range: [85, 92] },
+  { id: "content_assets", title: "Task 7 - Content Assets Library", range: [92, 100] },
+];
+
+function computeTaskProgress(overall) {
+  const progress = {};
+  TASK_PLAN.forEach((t) => {
+    const [start, end] = t.range;
+    let pct = 0;
+    if (overall >= end) pct = 100;
+    else if (overall <= start) pct = 0;
+    else pct = Math.round(((overall - start) / (end - start)) * 100);
+
+    const status = pct === 0 ? "pending" : pct === 100 ? "done" : "running";
+    progress[t.id] = { percent: Math.max(0, Math.min(100, pct)), status, title: t.title };
+  });
+  return progress;
+}
+
 export default function ZipIntelApp() {
   const [zip, setZip] = useState("");
   const [stage, setStage] = useState("home"); // home | pipeline | detail | asset
@@ -98,6 +124,15 @@ export default function ZipIntelApp() {
   const [analysisData, setAnalysisData] = useState(null);
   const [detailView, setDetailView] = useState(null);
   const [assetDetail, setAssetDetail] = useState(null);
+
+  // Progress simulation state
+  const [overallProgress, setOverallProgress] = useState(0);
+  const [taskProgress, setTaskProgress] = useState({});
+  const progressTimerRef = useRef(null);
+
+  useEffect(() => {
+    setTaskProgress(computeTaskProgress(overallProgress));
+  }, [overallProgress]);
 
   const steps = useMemo(
     () => [
@@ -139,6 +174,24 @@ export default function ZipIntelApp() {
     return /^\d{5}(-\d{4})?$/.test(z.trim());
   }
 
+  function startProgressSimulation() {
+    // Start at 0 and climb up to 85% while awaiting backend
+    setOverallProgress(0);
+    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    progressTimerRef.current = setInterval(() => {
+      setOverallProgress((prev) => {
+        if (prev >= 85) return prev; // hold until real data arrives
+        return Math.min(85, prev + 3);
+      });
+    }, 800);
+  }
+
+  function stopProgressSimulation(finalValue = 100) {
+    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    progressTimerRef.current = null;
+    setOverallProgress(finalValue);
+  }
+
   async function runAnalysis() {
     if (!validateZip(zip)) {
       setError("Please enter a valid ZIP code (e.g., 12345 or 12345-6789)");
@@ -148,6 +201,12 @@ export default function ZipIntelApp() {
     setLoading(true);
     setError("");
     setSuccess("");
+    setAnalysisData(null);
+    setDetailView(null);
+
+    // Move to dashboard and show progress immediately
+    setStage("pipeline");
+    startProgressSimulation();
 
     try {
       const response = await axios.post(`${API}/zip-analysis`, {
@@ -155,12 +214,14 @@ export default function ZipIntelApp() {
       });
 
       setAnalysisData(response.data);
-      setStage("pipeline");
+      stopProgressSimulation(100);
       setSuccess("Analysis completed successfully!");
       
     } catch (err) {
       console.error("Analysis error:", err);
+      stopProgressSimulation(overallProgress); // stop where it is
       setError(err.response?.data?.detail || "Failed to generate analysis. Please try again.");
+      // Optionally stay on pipeline to show progress + error; for now, keep user on dashboard with error toast
     } finally {
       setLoading(false);
     }
@@ -215,6 +276,16 @@ export default function ZipIntelApp() {
           >
             <Toast.Title className="font-semibold">Success!</Toast.Title>
             <Toast.Description>{success}</Toast.Description>
+          </Toast.Root>
+        )}
+        {error && (
+          <Toast.Root
+            className="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4 shadow-lg"
+            open={!!error}
+            onOpenChange={() => setError("")}
+          >
+            <Toast.Title className="font-semibold">Error</Toast.Title>
+            <Toast.Description>{error}</Toast.Description>
           </Toast.Root>
         )}
         <Toast.Viewport className="fixed bottom-0 right-0 p-6 w-96 z-50" />
@@ -278,11 +349,15 @@ export default function ZipIntelApp() {
         </div>
       )}
 
-      {/* Intelligence Dashboard */}
-      {stage === "pipeline" && analysisData && (
+      {/* Intelligence Dashboard (now supports loading/progress) */}
+      {stage === "pipeline" && (
         <IntelligenceDashboard 
           analysisData={analysisData}
+          loading={!analysisData}
+          overallProgress={overallProgress}
+          taskProgress={taskProgress}
           onViewDetail={(key, title, data) => {
+            if (!analysisData) return; // disable navigation while loading
             setDetailView({ key, title, data });
             setStage("detail");
           }}
@@ -295,6 +370,7 @@ export default function ZipIntelApp() {
           <IntelligenceSidebar
             analysisData={analysisData}
             activeCategory={detailView.key}
+            loading={false}
             onNavigate={(type, title, data) => {
               if (type === 'overview') {
                 setStage("pipeline");

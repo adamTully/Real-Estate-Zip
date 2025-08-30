@@ -12,13 +12,14 @@ import {
   ArrowLeft
 } from "lucide-react";
 
-const SidebarNavItem = ({ icon: Icon, label, isActive, onClick, status }) => (
+const SidebarNavItem = ({ icon: Icon, label, isActive, onClick, status, disabled }) => (
   <button
     onClick={onClick}
+    disabled={disabled}
     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all duration-200 ${
-      isActive 
+      disabled ? 'cursor-not-allowed text-neutral-400' : (isActive 
         ? 'bg-blue-100 text-blue-900 border-blue-200' 
-        : 'text-neutral-700 hover:bg-neutral-100'
+        : 'text-neutral-700 hover:bg-neutral-100')
     }`}
   >
     <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-neutral-500'}`} />
@@ -32,45 +33,45 @@ const IntelligenceSidebar = ({
   analysisData, 
   activeCategory = 'overview', 
   onNavigate, 
-  onBackToDashboard 
+  onBackToDashboard,
+  loading = false,
+  taskProgress = {}
 }) => {
-  if (!analysisData) return null;
-
   const categories = [
     {
       id: 'buyer_migration',
       title: 'Buyer Migration Intel',
       icon: MapPin,
-      data: analysisData.buyer_migration,
-      status: 'complete'
+      data: analysisData?.buyer_migration,
+      status: loading ? 'processing' : 'complete'
     },
     {
       id: 'seo_youtube_trends', 
       title: 'SEO & YouTube Trends',
       icon: Sparkles,
-      data: analysisData.seo_youtube_trends,
-      status: 'complete'
+      data: analysisData?.seo_youtube_trends,
+      status: loading ? 'processing' : 'complete'
     },
     {
       id: 'content_strategy',
       title: 'Content Strategy', 
       icon: Wand2,
-      data: analysisData.content_strategy,
-      status: 'complete'
+      data: analysisData?.content_strategy,
+      status: loading ? 'processing' : 'complete'
     },
     {
       id: 'hidden_listings',
       title: 'Market Research',
       icon: FileText,
-      data: analysisData.hidden_listings,
-      status: 'complete'
+      data: analysisData?.hidden_listings,
+      status: loading ? 'processing' : 'complete'
     },
     {
       id: 'content_assets',
       title: 'Content Creation',
       icon: Download, 
-      data: analysisData.content_assets,
-      status: 'complete'
+      data: analysisData?.content_assets,
+      status: loading ? 'processing' : 'complete'
     }
   ];
 
@@ -95,14 +96,14 @@ const IntelligenceSidebar = ({
             <span className="text-xs font-semibold text-blue-800">EXCLUSIVE TERRITORY</span>
           </div>
           <h2 className="text-lg font-bold text-neutral-900">
-            ZIP {analysisData.zip_code || analysisData.buyer_migration?.location?.zip_code}
+            ZIP {analysisData?.zip_code || analysisData?.buyer_migration?.location?.zip_code || '...'}
           </h2>
           <p className="text-sm text-neutral-600">
-            {analysisData.buyer_migration?.location?.city}, {analysisData.buyer_migration?.location?.state}
+            {analysisData?.buyer_migration?.location?.city}, {analysisData?.buyer_migration?.location?.state}
           </p>
           <div className="flex items-center gap-2 mt-2 text-xs text-green-700">
             <CheckCircle2 className="w-3 h-3" />
-            <span>License Active • 6 months remaining</span>
+            <span>{loading ? 'Analysis in progress' : 'License Active • 6 months remaining'}</span>
           </div>
         </div>
 
@@ -112,8 +113,9 @@ const IntelligenceSidebar = ({
             icon={Target}
             label="Intelligence Overview"
             isActive={activeCategory === 'overview'}
-            onClick={() => onNavigate('overview', 'Intelligence Overview', null)}
-            status="complete"
+            onClick={() => onNavigate && onNavigate('overview', 'Intelligence Overview', null)}
+            status={loading ? 'processing' : 'complete'}
+            disabled={false}
           />
           
           <div className="pt-3 pb-2">
@@ -128,8 +130,9 @@ const IntelligenceSidebar = ({
               icon={category.icon}
               label={category.title}
               isActive={activeCategory === category.id}
-              onClick={() => onNavigate('detail', category.title, { key: category.id, data: category.data })}
+              onClick={() => onNavigate && onNavigate('detail', category.title, { key: category.id, data: category.data })}
               status={category.status}
+              disabled={loading}
             />
           ))}
         </div>
