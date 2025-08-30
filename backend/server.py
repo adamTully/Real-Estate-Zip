@@ -140,8 +140,8 @@ class ZipIntelligenceService:
 Please structure your response with clear sections and be specific with data, statistics, and actionable recommendations."""
 
             # Send to ChatGPT
-            user_message = UserMessage(text=prompt)
-            response = await self.llm.send_message(user_message)
+            # Send to ChatGPT with retries
+            response_text = await self._safe_send(prompt)
             
             # Parse the response into structured format
             return {
@@ -151,7 +151,7 @@ Please structure your response with clear sections and be specific with data, st
                     "state": state_name,
                     "zip_code": zip_code
                 },
-                "analysis_content": response,
+                "analysis_content": response_text,
                 "generated_with": "ChatGPT GPT-5",
                 "timestamp": datetime.utcnow().isoformat()
             }
