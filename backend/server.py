@@ -75,6 +75,38 @@ class ZipIntelligenceService:
             session_id=f"zipintel-{uuid.uuid4()}",
             system_message="You are an expert real estate market analyst. Provide comprehensive, data-driven insights based on the user's requests. Always be specific, actionable, and professional in your responses."
         ).with_model("openai", "gpt-5")
+
+    async def _normalize_llm_response(self, resp: Any) -> str:
+        try:
+            if isinstance(resp, str):
+                return resp
+            # emergentintegrations may return an object with .text
+            text = getattr(resp, 'text', None)
+            if isinstance(text, str):
+                return text
+            # Fallback to JSON dump
+            return json.dumps(resp, ensure_ascii=False)
+        except Exception:
+            return ""
+
+    async def _safe_send(self, prompt: str, max_retries: int = 3) -> str:
+        delay = 1.0
+        last_err = None
+        for attempt in range(max_retries):
+            try:
+                user_message = UserMessage(text=prompt)
+                resp = await self.llm.send_message(user_message)
+                text = await self._normalize_llm_response(resp)
+                if text and not any(term in text.lower() for term in ["rate limit", "quota", "temporarily unavailable"]):
+                    return text
+                # If response text indicates rate limit, raise to trigger retry
+                raise RuntimeError("Upstream rate limit or temporary failure text")
+            except Exception as e:
+                last_err = e
+                await asyncio.sleep(delay)
+                delay = min(delay * 2, 8)  # exponential backoff
+        logging.error(f"LLM send failed after retries: {str(last_err)}")
+        return "Real-time analysis temporarily unavailable. Please try again."
         
     async def get_location_info(self, zip_code: str) -> Dict[str, Any]:
         """Get basic location information for ZIP code"""
