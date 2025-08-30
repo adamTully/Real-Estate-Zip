@@ -209,10 +209,28 @@ export default function ZipIntelApp() {
     startProgressSimulation();
 
     try {
-      const response = await axios.post(`${API}/zip-analysis`, {
+      // Kickoff non-blocking job
+      const kickoff = await axios.post(`${API}/zip-analysis/start`, {
         zip_code: zip.trim()
       });
 
+      // Poll for status until done
+      let done = false;
+      while (!done) {
+        await new Promise(res => setTimeout(res, 2000));
+        const { data: status } = await axios.get(`${API}/zip-analysis/status/${zip.trim()}`);
+        setOverallProgress(status.overall_percent || 0);
+        if (status.state === 'done') {
+          done = true;
+          break;
+        }
+        if (status.state === 'failed') {
+          throw new Error(status.error || 'Analysis failed');
+        }
+      }
+
+      // Fetch final result
+      const response = await axios.get(`${API}/zip-analysis/${zip.trim()}`);
       setAnalysisData(response.data);
       stopProgressSimulation(100);
       setSuccess("Analysis completed successfully!");
