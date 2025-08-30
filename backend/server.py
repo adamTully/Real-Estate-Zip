@@ -65,6 +65,26 @@ class ContentAsset(BaseModel):
     content: Optional[str] = None
     file_path: Optional[str] = None
 
+# Task ordering and percent milestones
+TASK_ORDER = [
+    "location",
+    "buyer_migration",
+    "seo_youtube_trends",
+    "content_strategy",
+    "hidden_listings",
+    "market_hooks",
+    "content_assets",
+]
+TASK_PERCENT = {
+    "location": 10,
+    "buyer_migration": 30,
+    "seo_youtube_trends": 50,
+    "content_strategy": 70,
+    "hidden_listings": 85,
+    "market_hooks": 92,
+    "content_assets": 100,
+}
+
 # ZIP Intelligence Service
 class ZipIntelligenceService:
     def __init__(self):
@@ -75,7 +95,7 @@ class ZipIntelligenceService:
             session_id=f"zipintel-{uuid.uuid4()}",
             system_message="You are an expert real estate market analyst. Provide comprehensive, data-driven insights based on the user's requests. Always be specific, actionable, and professional in your responses."
         ).with_model("openai", "gpt-5")
-
+        
     async def _normalize_llm_response(self, resp: Any) -> str:
         try:
             if isinstance(resp, str):
@@ -111,7 +131,6 @@ class ZipIntelligenceService:
     async def get_location_info(self, zip_code: str) -> Dict[str, Any]:
         """Get basic location information for ZIP code"""
         try:
-            # Remove -4 extension if present for geolocation
             base_zip = zip_code.split('-')[0]
             location = self.geolocator.geocode(f"{base_zip}, USA")
             
@@ -129,163 +148,104 @@ class ZipIntelligenceService:
             return {"city": "Unknown", "state": "Unknown", "latitude": 0, "longitude": 0}
 
     async def generate_buyer_migration_intel(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
-        """Generate buyer migration intelligence using ChatGPT"""
         city_name = location_info.get('city', 'Unknown')
         state_name = location_info.get('state', 'Unknown')
-        
         try:
-            # Create the prompt based on your mapping
             prompt = f"""Act as a real estate market analyst. I'm a Realtor in {city_name}, {state_name}. Based on the latest migration patterns, tell me: where most of the buyers relocating to {city_name} are coming from; why they're moving (cost of living, lifestyle, taxes, etc.); and what type of content should I be creating to attract those buyers. Include specific hooks, keywords, and video titles based on current trends.
 
 Please structure your response with clear sections and be specific with data, statistics, and actionable recommendations."""
-
-            # Send to ChatGPT
-            # Send to ChatGPT with retries
             response_text = await self._safe_send(prompt)
-            
-            # Parse the response into structured format
             return {
                 "summary": f"Migration analysis for {city_name}, {state_name} completed with real market data",
-                "location": {
-                    "city": city_name,
-                    "state": state_name,
-                    "zip_code": zip_code
-                },
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
                 "analysis_content": response_text,
                 "generated_with": "ChatGPT GPT-5",
                 "timestamp": datetime.utcnow().isoformat()
             }
-            
         except Exception as e:
             logging.error(f"ChatGPT error for buyer migration: {str(e)}")
-            # Fallback to ensure system doesn't break
             return {
                 "summary": f"Migration analysis for {city_name}, {state_name} (fallback mode)",
-                "location": {
-                    "city": city_name,
-                    "state": state_name, 
-                    "zip_code": zip_code
-                },
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
                 "analysis_content": "Real-time analysis temporarily unavailable. Please try again.",
                 "error": str(e)
             }
 
     async def generate_seo_youtube_trends(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
-        """Generate SEO and YouTube trends analysis using ChatGPT"""
         city_name = location_info.get('city', 'Unknown')
         state_name = location_info.get('state', 'Unknown')
-        
         try:
             prompt = f"""Act as an SEO expert and YouTube strategist. What are the top trending searches, keywords, and questions buyers are Googling and searching on YouTube related to moving to or living in {city_name}, {state_name}? Format the results as: high-volume local keywords; long-tail questions; video title ideas that align with these terms.
 
 Provide specific search volumes where possible and include "People also ask" questions. Be comprehensive and actionable."""
-
             response_text = await self._safe_send(prompt)
-            
             return {
                 "summary": f"SEO & YouTube analysis for {city_name}, {state_name} with real search data",
-                "location": {
-                    "city": city_name,
-                    "state": state_name,
-                    "zip_code": zip_code
-                },
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
                 "analysis_content": response_text,
                 "generated_with": "ChatGPT GPT-5",
                 "timestamp": datetime.utcnow().isoformat()
             }
-            
         except Exception as e:
             logging.error(f"ChatGPT error for SEO analysis: {str(e)}")
             return {
                 "summary": f"SEO analysis for {city_name}, {state_name} (fallback mode)",
-                "location": {
-                    "city": city_name,
-                    "state": state_name,
-                    "zip_code": zip_code
-                },
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
                 "analysis_content": "Real-time analysis temporarily unavailable. Please try again.",
                 "error": str(e)
             }
 
     async def generate_content_strategy(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
-        """Generate 8-week content marketing strategy using ChatGPT"""
         city_name = location_info.get('city', 'Unknown')
         state_name = location_info.get('state', 'Unknown')
-        
         try:
             prompt = f"""Act as a real estate marketing strategist. Based on everything we've uncovered about buyer migration and trending searches for {city_name}, {state_name}, build me a full content-powered marketing strategy to attract buyers relocating to this area. Include: short-form content (Instagram, TikTok, YouTube Shorts); long-form content (YouTube, blog, or podcast); lead magnets; email + retargeting campaign themes. Make it practical and week-by-week if possible.
 
 Create an 8-week detailed plan with specific content ideas, hooks, and CTAs."""
-
             response_text = await self._safe_send(prompt)
-            
             return {
                 "summary": f"8-week content strategy for {city_name}, {state_name} market",
-                "location": {
-                    "city": city_name,
-                    "state": state_name,
-                    "zip_code": zip_code
-                },
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
                 "analysis_content": response_text,
                 "generated_with": "ChatGPT GPT-5",
                 "timestamp": datetime.utcnow().isoformat()
             }
-            
         except Exception as e:
             logging.error(f"ChatGPT error for content strategy: {str(e)}")
             return {
                 "summary": f"Content strategy for {city_name}, {state_name} (fallback mode)",
-                "location": {
-                    "city": city_name,
-                    "state": state_name,
-                    "zip_code": zip_code
-                },
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
                 "analysis_content": "Real-time analysis temporarily unavailable. Please try again.",
                 "error": str(e)
             }
 
     async def generate_hidden_listings_analysis(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
-        """Generate market research for hidden listings using ChatGPT"""
         city_name = location_info.get('city', 'Unknown')
         state_name = location_info.get('state', 'Unknown')
-        
         try:
             prompt = f"""Act as a local market research strategist. I'm a Realtor in {zip_code} looking to uncover hidden listing opportunities. Analyze public market trends, inventory patterns, demographic behavior, and based on that, tell me: – 3-5 neighborhoods or micro-areas with potential seller activity that other agents may be ignoring – What types of sellers are most likely to list right now (upsizers, retirees, relocators, etc.) – Specific trends or pain points that might motivate them to sell. Write in plain English with clear takeaways I can use for prospecting, content, and local marketing.
 
 Be specific about {city_name}, {state_name} and include actionable prospecting strategies."""
-
             response_text = await self._safe_send(prompt)
-            
             return {
                 "summary": f"Hidden listings analysis for {city_name}, {state_name} micro-markets",
-                "location": {
-                    "city": city_name,
-                    "state": state_name,
-                    "zip_code": zip_code
-                },
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
                 "analysis_content": response_text,
                 "generated_with": "ChatGPT GPT-5",
                 "timestamp": datetime.utcnow().isoformat()
             }
-            
         except Exception as e:
             logging.error(f"ChatGPT error for market research: {str(e)}")
             return {
                 "summary": f"Market research for {city_name}, {state_name} (fallback mode)",
-                "location": {
-                    "city": city_name,
-                    "state": state_name,
-                    "zip_code": zip_code
-                },
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
                 "analysis_content": "Real-time analysis temporarily unavailable. Please try again.",
                 "error": str(e)
             }
 
     async def generate_market_hooks_titles(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
-        """Generate market-specific hooks and titles"""
         city_name = location_info.get('city', 'Unknown')
         state_name = location_info.get('state', 'Unknown')
-        
         return {
             "summary": f"Compelling hooks and titles specifically crafted for {city_name} market appeal",
             "detailed_analysis": f"""
@@ -364,38 +324,25 @@ Be specific about {city_name}, {state_name} and include actionable prospecting s
         }
 
     async def generate_content_assets(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
-        """Generate content assets using ChatGPT"""
         city_name = location_info.get('city', 'Unknown')
         state_name = location_info.get('state', 'Unknown')
-        
         try:
             prompt = f"""Based on your findings, please produce the following for me: - 10 full article blog post using the SEO findings. Use things like the "Long-tail questions" and other local keywords for {city_name}, {state_name}. Make all of these individual downloadable files. - Based on the content strategy, please generate a Lead Magnet. Please make those individual pdf's I can download. - Also based on the content strategy, please create an email for each week. Also, make those individually downloadable.
 
 Create comprehensive, ready-to-use content that I can implement immediately."""
-
             response_text = await self._safe_send(prompt)
-            
             return {
                 "summary": f"Content library generated for {city_name}, {state_name} including blogs, lead magnets, and email campaigns",
-                "location": {
-                    "city": city_name,
-                    "state": state_name,
-                    "zip_code": zip_code
-                },
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
                 "analysis_content": response_text,
                 "generated_with": "ChatGPT GPT-5",
                 "timestamp": datetime.utcnow().isoformat()
             }
-            
         except Exception as e:
             logging.error(f"ChatGPT error for content creation: {str(e)}")
             return {
                 "summary": f"Content creation for {city_name}, {state_name} (fallback mode)",
-                "location": {
-                    "city": city_name,
-                    "state": state_name,
-                    "zip_code": zip_code
-                },
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
                 "analysis_content": "Real-time analysis temporarily unavailable. Please try again.",
                 "error": str(e)
             }
@@ -403,34 +350,125 @@ Create comprehensive, ready-to-use content that I can implement immediately."""
 # Initialize service
 zip_intel_service = ZipIntelligenceService()
 
+async def _init_status(zip_code: str) -> Dict[str, Any]:
+    now = datetime.utcnow()
+    job_id = str(uuid.uuid4())
+    tasks = {tid: {"status": "pending", "percent": 0, "title": tid} for tid in TASK_ORDER}
+    doc = {
+        "zip_code": zip_code,
+        "job_id": job_id,
+        "state": "running",
+        "overall_percent": 0,
+        "tasks": tasks,
+        "created_at": now,
+        "updated_at": now,
+    }
+    await db.analysis_status.update_one({"zip_code": zip_code}, {"$set": doc}, upsert=True)
+    return doc
+
+async def _update_task(zip_code: str, task_id: str, status: str, percent: int):
+    await db.analysis_status.update_one(
+        {"zip_code": zip_code},
+        {"$set": {f"tasks.{task_id}.status": status, f"tasks.{task_id}.percent": percent, "updated_at": datetime.utcnow()}},
+    )
+
+async def _update_overall(zip_code: str, percent: int):
+    await db.analysis_status.update_one(
+        {"zip_code": zip_code},
+        {"$set": {"overall_percent": percent, "updated_at": datetime.utcnow()}},
+    )
+
+async def _complete_status(zip_code: str, state: str = "done"):
+    await db.analysis_status.update_one(
+        {"zip_code": zip_code},
+        {"$set": {"state": state, "overall_percent": 100 if state == "done" else 0, "updated_at": datetime.utcnow()}},
+    )
+
+async def _run_zip_job(zip_code: str):
+    try:
+        # location
+        await _update_task(zip_code, "location", "running", 50)
+        location_info = await zip_intel_service.get_location_info(zip_code)
+        await _update_task(zip_code, "location", "done", 100)
+        await _update_overall(zip_code, TASK_PERCENT["location"])
+
+        # sequential sections with small stagger
+        sections = {}
+
+        await _update_task(zip_code, "buyer_migration", "running", 10)
+        sections["buyer_migration"] = await zip_intel_service.generate_buyer_migration_intel(zip_code, location_info)
+        await _update_task(zip_code, "buyer_migration", "done", 100)
+        await _update_overall(zip_code, TASK_PERCENT["buyer_migration"])
+        await asyncio.sleep(0.5)
+
+        await _update_task(zip_code, "seo_youtube_trends", "running", 10)
+        sections["seo_youtube_trends"] = await zip_intel_service.generate_seo_youtube_trends(zip_code, location_info)
+        await _update_task(zip_code, "seo_youtube_trends", "done", 100)
+        await _update_overall(zip_code, TASK_PERCENT["seo_youtube_trends"])
+        await asyncio.sleep(0.5)
+
+        await _update_task(zip_code, "content_strategy", "running", 10)
+        sections["content_strategy"] = await zip_intel_service.generate_content_strategy(zip_code, location_info)
+        await _update_task(zip_code, "content_strategy", "done", 100)
+        await _update_overall(zip_code, TASK_PERCENT["content_strategy"])
+        await asyncio.sleep(0.5)
+
+        await _update_task(zip_code, "hidden_listings", "running", 10)
+        sections["hidden_listings"] = await zip_intel_service.generate_hidden_listings_analysis(zip_code, location_info)
+        await _update_task(zip_code, "hidden_listings", "done", 100)
+        await _update_overall(zip_code, TASK_PERCENT["hidden_listings"])
+        await asyncio.sleep(0.5)
+
+        await _update_task(zip_code, "market_hooks", "running", 10)
+        sections["market_hooks"] = await zip_intel_service.generate_market_hooks_titles(zip_code, location_info)
+        await _update_task(zip_code, "market_hooks", "done", 100)
+        await _update_overall(zip_code, TASK_PERCENT["market_hooks"])
+        await asyncio.sleep(0.5)
+
+        await _update_task(zip_code, "content_assets", "running", 10)
+        sections["content_assets"] = await zip_intel_service.generate_content_assets(zip_code, location_info)
+        await _update_task(zip_code, "content_assets", "done", 100)
+        await _update_overall(zip_code, TASK_PERCENT["content_assets"])
+
+        # Create market intelligence record at the end
+        intelligence = MarketIntelligence(
+            zip_code=zip_code,
+            buyer_migration=sections["buyer_migration"],
+            seo_youtube_trends=sections["seo_youtube_trends"],
+            content_strategy=sections["content_strategy"],
+            hidden_listings=sections["hidden_listings"],
+            market_hooks=sections["market_hooks"],
+            content_assets=sections["content_assets"],
+        )
+        await db.market_intelligence.insert_one(intelligence.dict())
+        await _complete_status(zip_code, state="done")
+    except Exception as e:
+        logging.error(f"Job failed for {zip_code}: {str(e)}")
+        await db.analysis_status.update_one(
+            {"zip_code": zip_code},
+            {"$set": {"state": "failed", "error": str(e), "updated_at": datetime.utcnow()}},
+        )
+
 # API Endpoints
 @api_router.post("/zip-analysis", response_model=MarketIntelligence)
 async def analyze_zip_code(request: ZipAnalysisRequest, background_tasks: BackgroundTasks):
-    """Generate comprehensive ZIP code market intelligence"""
+    """Generate comprehensive ZIP code market intelligence (legacy one-shot)."""
     try:
         zip_code = request.zip_code
-        
-        # Check if analysis already exists (cache for 24 hours)
         existing = await db.market_intelligence.find_one({
             "zip_code": zip_code,
             "created_at": {"$gte": datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)}
         })
-        
         if existing:
             return MarketIntelligence(**existing)
-        
-        # Get location information
+        # One-shot path (may 504 on long runs). Kept for compatibility.
         location_info = await zip_intel_service.get_location_info(zip_code)
-        
-        # Generate all intelligence components
         buyer_migration = await zip_intel_service.generate_buyer_migration_intel(zip_code, location_info)
         seo_youtube = await zip_intel_service.generate_seo_youtube_trends(zip_code, location_info)
         content_strategy = await zip_intel_service.generate_content_strategy(zip_code, location_info)
         hidden_listings = await zip_intel_service.generate_hidden_listings_analysis(zip_code, location_info)
         market_hooks = await zip_intel_service.generate_market_hooks_titles(zip_code, location_info)
         content_assets = await zip_intel_service.generate_content_assets(zip_code, location_info)
-        
-        # Create market intelligence record
         intelligence = MarketIntelligence(
             zip_code=zip_code,
             buyer_migration=buyer_migration,
@@ -440,15 +478,45 @@ async def analyze_zip_code(request: ZipAnalysisRequest, background_tasks: Backgr
             market_hooks=market_hooks,
             content_assets=content_assets
         )
-        
-        # Save to database
         await db.market_intelligence.insert_one(intelligence.dict())
-        
         return intelligence
-        
     except Exception as e:
         logging.error(f"Error analyzing ZIP code {request.zip_code}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error generating analysis: {str(e)}")
+
+@api_router.post("/zip-analysis/start")
+async def start_zip_analysis(request: ZipAnalysisRequest):
+    """Start analysis job and return immediately with a job id and initial status."""
+    zip_code = request.zip_code
+    # If exists today, mark status done and return
+    existing = await db.market_intelligence.find_one({
+        "zip_code": zip_code,
+        "created_at": {"$gte": datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)}
+    })
+    if existing:
+        # Ensure status reflects done
+        await db.analysis_status.update_one(
+            {"zip_code": zip_code},
+            {"$set": {"zip_code": zip_code, "state": "done", "overall_percent": 100, "updated_at": datetime.utcnow()}},
+            upsert=True,
+        )
+        status_doc = await db.analysis_status.find_one({"zip_code": zip_code}, {"_id": 0})
+        return status_doc
+
+    # Initialize and kick off job
+    status_doc = await _init_status(zip_code)
+    asyncio.create_task(_run_zip_job(zip_code))
+    status_doc.pop('_id', None)
+    return status_doc
+
+@api_router.get("/zip-analysis/status/{zip_code}")
+async def get_zip_status(zip_code: str):
+    """Get current analysis status for a ZIP"""
+    status_doc = await db.analysis_status.find_one({"zip_code": zip_code})
+    if not status_doc:
+        raise HTTPException(status_code=404, detail="Status not found")
+    status_doc.pop('_id', None)
+    return status_doc
 
 @api_router.get("/zip-analysis/{zip_code}", response_model=MarketIntelligence)
 async def get_zip_analysis(zip_code: str):
@@ -467,42 +535,31 @@ async def get_zip_analysis(zip_code: str):
 async def generate_hidden_listings_pdf(zip_code: str):
     """Generate and download hidden listings PDF"""
     try:
-        # Get analysis data
         analysis = await db.market_intelligence.find_one({"zip_code": zip_code})
         if not analysis:
             raise HTTPException(status_code=404, detail="Analysis not found")
-        
-        # Create PDF
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
         doc = SimpleDocTemplate(temp_file.name, pagesize=letter)
         styles = getSampleStyleSheet()
         story = []
-        
-        # Add content
         title = Paragraph(f"Hidden Listings Analysis - {zip_code}", styles['Title'])
         story.append(title)
         story.append(Spacer(1, 12))
-        
         content = analysis['hidden_listings']['detailed_analysis']
         for line in content.split('\n'):
             if line.strip():
                 if line.startswith('#'):
-                    # Header
                     para = Paragraph(line.replace('#', '').strip(), styles['Heading2'])
                 else:
-                    # Regular content
                     para = Paragraph(line.strip(), styles['Normal'])
                 story.append(para)
                 story.append(Spacer(1, 6))
-        
         doc.build(story)
-        
         return FileResponse(
             temp_file.name,
             media_type='application/pdf',
             filename=f"{zip_code}-hidden-listings.pdf"
         )
-        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating PDF: {str(e)}")
 
@@ -513,9 +570,7 @@ async def get_content_asset(zip_code: str, asset_type: str, asset_name: str):
         analysis = await db.market_intelligence.find_one({"zip_code": zip_code})
         if not analysis:
             raise HTTPException(status_code=404, detail="Analysis not found")
-        
         content_assets = analysis['content_assets']
-        
         if asset_type == "blogs":
             assets = content_assets['blog_posts']
         elif asset_type == "emails":
@@ -524,13 +579,10 @@ async def get_content_asset(zip_code: str, asset_type: str, asset_name: str):
             return {"content": content_assets['lead_magnet']['content']}
         else:
             raise HTTPException(status_code=400, detail="Invalid asset type")
-        
         for asset in assets:
             if asset['name'] == asset_name:
                 return {"content": asset['content']}
-        
         raise HTTPException(status_code=404, detail="Asset not found")
-        
     except HTTPException:
         raise
     except Exception as e:
