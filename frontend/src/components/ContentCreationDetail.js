@@ -226,4 +226,22 @@ const ContentCreationDetail = ({ data }) => {
   );
 };
 
+
+function CopyButton({ text }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={() => {
+        navigator.clipboard.writeText(text || '');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+      className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border ${copied ? 'bg-green-50 border-green-300 text-green-800' : 'border-neutral-300 hover:bg-neutral-50'}`}
+      aria-live="polite"
+    >
+      {copied ? 'Content Copied!' : 'Copy Text'}
+    </button>
+  );
+}
+
 export default ContentCreationDetail;
