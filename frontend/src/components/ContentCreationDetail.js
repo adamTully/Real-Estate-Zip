@@ -91,7 +91,16 @@ const ContentCreationDetail = ({ data }) => {
             <div />
           </div>
 
-          <Tabs.Content value="blogs" className="p-4">
+          <Tabs.Content value="blogs" className="p-4 space-y-3">
+            <div className="flex items-center justify-end">
+              <button
+                onClick={() => downloadAll('blogs')}
+                disabled={!blogs.length}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border border-neutral-300 hover:bg-neutral-50"
+              >
+                <Download className="w-3 h-3" /> Download Blog Posts (.zip)
+              </button>
+            </div>
             {blogs.length === 0 ? (
               <div className="text-sm text-neutral-500">No blog posts available yet.</div>
             ) : (
@@ -109,7 +118,16 @@ const ContentCreationDetail = ({ data }) => {
             )}
           </Tabs.Content>
 
-          <Tabs.Content value="emails" className="p-4">
+          <Tabs.Content value="emails" className="p-4 space-y-3">
+            <div className="flex items-center justify-end">
+              <button
+                onClick={() => downloadAll('emails')}
+                disabled={!emails.length}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border border-neutral-300 hover:bg-neutral-50"
+              >
+                <Download className="w-3 h-3" /> Download Emails (.zip)
+              </button>
+            </div>
             {emails.length === 0 ? (
               <div className="text-sm text-neutral-500">No emails available yet.</div>
             ) : (
