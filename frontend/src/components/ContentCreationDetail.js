@@ -74,17 +74,16 @@ import axios from "axios";
                </button>
              </div>
              {emails.length === 0 ? (
--              <div className="text-sm text-neutral-500">No emails available yet.</div>
-+              <div className="flex items-center justify-between">
-+                <div className="text-sm text-neutral-500">No emails available yet.</div>
-+                <button
-+                  onClick={regenerate}
-+                  disabled={regenerating}
-+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border border-neutral-300 hover:bg-neutral-50"
-+                >
-+                  {regenerating ? 'Generating…' : 'Generate Assets'}
-+                </button>
-+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-neutral-500">No emails available yet.</div>
+                <button
+                  onClick={regenerate}
+                  disabled={regenerating}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border border-neutral-300 hover:bg-neutral-50"
+                >
+                  {regenerating ? 'Generating…' : 'Generate Assets'}
+                </button>
+              </div>
              ) : (
                <div className="divide-y divide-neutral-200">
                  {emails.map((e, idx) => (
