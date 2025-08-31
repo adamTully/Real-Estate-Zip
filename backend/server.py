@@ -54,9 +54,9 @@ class MarketIntelligence(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-# Focus-mode task plan: add Content Strategy
-TASK_ORDER = ["location", "buyer_migration", "seo_youtube_trends", "content_strategy"]
-TASK_PERCENT = {"location": 20, "buyer_migration": 50, "seo_youtube_trends": 80, "content_strategy": 100}
+# Focus-mode task plan: add Content Assets
+TASK_ORDER = ["location", "buyer_migration", "seo_youtube_trends", "content_strategy", "content_assets"]
+TASK_PERCENT = {"location": 15, "buyer_migration": 40, "seo_youtube_trends": 70, "content_strategy": 90, "content_assets": 100}
 
 # Service
 class ZipIntelligenceService:
@@ -282,6 +282,84 @@ Return your answer in clean Markdown with this structure and clear typography-fr
                 "error": str(e),
             }
 
+    async def generate_content_assets(self, zip_code: str, location_info: Dict[str, Any]) -> Dict[str, Any]:
+        city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        try:
+            prompt = f"""
+Act as a content production system for a Realtor in {city_name}, {state_name} (ZIP {zip_code}).
+
+Return ONLY valid JSON (no prose) with this schema:
+{
+  "summary": string,
+  "blog_posts": [
+    {"name": string, "title": string, "content": string}
+  ],
+  "email_campaigns": [
+    {"name": string, "title": string, "content": string}
+  ]
+}
+
+Requirements:
+- name must use kebab-case and end with .txt (e.g., moving-to-{city}-guide.txt)
+- content must be plain text (no HTML/Markdown), ready to download as .txt
+- 8 emails, 10 blogs; keep each ~300-700 words
+- Titles should reflect local SEO terms and clear value
+"""
+            raw = await self._safe_send(prompt)
+            data = None
+            try:
+                data = json.loads(raw)
+            except Exception:
+                # try to extract JSON from code fence
+                start = raw.find('{')
+                end = raw.rfind('}')
+                if start != -1 and end != -1:
+                    try:
+                        data = json.loads(raw[start:end+1])
+                    except Exception:
+                        data = None
+            if not data:
+                raise RuntimeError("Failed to parse content assets JSON")
+
+            def enrich(items):
+                enriched = []
+                for it in items:
+                    name = it.get('name') or f"{city_name.lower().replace(' ', '-')}-{uuid.uuid4().hex[:6]}.txt"
+                    if not name.endswith('.txt'):
+                        name = name + '.txt'
+                    content = it.get('content', '')
+                    size_kb = max(1, len(content.encode('utf-8')) // 1024)
+                    enriched.append({
+                        "name": name,
+                        "title": it.get('title') or name,
+                        "content": content,
+                        "size_kb": size_kb,
+                    })
+                return enriched
+
+            blogs = enrich(data.get('blog_posts', []))
+            emails = enrich(data.get('email_campaigns', []))
+
+            return {
+                "summary": data.get('summary', f"Content assets for {city_name}, {state_name}"),
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
+                "blog_posts": blogs,
+                "email_campaigns": emails,
+                "generated_with": "ChatGPT GPT-5",
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+        except Exception as e:
+            logging.error(f"ChatGPT error for content assets: {str(e)}")
+            # Fallback minimal structure
+            return {
+                "summary": f"Content assets (fallback) for {city_name}, {state_name}",
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
+                "blog_posts": [],
+                "email_campaigns": [],
+                "error": str(e),
+            }
+
 # Status helpers
 async def _init_status(zip_code: str) -> Dict[str, Any]:
     now = datetime.utcnow()
@@ -317,7 +395,7 @@ async def _complete_status(zip_code: str, state: str = "done"):
         {"$set": {"state": state, "overall_percent": 100 if state == "done" else 0, "updated_at": datetime.utcnow()}},
     )
 
-# Background job now runs Buyer Migration + SEO + Content Strategy
+# Background job now runs Buyer Migration + SEO + Content Strategy + Content Assets
 async def _run_zip_job(zip_code: str):
     try:
         svc = ZipIntelligenceService()
@@ -342,16 +420,21 @@ async def _run_zip_job(zip_code: str):
         strategy = await svc.generate_content_strategy(zip_code, location_info)
         await _update_task(zip_code, "content_strategy", "done", 100)
         await _update_overall(zip_code, TASK_PERCENT["content_strategy"])
+        await asyncio.sleep(0.5)
 
-        placeholder = {"summary": "Pending generation", "analysis_content": "Not generated yet."}
+        await _update_task(zip_code, "content_assets", "running", 10)
+        assets = await svc.generate_content_assets(zip_code, location_info)
+        await _update_task(zip_code, "content_assets", "done", 100)
+        await _update_overall(zip_code, TASK_PERCENT["content_assets"])
+
         intelligence = MarketIntelligence(
             zip_code=zip_code,
             buyer_migration=buyer_migration,
             seo_youtube_trends=seo,
             content_strategy=strategy,
-            hidden_listings=placeholder,
+            hidden_listings={"summary": "Pending generation", "analysis_content": "Not generated yet."},
             market_hooks={"summary": "Pending generation", "detailed_analysis": "Not generated yet."},
-            content_assets=placeholder,
+            content_assets=assets,
         )
         await db.market_intelligence.insert_one(intelligence.dict())
         await _complete_status(zip_code, state="done")
@@ -378,15 +461,15 @@ async def analyze_zip_code(request: ZipAnalysisRequest, background_tasks: Backgr
         buyer_migration = await svc.generate_buyer_migration_intel(zip_code, location_info)
         seo = await svc.generate_seo_youtube_trends(zip_code, location_info)
         strategy = await svc.generate_content_strategy(zip_code, location_info)
-        placeholder = {"summary": "Pending generation", "analysis_content": "Not generated yet."}
+        assets = await svc.generate_content_assets(zip_code, location_info)
         intelligence = MarketIntelligence(
             zip_code=zip_code,
             buyer_migration=buyer_migration,
             seo_youtube_trends=seo,
             content_strategy=strategy,
-            hidden_listings=placeholder,
+            hidden_listings={"summary": "Pending generation", "analysis_content": "Not generated yet."},
             market_hooks={"summary": "Pending generation", "detailed_analysis": "Not generated yet."},
-            content_assets=placeholder,
+            content_assets=assets,
         )
         await db.market_intelligence.insert_one(intelligence.dict())
         return intelligence
@@ -447,7 +530,7 @@ async def generate_hidden_listings_pdf(zip_code: str):
         title = Paragraph(f"Hidden Listings Analysis - {zip_code}", styles['Title'])
         story.append(title)
         story.append(Spacer(1, 12))
-        content = analysis['hidden_listings']['detailed_analysis']
+        content = analysis['hidden_listings'].get('detailed_analysis') or analysis['hidden_listings'].get('analysis_content', '')
         for line in content.split('\n'):
             if line.strip():
                 if line.startswith('#'):
@@ -473,11 +556,9 @@ async def get_content_asset(zip_code: str, asset_type: str, asset_name: str):
             raise HTTPException(status_code=404, detail="Analysis not found")
         content_assets = analysis['content_assets']
         if asset_type == "blogs":
-            assets = content_assets['blog_posts']
+            assets = content_assets.get('blog_posts', [])
         elif asset_type == "emails":
-            assets = content_assets['email_campaigns']
-        elif asset_type == "lead_magnet":
-            return {"content": content_assets['lead_magnet']['content']}
+            assets = content_assets.get('email_campaigns', [])
         else:
             raise HTTPException(status_code=400, detail="Invalid asset type")
         for asset in assets:
@@ -491,7 +572,7 @@ async def get_content_asset(zip_code: str, asset_type: str, asset_name: str):
 
 @api_router.get("/")
 async def root():
-    return {"message": "ZIP Intel Generator API v2.0 (focus: buyer migration + seo + content strategy)"}
+    return {"message": "ZIP Intel Generator API v2.0 (focus: buyer + seo + strategy + assets)"}
 
 # Mount router and middleware
 app.include_router(api_router)
