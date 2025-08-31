@@ -58,6 +58,8 @@ const ContentCreationDetail = ({ data }) => {
   };
 
   const downloadAll = async (type) => {
+  const [copied, setCopied] = useState(false);
+
     const items = type === 'blogs' ? blogs : emails;
     if (!items.length) return;
     const zip = new JSZip();
