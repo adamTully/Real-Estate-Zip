@@ -3,24 +3,17 @@ import {
   Loader2, 
   MapPin, 
   Sparkles, 
-  Wand2, 
-  FileText, 
-  Mail, 
   Download, 
   ArrowLeft, 
   ExternalLink,
   AlertCircle,
   CheckCircle2
 } from "lucide-react";
-import * as Dialog from "@radix-ui/react-dialog";
-import * as Tabs from "@radix-ui/react-tabs";
 import * as Toast from "@radix-ui/react-toast";
 import BuyerMigrationDetailView from "./components/BuyerMigrationDetail";
+import SeoYouTubeDetail from "./components/SeoYouTubeDetail";
 import IntelligenceDashboard from "./components/IntelligenceDashboard";
 import IntelligenceSidebar from "./components/IntelligenceSidebar";
-import JSZip from "jszip";
-import { saveAs } from "file-saver";
-import { jsPDF } from "jspdf";
 import axios from "axios";
 import "./App.css";
 
@@ -41,10 +34,11 @@ const Button = ({ className = "", variant = "default", children, disabled, ...pr
 const Input = ({ className = "", error, ...props }) => (<input className={`w-full rounded-xl border px-4 py-3 text-base outline-none focus:ring-4 focus:ring-black/5 ${error ? 'border-red-300 focus:ring-red-100' : 'border-neutral-300'} ${className}`} {...props} />);
 const Alert = ({ variant = "default", children }) => { const variants = { default: "bg-blue-50 border-blue-200 text-blue-800", error: "bg-red-50 border-red-200 text-red-800", success: "bg-green-50 border-green-200 text-green-800" }; return (<div className={`p-4 rounded-xl border ${variants[variant]} flex items-start gap-3`}>{variant === "error" && <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />} {variant === "success" && <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />}<div className="text-sm">{children}</div></div>); };
 
-// Focus mode: only two tasks
+// Three tasks now: location -> buyer -> seo
 const TASK_PLAN = [
-  { id: "location", title: "Task 1 - ZIP Code Analysis", range: [0, 50] },
-  { id: "buyer_migration", title: "Task 2 - Buyer Migration Intelligence", range: [50, 100] },
+  { id: "location", title: "Task 1 - ZIP Code Analysis", range: [0, 25] },
+  { id: "buyer_migration", title: "Task 2 - Buyer Migration Intelligence", range: [25, 60] },
+  { id: "seo_youtube_trends", title: "Task 3 - SEO & YouTube Trends", range: [60, 100] },
 ];
 function computeTaskProgress(overall) { const progress = {}; TASK_PLAN.forEach((t) => { const [start, end] = t.range; let pct = 0; if (overall >= end) pct = 100; else if (overall <= start) pct = 0; else pct = Math.round(((overall - start) / (end - start)) * 100); const status = pct === 0 ? "pending" : pct === 100 ? "done" : "running"; progress[t.id] = { percent: Math.max(0, Math.min(100, pct)), status, title: t.title }; }); return progress; }
 
@@ -64,7 +58,7 @@ export default function ZipIntelApp() {
 
   function validateZip(z) { return /^\d{5}(-\d{4})?$/.test(z.trim()); }
 
-  function startProgressSimulation() { setOverallProgress(0); if (progressTimerRef.current) clearInterval(progressTimerRef.current); progressTimerRef.current = setInterval(() => { setOverallProgress((prev) => { if (prev >= 49) return prev; return Math.min(49, prev + 4); }); }, 800); }
+  function startProgressSimulation() { setOverallProgress(0); if (progressTimerRef.current) clearInterval(progressTimerRef.current); progressTimerRef.current = setInterval(() => { setOverallProgress((prev) => { if (prev >= 59) return prev; return Math.min(59, prev + 4); }); }, 800); }
   function stopProgressSimulation(finalValue = 100) { if (progressTimerRef.current) clearInterval(progressTimerRef.current); progressTimerRef.current = null; setOverallProgress(finalValue); }
 
   async function runAnalysis() {
@@ -72,7 +66,7 @@ export default function ZipIntelApp() {
     setLoading(true); setError(""); setSuccess(""); setAnalysisData(null); setDetailView(null);
     setStage("pipeline"); startProgressSimulation();
     try {
-      const kickoff = await axios.post(`${API}/zip-analysis/start`, { zip_code: zip.trim() });
+      await axios.post(`${API}/zip-analysis/start`, { zip_code: zip.trim() });
       let done = false;
       while (!done) {
         await new Promise(res => setTimeout(res, 2000));
@@ -102,7 +96,7 @@ export default function ZipIntelApp() {
         <div className="mx-auto max-w-xl px-6 py-20">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-neutral-900 mb-4">ZIP Intel Generator</h1>
-            <p className="text-lg text-neutral-600">Generate Buyer Migration intelligence for any ZIP code</p>
+            <p className="text-lg text-neutral-600">Generate Buyer Migration + SEO/YouTube intelligence for any ZIP code</p>
           </div>
           <Card><CardContent>
             <form onSubmit={onSubmitZip} className="space-y-4">
@@ -133,11 +127,12 @@ export default function ZipIntelApp() {
             analysisData={analysisData}
             activeCategory={detailView.key}
             loading={false}
-            onNavigate={(type, title, data) => { if (type === 'overview') { setStage("pipeline"); } else { setDetailView(data); setStage("detail"); } }}
+            onNavigate={(type, title, obj) => { if (type === 'overview') { setStage("pipeline"); } else { setDetailView(obj); setStage("detail"); } }}
             onBackToDashboard={() => setStage("pipeline")}
           />
           <div className="flex-1 p-8">
-            <BuyerMigrationDetailView data={detailView.data} />
+            {detailView.key === 'buyer_migration' && <BuyerMigrationDetailView data={detailView.data} />}
+            {detailView.key === 'seo_youtube_trends' && <SeoYouTubeDetail data={detailView.data} />}
           </div>
         </div>
       )}

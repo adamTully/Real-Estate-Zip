@@ -54,9 +54,9 @@ class MarketIntelligence(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-# Focus-mode task plan (location + buyer_migration only)
-TASK_ORDER = ["location", "buyer_migration"]
-TASK_PERCENT = {"location": 40, "buyer_migration": 100}
+# Focus-mode task plan: add SEO & YouTube Trends
+TASK_ORDER = ["location", "buyer_migration", "seo_youtube_trends"]
+TASK_PERCENT = {"location": 25, "buyer_migration": 60, "seo_youtube_trends": 100}
 
 # Service
 class ZipIntelligenceService:
@@ -178,6 +178,54 @@ Be specific, professional, and avoid fluff. Use lists where possible. Keep table
                 "error": str(e),
             }
 
+    async def generate_seo_youtube_trends(self, zip_code: str, location_info: Dict[str, Any]) -> Dict[str, Any]:
+        city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        try:
+            prompt = f"""
+Act as an SEO expert and YouTube strategist. I'm a Realtor in {city_name}, {state_name} (ZIP {zip_code}).
+
+Return your answer in clean Markdown with clear sections and lists using this structure:
+
+# SEO & YouTube Trends – {city_name}, {state_name}
+
+## Market Search Insights
+- 2-4 sentences summarizing how locals and relocators search for {city_name} topics
+
+## High-Volume Local Keywords
+- Bullet list of short phrases with brief intent notes
+
+| Keyword | Intent | Note |
+| --- | --- | --- |
+| moving to {city_name} | informational | relocation interest |
+| best neighborhoods in {city_name} | research | school/lifestyle fit |
+
+## Long-Tail Questions
+- Bullet list of People Also Ask-style questions
+
+## Video Title Ideas
+- Bullet list of YouTube-ready titles optimized for search and CTR
+
+## Implementation Tips
+- Actionable on-page SEO and YouTube optimization tips (titles, descriptions, chapters, hooks)
+"""
+            response_text = await self._safe_send(prompt)
+            return {
+                "summary": f"SEO & YouTube analysis for {city_name}, {state_name} with real search data",
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
+                "analysis_content": response_text,
+                "generated_with": "ChatGPT GPT-5",
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+        except Exception as e:
+            logging.error(f"ChatGPT error for SEO analysis: {str(e)}")
+            return {
+                "summary": f"SEO analysis for {city_name}, {state_name} (fallback mode)",
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
+                "analysis_content": "Real-time analysis temporarily unavailable. Please try again.",
+                "error": str(e),
+            }
+
 # Status helpers
 async def _init_status(zip_code: str) -> Dict[str, Any]:
     now = datetime.utcnow()
@@ -213,7 +261,7 @@ async def _complete_status(zip_code: str, state: str = "done"):
         {"$set": {"state": state, "overall_percent": 100 if state == "done" else 0, "updated_at": datetime.utcnow()}},
     )
 
-# Background job: focus mode
+# Background job now runs Buyer Migration + SEO
 async def _run_zip_job(zip_code: str):
     try:
         svc = ZipIntelligenceService()
@@ -226,12 +274,18 @@ async def _run_zip_job(zip_code: str):
         buyer_migration = await svc.generate_buyer_migration_intel(zip_code, location_info)
         await _update_task(zip_code, "buyer_migration", "done", 100)
         await _update_overall(zip_code, TASK_PERCENT["buyer_migration"])
+        await asyncio.sleep(0.5)
+
+        await _update_task(zip_code, "seo_youtube_trends", "running", 10)
+        seo = await svc.generate_seo_youtube_trends(zip_code, location_info)
+        await _update_task(zip_code, "seo_youtube_trends", "done", 100)
+        await _update_overall(zip_code, TASK_PERCENT["seo_youtube_trends"])
 
         placeholder = {"summary": "Pending generation", "analysis_content": "Not generated yet."}
         intelligence = MarketIntelligence(
             zip_code=zip_code,
             buyer_migration=buyer_migration,
-            seo_youtube_trends=placeholder,
+            seo_youtube_trends=seo,
             content_strategy=placeholder,
             hidden_listings=placeholder,
             market_hooks={"summary": "Pending generation", "detailed_analysis": "Not generated yet."},
@@ -260,11 +314,12 @@ async def analyze_zip_code(request: ZipAnalysisRequest, background_tasks: Backgr
         svc = ZipIntelligenceService()
         location_info = await svc.get_location_info(zip_code)
         buyer_migration = await svc.generate_buyer_migration_intel(zip_code, location_info)
+        seo = await svc.generate_seo_youtube_trends(zip_code, location_info)
         placeholder = {"summary": "Pending generation", "analysis_content": "Not generated yet."}
         intelligence = MarketIntelligence(
             zip_code=zip_code,
             buyer_migration=buyer_migration,
-            seo_youtube_trends=placeholder,
+            seo_youtube_trends=seo,
             content_strategy=placeholder,
             hidden_listings=placeholder,
             market_hooks={"summary": "Pending generation", "detailed_analysis": "Not generated yet."},
@@ -373,7 +428,7 @@ async def get_content_asset(zip_code: str, asset_type: str, asset_name: str):
 
 @api_router.get("/")
 async def root():
-    return {"message": "ZIP Intel Generator API v2.0 (focus: buyer migration)"}
+    return {"message": "ZIP Intel Generator API v2.0 (focus: buyer migration + seo)"}
 
 # Mount router and middleware
 app.include_router(api_router)
