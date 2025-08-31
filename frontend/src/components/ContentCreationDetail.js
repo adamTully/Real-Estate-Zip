@@ -5,6 +5,7 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import axios from "axios";
 import { Download, FolderOpen, X } from "lucide-react";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 const ListRow = ({ title, sizeKB, onDownload, onPreview }) => (
   <div className="flex items-center justify-between py-3 border-b border-neutral-200">
