@@ -70,13 +70,17 @@ export default function ZipIntelApp() {
     
     if (!analysisData && lastZip && onDetailRoute) {
       console.log('Attempting to hydrate data for ZIP:', lastZip);
+      console.log('API URL:', `${API}/zip-analysis/${lastZip}`);
       (async () => {
         try {
-          const { data } = await axios.get(`${API}/zip-analysis/${lastZip}`);
-          console.log('Successfully hydrated data:', data?.zip_code);
-          setAnalysisData(data);
+          const response = await axios.get(`${API}/zip-analysis/${lastZip}`);
+          console.log('API Response Status:', response.status);
+          console.log('API Response Data Keys:', Object.keys(response.data || {}));
+          console.log('Successfully hydrated data for ZIP:', response.data?.zip_code);
+          setAnalysisData(response.data);
         } catch (e) {
-          console.error('Failed to hydrate data:', e);
+          console.error('Failed to hydrate data:', e.message);
+          console.error('Error details:', e.response?.status, e.response?.statusText);
           // ignore; user can run a new analysis
         }
       })();
