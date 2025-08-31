@@ -9,18 +9,26 @@ import MarkdownRenderer from "./MarkdownRenderer";
 
 const ListRow = ({ title, sizeKB, onDownload, onPreview }) => (
   <div className="flex items-center justify-between py-3 border-b border-neutral-200">
-    <button onClick={onPreview} className="text-left">
-      <div className="text-sm font-medium text-neutral-900 hover:text-blue-600">
+    <div>
+      <div className="text-sm font-medium text-neutral-900">
         {title}
       </div>
       <div className="text-xs text-neutral-500">~{sizeKB} KB</div>
-    </button>
-    <button
-      onClick={onDownload}
-      className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-    >
-      <Download className="w-3 h-3" /> Download
-    </button>
+    </div>
+    <div className="flex items-center gap-2">
+      <button
+        onClick={onPreview}
+        className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border border-neutral-300 hover:bg-neutral-50"
+      >
+        Preview
+      </button>
+      <button
+        onClick={onDownload}
+        className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+      >
+        <Download className="w-3 h-3" /> Download
+      </button>
+    </div>
   </div>
 );
 
