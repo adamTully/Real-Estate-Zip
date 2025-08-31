@@ -58,13 +58,31 @@ const MarkdownRenderer = ({ content = "", className = "" }) => {
         remarkPlugins={gfm ? [gfm] : []}
         components={{
           h1: ({ node, children, ...props }) => (
-            <h1 id={slugify(children)} className="scroll-mt-20 text-3xl font-bold text-neutral-900 mt-6 mb-4" {...props}>{children}</h1>
+            <h1
+              id={slugify(children)}
+              className="scroll-mt-20 text-[clamp(28px,4.5vw,40px)] font-extrabold tracking-tight text-neutral-900 mt-6 mb-4"
+              {...props}
+            >
+              {children}
+            </h1>
           ),
           h2: ({ node, children, ...props }) => (
-            <h2 id={slugify(children)} className="scroll-mt-20 text-2xl font-semibold text-neutral-900 mt-6 mb-3" {...props}>{children}</h2>
+            <h2
+              id={slugify(children)}
+              className="scroll-mt-20 text-[clamp(22px,3.5vw,32px)] font-bold text-neutral-900 mt-10 mb-3 pt-4 border-t border-neutral-200"
+              {...props}
+            >
+              {children}
+            </h2>
           ),
           h3: ({ node, children, ...props }) => (
-            <h3 id={slugify(children)} className="scroll-mt-20 text-xl font-semibold text-neutral-900 mt-5 mb-2" {...props}>{children}</h3>
+            <h3
+              id={slugify(children)}
+              className="scroll-mt-20 text-[clamp(18px,3vw,24px)] font-semibold text-neutral-900 mt-8 mb-2"
+              {...props}
+            >
+              {children}
+            </h3>
           ),
           p: ({ node, ...props }) => (
             <p className="mb-3 leading-relaxed text-neutral-800" {...props} />
