@@ -1,5 +1,5 @@
 import React from "react";
-import { MapPin, Sparkles, Target, Crown, CheckCircle2, Clock, ArrowLeft } from "lucide-react";
+import { MapPin, Sparkles, Wand2, Target, Crown, CheckCircle2, Clock, ArrowLeft } from "lucide-react";
 
 const SidebarNavItem = ({ icon: Icon, label, isActive, onClick, status, disabled }) => (
   <button onClick={onClick} disabled={disabled} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all duration-200 ${disabled ? 'cursor-not-allowed text-neutral-400' : (isActive ? 'bg-blue-100 text-blue-900 border-blue-200' : 'text-neutral-700 hover:bg-neutral-100')}`}> <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-neutral-500'}`} /><span className="font-medium text-sm flex-1">{label}</span>{status === 'complete' && <CheckCircle2 className="w-4 h-4 text-green-600" />}{status === 'processing' && <Clock className="w-4 h-4 text-orange-500" />}</button>
@@ -21,6 +21,7 @@ const IntelligenceSidebar = ({ analysisData, activeCategory = 'overview', onNavi
           <div className="pt-3 pb-2"><p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide px-3">Intelligence Categories</p></div>
           <SidebarNavItem icon={MapPin} label="Buyer Migration Intel" isActive={activeCategory === 'buyer_migration'} onClick={() => onNavigate && onNavigate('detail', 'Buyer Migration Intel', { key: 'buyer_migration', data: analysisData?.buyer_migration })} status={loading ? 'processing' : 'complete'} disabled={loading} />
           <SidebarNavItem icon={Sparkles} label="SEO & YouTube Trends" isActive={activeCategory === 'seo_youtube_trends'} onClick={() => onNavigate && onNavigate('detail', 'SEO & YouTube Trends', { key: 'seo_youtube_trends', data: analysisData?.seo_youtube_trends })} status={loading ? 'processing' : 'complete'} disabled={loading} />
+          <SidebarNavItem icon={Wand2} label="Content Strategy" isActive={activeCategory === 'content_strategy'} onClick={() => onNavigate && onNavigate('detail', 'Content Strategy', { key: 'content_strategy', data: analysisData?.content_strategy })} status={loading ? 'processing' : 'complete'} disabled={loading} />
         </div>
       </div>
     </div>

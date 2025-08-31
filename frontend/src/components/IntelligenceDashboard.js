@@ -1,5 +1,5 @@
 import React from "react";
-import { MapPin, Sparkles, ExternalLink, CheckCircle2, Clock, ArrowRight } from "lucide-react";
+import { MapPin, Sparkles, Wand2, ExternalLink, CheckCircle2, Clock, ArrowRight } from "lucide-react";
 import IntelligenceSidebar from "./IntelligenceSidebar";
 
 const Card = ({ className = "", children, ...props }) => (
@@ -79,14 +79,16 @@ const IntelligenceDashboard = ({ analysisData, onViewDetail, loading = false, ta
               {taskProgress.location && (<Card className="p-4"><div className="flex items-center justify-between mb-2"><p className="text-sm font-medium text-neutral-800">{taskProgress.location.title}</p><Badge variant={taskProgress.location.status === 'done' ? 'success' : 'warning'}>{taskProgress.location.status === 'done' ? 'Done' : 'In Progress'}</Badge></div><ProgressBar percent={taskProgress.location.percent} /></Card>)}
               {taskProgress.buyer_migration && (<Card className="p-4"><div className="flex items-center justify-between mb-2"><p className="text-sm font-medium text-neutral-800">{taskProgress.buyer_migration.title}</p><Badge variant={taskProgress.buyer_migration.status === 'done' ? 'success' : 'warning'}>{taskProgress.buyer_migration.status === 'done' ? 'Done' : 'In Progress'}</Badge></div><ProgressBar percent={taskProgress.buyer_migration.percent} /></Card>)}
               {taskProgress.seo_youtube_trends && (<Card className="p-4"><div className="flex items-center justify-between mb-2"><p className="text-sm font-medium text-neutral-800">{taskProgress.seo_youtube_trends.title}</p><Badge variant={taskProgress.seo_youtube_trends.status === 'done' ? 'success' : 'warning'}>{taskProgress.seo_youtube_trends.status === 'done' ? 'Done' : 'In Progress'}</Badge></div><ProgressBar percent={taskProgress.seo_youtube_trends.percent} /></Card>)}
+              {taskProgress.content_strategy && (<Card className="p-4"><div className="flex items-center justify-between mb-2"><p className="text-sm font-medium text-neutral-800">{taskProgress.content_strategy.title}</p><Badge variant={taskProgress.content_strategy.status === 'done' ? 'success' : 'warning'}>{taskProgress.content_strategy.status === 'done' ? 'Done' : 'In Progress'}</Badge></div><ProgressBar percent={taskProgress.content_strategy.percent} /></Card>)}
             </div>
           )}
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             <IntelligenceCard title={'Buyer Migration Intel'} description={'Migration patterns and buyer motivations'} summary={!loading ? analysisData?.buyer_migration?.summary : undefined} onViewDetails={() => onViewDetail && onViewDetail('buyer_migration', 'Buyer Migration Intel', analysisData?.buyer_migration)} icon={MapPin} loading={loading} task={loading ? taskProgress.buyer_migration : null} />
             <IntelligenceCard title={'SEO & YouTube Trends'} description={'Keyword research and content opportunities'} summary={!loading ? analysisData?.seo_youtube_trends?.summary : undefined} onViewDetails={() => onViewDetail && onViewDetail('seo_youtube_trends', 'SEO & YouTube Trends', analysisData?.seo_youtube_trends)} icon={Sparkles} loading={loading} task={loading ? taskProgress.seo_youtube_trends : null} />
+            <IntelligenceCard title={'Content Strategy'} description={'8-week marketing roadmap and execution plan'} summary={!loading ? analysisData?.content_strategy?.summary : undefined} onViewDetails={() => onViewDetail && onViewDetail('content_strategy', 'Content Strategy', analysisData?.content_strategy)} icon={Wand2} loading={loading} task={loading ? taskProgress.content_strategy : null} />
           </div>
           {!loading && (
-            <Card className="p-6 bg-gradient-to-r from-neutral-50 to-green-50 border-green-200"><div className="flex items-start gap-4"><div className="p-2 bg-green-100 rounded-lg"><ArrowRight className="w-5 h-5 text-green-600" /></div><div><h3 className="text-lg font-semibold text-neutral-900 mb-2">Recommended Next Steps</h3><div className="space-y-2 text-sm text-neutral-700"><div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-600" /><span>Review Buyer Migration and create a keyword-aligned content plan</span></div></div></div></div></Card>
+            <Card className="p-6 bg-gradient-to-r from-neutral-50 to-green-50 border-green-200"><div className="flex items-start gap-4"><div className="p-2 bg-green-100 rounded-lg"><ArrowRight className="w-5 h-5 text-green-600" /></div><div><h3 className="text-lg font-semibold text-neutral-900 mb-2">Recommended Next Steps</h3><div className="space-y-2 text-sm text-neutral-700"><div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-600" /><span>Review all three sections and align next content pieces</span></div></div></div></div></Card>
           )}
         </div>
       </div>
