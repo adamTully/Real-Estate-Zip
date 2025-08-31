@@ -1,20 +1,13 @@
 import React from "react";
 import { 
-  MapPin, 
-  Sparkles, 
-  Wand2, 
-  FileText, 
-  Download, 
+  MapPin,
   ExternalLink, 
   CheckCircle2,
   Clock,
-  ArrowRight,
-  Calendar,
-  Target
+  ArrowRight
 } from "lucide-react";
 import IntelligenceSidebar from "./IntelligenceSidebar";
 
-// UI Components
 const Card = ({ className = "", children, ...props }) => (
   <div className={`rounded-2xl shadow-sm border border-neutral-200 bg-white ${className}`} {...props}>
     {children}
@@ -28,7 +21,6 @@ const Badge = ({ children, variant = "default" }) => {
     warning: "bg-orange-100 text-orange-800",
     info: "bg-blue-100 text-blue-800"
   };
-  
   return (
     <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${variants[variant]}`}>
       {children}
@@ -47,22 +39,16 @@ const Skeleton = ({ className = "" }) => (
 );
 
 const IntelligenceCard = ({ 
-  category, 
   title, 
   description, 
   summary, 
-  status, 
-  previewData, 
   onViewDetails, 
-  onQuickAction,
   icon: Icon,
-  isActive,
   loading = false,
   task = null
 }) => (
-  <Card className={`p-6 transition-all duration-200 ${isActive ? 'ring-2 ring-blue-500' : ''}`}>
+  <Card className={`p-6 transition-all duration-200`}>
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-50 rounded-lg">
@@ -74,7 +60,7 @@ const IntelligenceCard = ({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {!loading && status === 'complete' && (
+          {!loading && (
             <Badge variant="success">
               <CheckCircle2 className="w-3 h-3 mr-1" />
               Complete
@@ -89,7 +75,6 @@ const IntelligenceCard = ({
         </div>
       </div>
 
-      {/* Loading State with Task Progress */}
       {loading ? (
         <div className="space-y-4">
           {task && (
@@ -112,36 +97,16 @@ const IntelligenceCard = ({
               View Full Analysis
               <ExternalLink className="w-3 h-3" />
             </button>
-            <button
-              disabled
-              className="px-3 py-1 bg-neutral-100 text-neutral-400 text-xs rounded-lg cursor-not-allowed"
-            >
-              Quick Action
-            </button>
           </div>
         </div>
       ) : (
         <>
-          {/* Summary */}
           {summary && (
             <div className="bg-neutral-50 p-3 rounded-lg">
               <p className="text-sm text-neutral-700 leading-relaxed">{summary}</p>
             </div>
           )}
 
-          {/* Preview Data */}
-          {previewData && (
-            <div className="space-y-2">
-              {previewData.map((item, index) => (
-                <div key={index} className="flex items-center gap-2 text-sm text-neutral-600">
-                  <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Actions */}
           <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
             <button
               onClick={onViewDetails}
@@ -150,15 +115,6 @@ const IntelligenceCard = ({
               View Full Analysis
               <ExternalLink className="w-3 h-3" />
             </button>
-            
-            {onQuickAction && (
-              <button
-                onClick={onQuickAction}
-                className="px-3 py-1 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Quick Action
-              </button>
-            )}
           </div>
         </>
       )}
@@ -167,95 +123,26 @@ const IntelligenceCard = ({
 );
 
 const IntelligenceDashboard = ({ analysisData, onViewDetail, loading = false, taskProgress = {}, overallProgress = 0 }) => {
-  const activeCategory = 'overview';
-
-  const categories = [
-    {
-      id: 'buyer_migration',
-      title: 'Buyer Migration Intel',
-      description: 'Migration patterns and buyer motivations',
-      icon: MapPin,
-      data: analysisData?.buyer_migration,
-      status: 'complete'
-    },
-    {
-      id: 'seo_youtube_trends', 
-      title: 'SEO & YouTube Trends',
-      description: 'Keyword research and content opportunities',
-      icon: Sparkles,
-      data: analysisData?.seo_youtube_trends,
-      status: 'complete'
-    },
-    {
-      id: 'content_strategy',
-      title: 'Content Strategy', 
-      description: '8-week marketing roadmap',
-      icon: Wand2,
-      data: analysisData?.content_strategy,
-      status: 'complete'
-    },
-    {
-      id: 'hidden_listings',
-      title: 'Market Research',
-      description: 'Hidden opportunities and seller profiles', 
-      icon: FileText,
-      data: analysisData?.hidden_listings,
-      status: 'complete'
-    },
-    {
-      id: 'content_assets',
-      title: 'Content Creation',
-      description: 'Downloadable marketing materials',
-      icon: Download, 
-      data: analysisData?.content_assets,
-      status: 'complete'
-    }
-  ];
-
-  const getPreviewData = (category, data) => {
-    if (!data) return null;
-    switch (category.id) {
-      case 'buyer_migration':
-        return [data?.summary];
-      case 'seo_youtube_trends':
-        return [data?.summary];
-      case 'content_strategy':
-        return [data?.summary];
-      case 'hidden_listings':
-        return [data?.summary];
-      case 'content_assets':
-        return [data?.summary];
-      default:
-        return [];
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100">
       <div className="flex">
-        {/* Sidebar Navigation */}
         <IntelligenceSidebar
           analysisData={analysisData}
-          activeCategory={activeCategory}
+          activeCategory={'overview'}
           loading={loading}
           onNavigate={() => {}}
         />
 
-        {/* Main Content Area */}
         <div className="flex-1 p-8 space-y-8">
-          {/* Header */}
           <div>
-            <h1 className="text-3xl font-bold text-neutral-900 mb-2">
-              Market Intelligence Dashboard
-            </h1>
+            <h1 className="text-3xl font-bold text-neutral-900 mb-2">Market Intelligence Dashboard</h1>
             <p className="text-neutral-600">
               {analysisData?.buyer_migration?.location?.city && analysisData?.buyer_migration?.location?.state
                 ? `Complete territorial intelligence for ${analysisData.buyer_migration.location.city}, ${analysisData.buyer_migration.location.state}`
-                : 'Generating intelligence for your territory...'}
+                : 'Generating buyer migration intelligence for your territory...'}
             </p>
           </div>
 
-          {/* Overall Progress */}
           {loading && (
             <Card className="p-4">
               <div className="flex items-center justify-between mb-2">
@@ -266,45 +153,46 @@ const IntelligenceDashboard = ({ analysisData, onViewDetail, loading = false, ta
             </Card>
           )}
 
-          {/* Tasks Readout */}
           {loading && (
-            <div className="grid md:grid-cols-2 gap-4">
-              {Object.keys(taskProgress).map((key) => (
-                <Card key={key} className="p-4">
+            <div className="grid md:grid-cols-1 gap-4">
+              {taskProgress.location && (
+                <Card className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-neutral-800">{taskProgress[key].title}</p>
-                    <Badge variant={taskProgress[key].status === 'done' ? 'success' : 'warning'}>
-                      {taskProgress[key].status === 'done' ? 'Done' : taskProgress[key].status === 'running' ? 'In Progress' : 'Pending'}
+                    <p className="text-sm font-medium text-neutral-800">{taskProgress.location.title}</p>
+                    <Badge variant={taskProgress.location.status === 'done' ? 'success' : 'warning'}>
+                      {taskProgress.location.status === 'done' ? 'Done' : 'In Progress'}
                     </Badge>
                   </div>
-                  <ProgressBar percent={taskProgress[key].percent} />
+                  <ProgressBar percent={taskProgress.location.percent} />
                 </Card>
-              ))}
+              )}
+              {taskProgress.buyer_migration && (
+                <Card className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-neutral-800">{taskProgress.buyer_migration.title}</p>
+                    <Badge variant={taskProgress.buyer_migration.status === 'done' ? 'success' : 'warning'}>
+                      {taskProgress.buyer_migration.status === 'done' ? 'Done' : 'In Progress'}
+                    </Badge>
+                  </div>
+                  <ProgressBar percent={taskProgress.buyer_migration.percent} />
+                </Card>
+              )}
             </div>
           )}
 
-          {/* Intelligence Cards Grid */}
-          <div className="grid md:grid-cols-2 gap-6">
-            {categories.map((category) => (
-              <IntelligenceCard
-                key={category.id}
-                category={category.id}
-                title={category.title}
-                description={category.description}
-                summary={!loading ? category.data?.summary : undefined}
-                status={category.status}
-                previewData={!loading ? getPreviewData(category, category.data) : undefined}
-                onViewDetails={() => onViewDetail && onViewDetail(category.id, category.title, category.data)}
-                icon={category.icon}
-                isActive={false}
-                loading={loading}
-                task={loading ? taskProgress[category.id] : null}
-              />
-            ))}
+          <div className="grid md:grid-cols-1 gap-6">
+            <IntelligenceCard
+              title={'Buyer Migration Intel'}
+              description={'Migration patterns and buyer motivations'}
+              summary={!loading ? analysisData?.buyer_migration?.summary : undefined}
+              onViewDetails={() => onViewDetail && onViewDetail('buyer_migration', 'Buyer Migration Intel', analysisData?.buyer_migration)}
+              icon={MapPin}
+              loading={loading}
+              task={loading ? taskProgress.buyer_migration : null}
+            />
           </div>
 
           {!loading && (
-            // Next Steps
             <Card className="p-6 bg-gradient-to-r from-neutral-50 to-green-50 border-green-200">
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-green-100 rounded-lg">
@@ -315,15 +203,7 @@ const IntelligenceDashboard = ({ analysisData, onViewDetail, loading = false, ta
                   <div className="space-y-2 text-sm text-neutral-700">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-600" />
-                      <span>Download and customize your content library</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-green-600" />
-                      <span>Begin Week 1 of your content strategy</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-green-600" />
-                      <span>Start prospecting in identified micro-areas</span>
+                      <span>Review Buyer Migration analysis and define content angles</span>
                     </div>
                   </div>
                 </div>

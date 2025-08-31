@@ -1,16 +1,5 @@
 import React from "react";
-import { 
-  MapPin, 
-  Sparkles, 
-  Wand2, 
-  FileText, 
-  Download,
-  Target,
-  Crown,
-  CheckCircle2,
-  Clock,
-  ArrowLeft
-} from "lucide-react";
+import { MapPin, Target, Crown, CheckCircle2, Clock, ArrowLeft } from "lucide-react";
 
 const SidebarNavItem = ({ icon: Icon, label, isActive, onClick, status, disabled }) => (
   <button
@@ -35,50 +24,10 @@ const IntelligenceSidebar = ({
   onNavigate, 
   onBackToDashboard,
   loading = false,
-  taskProgress = {}
 }) => {
-  const categories = [
-    {
-      id: 'buyer_migration',
-      title: 'Buyer Migration Intel',
-      icon: MapPin,
-      data: analysisData?.buyer_migration,
-      status: loading ? 'processing' : 'complete'
-    },
-    {
-      id: 'seo_youtube_trends', 
-      title: 'SEO & YouTube Trends',
-      icon: Sparkles,
-      data: analysisData?.seo_youtube_trends,
-      status: loading ? 'processing' : 'complete'
-    },
-    {
-      id: 'content_strategy',
-      title: 'Content Strategy', 
-      icon: Wand2,
-      data: analysisData?.content_strategy,
-      status: loading ? 'processing' : 'complete'
-    },
-    {
-      id: 'hidden_listings',
-      title: 'Market Research',
-      icon: FileText,
-      data: analysisData?.hidden_listings,
-      status: loading ? 'processing' : 'complete'
-    },
-    {
-      id: 'content_assets',
-      title: 'Content Creation',
-      icon: Download, 
-      data: analysisData?.content_assets,
-      status: loading ? 'processing' : 'complete'
-    }
-  ];
-
   return (
     <div className="w-80 bg-white border-r border-neutral-200 min-h-screen">
       <div className="p-6">
-        {/* Back to Dashboard Button */}
         {activeCategory !== 'overview' && onBackToDashboard && (
           <button
             onClick={onBackToDashboard}
@@ -89,7 +38,6 @@ const IntelligenceSidebar = ({
           </button>
         )}
 
-        {/* Territory Header */}
         <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
           <div className="flex items-center gap-2 mb-2">
             <Crown className="w-4 h-4 text-blue-600" />
@@ -107,7 +55,6 @@ const IntelligenceSidebar = ({
           </div>
         </div>
 
-        {/* Navigation Menu */}
         <div className="space-y-1">
           <SidebarNavItem
             icon={Target}
@@ -117,24 +64,19 @@ const IntelligenceSidebar = ({
             status={loading ? 'processing' : 'complete'}
             disabled={false}
           />
-          
           <div className="pt-3 pb-2">
             <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide px-3">
               Intelligence Categories
             </p>
           </div>
-          
-          {categories.map((category) => (
-            <SidebarNavItem
-              key={category.id}
-              icon={category.icon}
-              label={category.title}
-              isActive={activeCategory === category.id}
-              onClick={() => onNavigate && onNavigate('detail', category.title, { key: category.id, data: category.data })}
-              status={category.status}
-              disabled={loading}
-            />
-          ))}
+          <SidebarNavItem
+            icon={MapPin}
+            label="Buyer Migration Intel"
+            isActive={activeCategory === 'buyer_migration'}
+            onClick={() => onNavigate && onNavigate('detail', 'Buyer Migration Intel', { key: 'buyer_migration', data: analysisData?.buyer_migration })}
+            status={loading ? 'processing' : 'complete'}
+            disabled={loading}
+          />
         </div>
       </div>
     </div>
