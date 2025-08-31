@@ -10,7 +10,7 @@ const IntelligenceSidebar = ({ analysisData, activeCategory = 'overview', onNavi
     <div className="w-80 bg-white border-r border-neutral-200 min-h-screen">
       <div className="p-6">
         {activeCategory !== 'overview' && onBackToDashboard && (<button onClick={onBackToDashboard} className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 text-sm mb-4 transition-colors"><ArrowLeft className="w-4 h-4" />Back to Dashboard</button>)}
-        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to紫-50 rounded-xl border border-blue-200">
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
           <div className="flex items-center gap-2 mb-2"><Crown className="w-4 h-4 text-blue-600" /><span className="text-xs font-semibold text-blue-800">EXCLUSIVE TERRITORY</span></div>
           <h2 className="text-lg font-bold text-neutral-900">ZIP {analysisData?.zip_code || analysisData?.buyer_migration?.location?.zip_code || '...'}</h2>
           <p className="text-sm text-neutral-600">{analysisData?.buyer_migration?.location?.city}, {analysisData?.buyer_migration?.location?.state}</p>
