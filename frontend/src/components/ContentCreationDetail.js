@@ -112,5 +112,4 @@ import axios from "axios";
                  Copy Text
                </button>
              </div>
-@@
  export default ContentCreationDetail;
