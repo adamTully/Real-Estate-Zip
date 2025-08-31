@@ -115,7 +115,7 @@ export default function ZipIntelApp() {
       <IntelligenceSidebar
         analysisData={analysisData}
         activeCategory={activeKey}
-        loading={!analysisData}
+        loading={loading}
         onNavigate={(type, title, obj) => {
           if (type === 'overview') navigate('/dashboard');
           else {
@@ -131,8 +131,31 @@ export default function ZipIntelApp() {
         onBackToDashboard={() => navigate('/dashboard')}
       />
       <div className="flex-1 p-8">
-        {!analysisData ? (
-          <Card><CardContent><p className="text-sm text-neutral-600">Loading analysis…</p></CardContent></Card>
+        {loading ? (
+          <Card>
+            <CardContent>
+              <div className="flex items-center gap-3">
+                <Loader2 className="animate-spin" size={18} />
+                <p className="text-sm text-neutral-600">Generating analysis...</p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : !analysisData ? (
+          <Card>
+            <CardContent>
+              <div className="text-center py-8">
+                <MapPin className="mx-auto h-12 w-12 text-neutral-400 mb-4" />
+                <h2 className="text-lg font-semibold text-neutral-900 mb-2">No Analysis Data</h2>
+                <p className="text-sm text-neutral-600 mb-4">
+                  You need to run an analysis first. Go back to the home page to enter a ZIP code.
+                </p>
+                <Button onClick={() => navigate('/')} variant="outline">
+                  <ArrowLeft size={16} />
+                  Back to Home
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         ) : activeKey === 'buyer_migration' ? (
           <BuyerMigrationDetailView data={analysisData.buyer_migration} />
         ) : activeKey === 'seo_youtube_trends' ? (
