@@ -66,17 +66,22 @@ export default function ZipIntelApp() {
   useEffect(() => {
     const lastZip = localStorage.getItem('zipintel:last_zip');
     const onDetailRoute = ["/dashboard","/market-intelligence","/seo-youtube-trends","/content-strategy","/content-assets"].includes(location.pathname);
+    console.log('Hydration check:', { analysisData: !!analysisData, lastZip, onDetailRoute, pathname: location.pathname });
+    
     if (!analysisData && lastZip && onDetailRoute) {
+      console.log('Attempting to hydrate data for ZIP:', lastZip);
       (async () => {
         try {
           const { data } = await axios.get(`${API}/zip-analysis/${lastZip}`);
+          console.log('Successfully hydrated data:', data?.zip_code);
           setAnalysisData(data);
         } catch (e) {
+          console.error('Failed to hydrate data:', e);
           // ignore; user can run a new analysis
         }
       })();
     }
-  }, [location.pathname]);
+  }, [location.pathname, analysisData]);
 
   function validateZip(z) { return /^\d{5}(-\d{4})?$/.test(z.trim()); }
 
