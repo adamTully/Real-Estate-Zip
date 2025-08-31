@@ -28,9 +28,7 @@ import axios from "axios";
        setRegenerating(false);
      }
    };
-@@
--          <Tabs.Content value="blogs" className="p-4 space-y-3">
-+          <Tabs.Content value="blogs" className="p-4 space-y-3">
+          <Tabs.Content value="blogs" className="p-4 space-y-3">
              <div className="flex items-center justify-end">
                <button
                  onClick={() => downloadAll('blogs')}
