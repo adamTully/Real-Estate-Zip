@@ -301,7 +301,7 @@ Return ONLY valid JSON (no prose) with this schema:
 }
 
 Requirements:
-- name must use kebab-case and end with .txt (e.g., moving-to-{city}-guide.txt)
+- name must use kebab-case and end with .txt (e.g., moving-to-{city_name}-guide.txt)
 - content must be plain text (no HTML/Markdown), ready to download as .txt
 - 8 emails, 10 blogs; keep each ~300-700 words
 - Titles should reflect local SEO terms and clear value
