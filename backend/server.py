@@ -322,24 +322,47 @@ Requirements:
             if not data:
                 raise RuntimeError("Failed to parse content assets JSON")
 
-            def enrich(items):
+            def _slugify(text: str) -> str:
+                try:
+                    return (
+                        (text or "")
+                        .lower()
+                        .strip()
+                        .replace("&", " and ")
+                        .replace("/", "-")
+                    )
+                except Exception:
+                    return ""
+
+            def enrich(items, kind: str):
                 enriched = []
-                for it in items:
-                    name = it.get('name') or f"{city_name.lower().replace(' ', '-')}-{uuid.uuid4().hex[:6]}.txt"
+                for idx, it in enumerate(items):
+                    title = it.get('title') or it.get('name') or f"{kind}-{idx+1}"
+                    slug = "-".join([s for s in _slugify(title).split() if s])
+                    # Derive filename
+                    if kind == 'emails':
+                        # Try extract week number from title (e.g., "Week 3 ...")
+                        import re as _re
+                        m = _re.search(r"week\s*(\d{1,2})", title, _re.IGNORECASE)
+                        week = m.group(1) if m else str(idx + 1)
+                        base = f"week-{week}-email-{slug}" if slug else f"week-{week}-email"
+                    else:
+                        base = f"blog-{slug}" if slug else f"blog-{idx+1}"
+                    name = it.get('name') or f"{base}.txt"
                     if not name.endswith('.txt'):
                         name = name + '.txt'
                     content = it.get('content', '')
                     size_kb = max(1, len(content.encode('utf-8')) // 1024)
                     enriched.append({
                         "name": name,
-                        "title": it.get('title') or name,
+                        "title": title,
                         "content": content,
                         "size_kb": size_kb,
                     })
                 return enriched
 
-            blogs = enrich(data.get('blog_posts', []))
-            emails = enrich(data.get('email_campaigns', []))
+            blogs = enrich(data.get('blog_posts', []), 'blogs')
+            emails = enrich(data.get('email_campaigns', []), 'emails')
 
             return {
                 "summary": data.get('summary', f"Content assets for {city_name}, {state_name}"),
