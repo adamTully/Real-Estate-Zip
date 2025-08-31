@@ -63,9 +63,7 @@ import axios from "axios";
                </div>
              )}
            </Tabs.Content>
-@@
--          <Tabs.Content value="emails" className="p-4 space-y-3">
-+          <Tabs.Content value="emails" className="p-4 space-y-3">
+          <Tabs.Content value="emails" className="p-4 space-y-3">
              <div className="flex items-center justify-end">
                <button
                  onClick={() => downloadAll('emails')}
