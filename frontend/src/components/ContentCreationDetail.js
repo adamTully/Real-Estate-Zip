@@ -8,27 +8,26 @@ import axios from "axios";
   const [blogs, setBlogs] = useState(data.blog_posts || []);
   const [emails, setEmails] = useState(data.email_campaigns || []);
   const [regenerating, setRegenerating] = useState(false);
-@@
    const openPreview = (item) => {
      setPreviewItem(item);
      setPreviewOpen(true);
    };
-+
-+  const API = process.env.REACT_APP_BACKEND_URL + "/api";
-+  const regenerate = async () => {
-+    try {
-+      setRegenerating(true);
-+      const zipCode = data.location?.zip_code;
-+      const { data: assets } = await axios.post(`${API}/zip-analysis/assets/regenerate`, { zip_code: zipCode });
-+      setBlogs(assets.blog_posts || []);
-+      setEmails(assets.email_campaigns || []);
-+    } catch (e) {
-+      // no-op: parent toasts handle errors in other flows
-+      console.error("Regenerate assets error", e);
-+    } finally {
-+      setRegenerating(false);
-+    }
-+  };
+
+   const API = process.env.REACT_APP_BACKEND_URL + "/api";
+   const regenerate = async () => {
+     try {
+       setRegenerating(true);
+       const zipCode = data.location?.zip_code;
+       const { data: assets } = await axios.post(`${API}/zip-analysis/assets/regenerate`, { zip_code: zipCode });
+       setBlogs(assets.blog_posts || []);
+       setEmails(assets.email_campaigns || []);
+     } catch (e) {
+       // no-op: parent toasts handle errors in other flows
+       console.error("Regenerate assets error", e);
+     } finally {
+       setRegenerating(false);
+     }
+   };
 @@
 -          <Tabs.Content value="blogs" className="p-4 space-y-3">
 +          <Tabs.Content value="blogs" className="p-4 space-y-3">
