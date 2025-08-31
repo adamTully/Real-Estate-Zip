@@ -98,7 +98,6 @@ import axios from "axios";
                </div>
              )}
            </Tabs.Content>
-@@
              <div className="p-4 border-t border-neutral-200">
                <button
                  onClick={() => previewItem && downloadText(previewItem.name, previewItem.content)}
@@ -106,12 +105,12 @@ import axios from "axios";
                >
                  <Download className="w-4 h-4" /> Download .txt
                </button>
-+              <button
-+                onClick={() => navigator.clipboard.writeText(previewItem?.content || '')}
-+                className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-neutral-300 hover:bg-neutral-50"
-+              >
-+                Copy Text
-+              </button>
+               <button
+                 onClick={() => navigator.clipboard.writeText(previewItem?.content || '')}
+                 className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-neutral-300 hover:bg-neutral-50"
+               >
+                 Copy Text
+               </button>
              </div>
 @@
  export default ContentCreationDetail;
