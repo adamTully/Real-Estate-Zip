@@ -57,36 +57,38 @@ const BuyerMigrationDetailView = ({ data }) => {
 
         {/* Outline */}
         <div className="lg:col-span-1">
-          <ContentBlock>
-            <div className="flex items-center gap-2 mb-3">
-              <ListTree className="w-4 h-4 text-neutral-600" />
-              <h3 className="text-sm font-semibold text-neutral-900">Outline</h3>
-            </div>
-            {headings.length ? (
-              <ul className="space-y-1 text-sm">
-                {headings.map((h, idx) => (
-                  <li key={idx} className={`text-neutral-700 ${h.level === 1 ? 'font-semibold' : h.level === 2 ? 'pl-3' : 'pl-5'}`}>
-                    <a href={`#${h.id}`} className="hover:text-blue-600">
-                      {h.text}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-neutral-500 text-sm">Headings will appear here.</p>
-            )}
-          </ContentBlock>
+          <div className="lg:sticky lg:top-24 space-y-4">
+            <ContentBlock>
+              <div className="flex items-center gap-2 mb-3">
+                <ListTree className="w-4 h-4 text-neutral-600" />
+                <h3 className="text-sm font-semibold text-neutral-900">Outline</h3>
+              </div>
+              {headings.length ? (
+                <ul className="space-y-1 text-sm">
+                  {headings.map((h, idx) => (
+                    <li key={idx} className={`text-neutral-700 ${h.level === 1 ? 'font-semibold' : h.level === 2 ? 'pl-3' : 'pl-5'}`}>
+                      <a href={`#${h.id}`} className="hover:text-blue-600">
+                        {h.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-neutral-500 text-sm">Headings will appear here.</p>
+              )}
+            </ContentBlock>
 
-          {/* Quick Tips */}
-          <ContentBlock>
-            <h3 className="text-sm font-semibold text-neutral-900 mb-2">How to use this report</h3>
-            <ul className="list-disc pl-5 space-y-1 text-sm text-neutral-700">
-              <li>Scan the Market Overview for a quick summary</li>
-              <li>Use "Where Buyers Are Coming From" to target relocation ads</li>
-              <li>Turn Hooks and Video Titles into short-form content</li>
-              <li>Apply Quick Actions this week to capture demand</li>
-            </ul>
-          </ContentBlock>
+            {/* Quick Tips */}
+            <ContentBlock>
+              <h3 className="text-sm font-semibold text-neutral-900 mb-2">How to use this report</h3>
+              <ul className="list-disc pl-5 space-y-1 text-sm text-neutral-700">
+                <li>Scan the Market Overview for a quick summary</li>
+                <li>Use "Where Buyers Are Coming From" to target relocation ads</li>
+                <li>Turn Hooks and Video Titles into short-form content</li>
+                <li>Apply Quick Actions this week to capture demand</li>
+              </ul>
+            </ContentBlock>
+          </div>
         </div>
       </div>
 
