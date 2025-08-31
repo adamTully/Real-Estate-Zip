@@ -9,7 +9,7 @@ import time
 class ZipIntel94105Tester:
     def __init__(self):
         # Use the exact URL from frontend/.env
-        self.base_url = "https://zipintel.preview.emergentagent.com"
+        self.base_url = "https://realestate-ai-41.preview.emergentagent.com"
         self.api_url = f"{self.base_url}/api"
         self.test_zip = "94105"  # Specific ZIP requested for testing
         self.tests_run = 0

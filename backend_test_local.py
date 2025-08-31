@@ -10,7 +10,7 @@ class LocalZipIntelTester:
     def __init__(self):
         # Test locally first, then external if needed
         self.local_url = "http://localhost:8001"
-        self.external_url = "https://zipintel.preview.emergentagent.com"
+        self.external_url = "https://realestate-ai-41.preview.emergentagent.com"
         self.test_zip = "94105"
         self.tests_run = 0
         self.tests_passed = 0
