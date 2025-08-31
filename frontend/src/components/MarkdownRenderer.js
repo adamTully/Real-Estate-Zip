@@ -1,8 +1,17 @@
 import React, { useEffect, useState, Suspense } from "react";
 
-// Lightweight Markdown renderer with graceful fallback
-// - Prefers react-markdown + remark-gfm if available
-// - Falls back to simple pre-wrapped text if the deps are not installed
+function slugify(children) {
+  try {
+    const text = React.Children.toArray(children).map((c) => {
+      if (typeof c === "string") return c;
+      if (typeof c?.props?.children === "string") return c.props.children;
+      return "";
+    }).join(" ");
+    return text.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
+  } catch {
+    return undefined;
+  }
+}
 
 const MarkdownRenderer = ({ content = "", className = "" }) => {
   const [ReactMarkdown, setReactMarkdown] = useState(null);
@@ -22,17 +31,13 @@ const MarkdownRenderer = ({ content = "", className = "" }) => {
           setGfm(() => gfmPlugin);
         }
       } catch (e) {
-        // Dependencies not installed yet; fallback to simple rendering
         if (mounted) setFailed(true);
       }
     }
     load();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
-  // Normalize common non-string shapes (e.g., { text: "..." })
   const normalized = typeof content === "string"
     ? content
     : content?.text || content?.message || JSON.stringify(content || "", null, 2);
@@ -52,20 +57,26 @@ const MarkdownRenderer = ({ content = "", className = "" }) => {
       <RM
         remarkPlugins={gfm ? [gfm] : []}
         components={{
-          h1: ({ node, ...props }) => (
-            <h1 className="text-3xl font-bold text-neutral-900 mt-6 mb-4" {...props} />
+          h1: ({ node, children, ...props }) => (
+            <h1 id={slugify(children)} className="scroll-mt-20 text-3xl font-bold text-neutral-900 mt-6 mb-4" {...props}>{children}</h1>
           ),
-          h2: ({ node, ...props }) => (
-            <h2 className="text-2xl font-semibold text-neutral-900 mt-6 mb-3" {...props} />
+          h2: ({ node, children, ...props }) => (
+            <h2 id={slugify(children)} className="scroll-mt-20 text-2xl font-semibold text-neutral-900 mt-6 mb-3" {...props}>{children}</h2>
           ),
-          h3: ({ node, ...props }) => (
-            <h3 className="text-xl font-semibold text-neutral-900 mt-5 mb-2" {...props} />
+          h3: ({ node, children, ...props }) => (
+            <h3 id={slugify(children)} className="scroll-mt-20 text-xl font-semibold text-neutral-900 mt-5 mb-2" {...props}>{children}</h3>
           ),
           p: ({ node, ...props }) => (
             <p className="mb-3 leading-relaxed text-neutral-800" {...props} />
           ),
+          ul: ({ node, ...props }) => (
+            <ul className="list-disc pl-5 space-y-1 mb-3 text-neutral-800" {...props} />
+          ),
+          ol: ({ node, ...props }) => (
+            <ol className="list-decimal pl-5 space-y-1 mb-3 text-neutral-800" {...props} />
+          ),
           li: ({ node, ordered, ...props }) => (
-            <li className="ml-4 mb-1" {...props} />
+            <li className="ml-1" {...props} />
           ),
           strong: ({ node, ...props }) => (
             <strong className="font-semibold text-neutral-900" {...props} />
@@ -74,12 +85,23 @@ const MarkdownRenderer = ({ content = "", className = "" }) => {
             <em className="italic" {...props} />
           ),
           a: ({ node, ...props }) => (
-            <a className="text-blue-600 hover:underline" {...props} />
+            <a className="text-blue-600 hover:underline" target="_blank" rel="noreferrer" {...props} />
           ),
           code: ({ inline, className: cn, children, ...props }) => (
             <code className={`bg-neutral-100 px-1.5 py-0.5 rounded ${cn || ""}`} {...props}>
               {children}
             </code>
+          ),
+          table: ({ node, ...props }) => (
+            <div className="overflow-auto mb-4">
+              <table className="min-w-full text-sm border border-neutral-200" {...props} />
+            </div>
+          ),
+          th: ({ node, ...props }) => (
+            <th className="bg-neutral-50 border border-neutral-200 px-3 py-2 text-left font-semibold" {...props} />
+          ),
+          td: ({ node, ...props }) => (
+            <td className="border border-neutral-200 px-3 py-2" {...props} />
           ),
         }}
         className={`prose max-w-none ${className}`}

@@ -1,60 +1,394 @@
-@@
-     async def generate_buyer_migration_intel(self, zip_code: str, location_info: Dict) -> Dict[str, Any]:
-         city_name = location_info.get('city', 'Unknown')
-         state_name = location_info.get('state', 'Unknown')
-         try:
--            prompt = f"""Act as a real estate market analyst. I'm a Realtor in {city_name}, {state_name}. Based on the latest migration patterns, tell me: where most of the buyers relocating to {city_name} are coming from; why they're moving (cost of living, lifestyle, taxes, etc.); and what type of content should I be creating to attract those buyers. Include specific hooks, keywords, and video titles based on current trends.
--
--Please structure your response with clear sections and be specific with data, statistics, and actionable recommendations."""
-+            prompt = f"""
-+Act as a real estate market analyst. I'm a Realtor in {city_name}, {state_name} (ZIP {zip_code}).
-+
-+Return your answer in clean, scannable Markdown with clear headings, subheadings, and lists. Use this exact structure:
-+
-+# Buyer Migration Intelligence – {city_name}, {state_name}
-+
-+## Market Overview
-+- 2-4 sentences summarizing notable migration dynamics and housing context.
-+
-+## Where Buyers Are Coming From
-+- Bullet list of top feeder cities/metros/states with brief reasons (1 line each)
-+- If relevant, include a simple table:
-+
-+| Origin | Share/Trend | Note |
-+| --- | --- | --- |
-+| City A | Rising | Lower cost, job inflows |
-+| City B | Stable | Lifestyle upgrade |
-+
-+## Why They're Moving
-+- Bullet list of top motivations (cost of living, schools, taxes, commute, lifestyle, climate, etc.) with practical implications for messaging
-+
-+## Content Strategy To Attract These Buyers
-+### Hooks (5-7)
-+- Short, thumb-stopping hooks tailored to {city_name}
-+
-+### SEO Keywords (10-15)
-+- Comma-separated list or bullets of local, high-intent terms
-+
-+### Video Title Ideas (5-10)
-+- YouTube-style titles optimized for search and CTR
-+
-+## Quick Actions (3-5)
-+- Actionable next steps you recommend a local agent takes this week
-+
-+Be specific, professional, and avoid fluff. Use lists where possible. Keep table simple and valid Markdown. """
-             response_text = await self._safe_send(prompt)
-@@
-             return {
-                 "summary": f"Migration analysis for {city_name}, {state_name} completed with real market data",
-                 "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
-                 "analysis_content": response_text,
-                 "generated_with": "ChatGPT GPT-5",
-                 "timestamp": datetime.utcnow().isoformat()
-             }
-@@
-             return {
-                 "summary": f"Migration analysis for {city_name}, {state_name} (fallback mode)",
-                 "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
-                 "analysis_content": "Real-time analysis temporarily unavailable. Please try again.",
-                 "error": str(e)
-             }
+from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks
+from fastapi.responses import FileResponse
+from dotenv import load_dotenv
+from starlette.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+import os
+import logging
+from pathlib import Path
+from pydantic import BaseModel, Field, validator
+from typing import Optional, Dict, Any
+import uuid
+from datetime import datetime
+import re
+import asyncio
+import tempfile
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from geopy.geocoders import Nominatim
+import json
+from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
+
+# MongoDB connection
+mongo_url = os.environ['MONGO_URL']
+client = AsyncIOMotorClient(mongo_url)
+db = client[os.environ['DB_NAME']]
+
+# App and router
+app = FastAPI()
+api_router = APIRouter(prefix="/api")
+
+# Models
+class ZipAnalysisRequest(BaseModel):
+    zip_code: str
+    
+    @validator('zip_code')
+    def validate_zip_code(cls, v):
+        if not re.match(r'^\d{5}(-\d{4})?$', v.strip()):
+            raise ValueError('Invalid ZIP code format')
+        return v.strip()
+
+class MarketIntelligence(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    zip_code: str
+    buyer_migration: Dict[str, Any]
+    seo_youtube_trends: Dict[str, Any]
+    content_strategy: Dict[str, Any]
+    hidden_listings: Dict[str, Any]
+    market_hooks: Dict[str, Any]
+    content_assets: Dict[str, Any]
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+# Focus-mode task plan (location + buyer_migration only)
+TASK_ORDER = ["location", "buyer_migration"]
+TASK_PERCENT = {"location": 40, "buyer_migration": 100}
+
+# Service
+class ZipIntelligenceService:
+    def __init__(self):
+        self.geolocator = Nominatim(user_agent="zip-intel-generator")
+        self.llm = LlmChat(
+            api_key=os.environ.get('OPENAI_API_KEY'),
+            session_id=f"zipintel-{uuid.uuid4()}",
+            system_message=(
+                "You are an expert real estate market analyst. Provide comprehensive, data-driven "
+                "insights based on the user's requests. Always be specific, actionable, and professional."
+            ),
+        ).with_model("openai", "gpt-5")
+
+    async def _normalize_llm_response(self, resp: Any) -> str:
+        try:
+            if isinstance(resp, str):
+                return resp
+            text = getattr(resp, 'text', None)
+            if isinstance(text, str):
+                return text
+            return json.dumps(resp, ensure_ascii=False)
+        except Exception:
+            return ""
+
+    async def _safe_send(self, prompt: str, max_retries: int = 3) -> str:
+        delay = 1.0
+        last_err = None
+        for _ in range(max_retries):
+            try:
+                user_message = UserMessage(text=prompt)
+                resp = await self.llm.send_message(user_message)
+                text = await self._normalize_llm_response(resp)
+                if text and not any(term in text.lower() for term in ["rate limit", "quota", "temporarily unavailable"]):
+                    return text
+                raise RuntimeError("Upstream rate limit or temporary failure text")
+            except Exception as e:
+                last_err = e
+                await asyncio.sleep(delay)
+                delay = min(delay * 2, 8)
+        logging.error(f"LLM send failed after retries: {str(last_err)}")
+        return "Real-time analysis temporarily unavailable. Please try again."
+
+    async def get_location_info(self, zip_code: str) -> Dict[str, Any]:
+        try:
+            base_zip = zip_code.split('-')[0]
+            location = self.geolocator.geocode(f"{base_zip}, USA")
+            if location:
+                display = location.raw.get('display_name', '')
+                city = display.split(',')[0]
+                state = display.split(',')[-3].strip() if ',' in display else 'Unknown'
+                return {
+                    "city": city,
+                    "state": state,
+                    "latitude": location.latitude,
+                    "longitude": location.longitude,
+                    "full_address": location.address,
+                }
+            return {"city": "Unknown", "state": "Unknown", "latitude": 0, "longitude": 0}
+        except Exception as e:
+            logging.error(f"Geolocation error for {zip_code}: {str(e)}")
+            return {"city": "Unknown", "state": "Unknown", "latitude": 0, "longitude": 0}
+
+    async def generate_buyer_migration_intel(self, zip_code: str, location_info: Dict[str, Any]) -> Dict[str, Any]:
+        city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        try:
+            prompt = f"""
+Act as a real estate market analyst. I'm a Realtor in {city_name}, {state_name} (ZIP {zip_code}).
+
+Return your answer in clean, scannable Markdown with clear headings, subheadings, and lists. Use this exact structure:
+
+# Buyer Migration Intelligence – {city_name}, {state_name}
+
+## Market Overview
+- 2-4 sentences summarizing notable migration dynamics and housing context.
+
+## Where Buyers Are Coming From
+- Bullet list of top feeder cities/metros/states with brief reasons (1 line each)
+- If relevant, include a simple table:
+
+| Origin | Share/Trend | Note |
+| --- | --- | --- |
+| City A | Rising | Lower cost, job inflows |
+| City B | Stable | Lifestyle upgrade |
+
+## Why They're Moving
+- Bullet list of top motivations (cost of living, schools, taxes, commute, lifestyle, climate, etc.) with practical implications for messaging
+
+## Content Strategy To Attract These Buyers
+### Hooks (5-7)
+- Short, thumb-stopping hooks tailored to {city_name}
+
+### SEO Keywords (10-15)
+- Comma-separated list or bullets of local, high-intent terms
+
+### Video Title Ideas (5-10)
+- YouTube-style titles optimized for search and CTR
+
+## Quick Actions (3-5)
+- Actionable next steps you recommend a local agent takes this week
+
+Be specific, professional, and avoid fluff. Use lists where possible. Keep table simple and valid Markdown.
+"""
+            response_text = await self._safe_send(prompt)
+            return {
+                "summary": f"Migration analysis for {city_name}, {state_name} completed with real market data",
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
+                "analysis_content": response_text,
+                "generated_with": "ChatGPT GPT-5",
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+        except Exception as e:
+            logging.error(f"ChatGPT error for buyer migration: {str(e)}")
+            return {
+                "summary": f"Migration analysis for {city_name}, {state_name} (fallback mode)",
+                "location": {"city": city_name, "state": state_name, "zip_code": zip_code},
+                "analysis_content": "Real-time analysis temporarily unavailable. Please try again.",
+                "error": str(e),
+            }
+
+# Status helpers
+async def _init_status(zip_code: str) -> Dict[str, Any]:
+    now = datetime.utcnow()
+    job_id = str(uuid.uuid4())
+    tasks = {tid: {"status": "pending", "percent": 0, "title": tid} for tid in TASK_ORDER}
+    doc = {
+        "zip_code": zip_code,
+        "job_id": job_id,
+        "state": "running",
+        "overall_percent": 0,
+        "tasks": tasks,
+        "created_at": now,
+        "updated_at": now,
+    }
+    await db.analysis_status.update_one({"zip_code": zip_code}, {"$set": doc}, upsert=True)
+    return doc
+
+async def _update_task(zip_code: str, task_id: str, status: str, percent: int):
+    await db.analysis_status.update_one(
+        {"zip_code": zip_code},
+        {"$set": {f"tasks.{task_id}.status": status, f"tasks.{task_id}.percent": percent, "updated_at": datetime.utcnow()}},
+    )
+
+async def _update_overall(zip_code: str, percent: int):
+    await db.analysis_status.update_one(
+        {"zip_code": zip_code},
+        {"$set": {"overall_percent": percent, "updated_at": datetime.utcnow()}},
+    )
+
+async def _complete_status(zip_code: str, state: str = "done"):
+    await db.analysis_status.update_one(
+        {"zip_code": zip_code},
+        {"$set": {"state": state, "overall_percent": 100 if state == "done" else 0, "updated_at": datetime.utcnow()}},
+    )
+
+# Background job: focus mode
+async def _run_zip_job(zip_code: str):
+    try:
+        svc = ZipIntelligenceService()
+        await _update_task(zip_code, "location", "running", 50)
+        location_info = await svc.get_location_info(zip_code)
+        await _update_task(zip_code, "location", "done", 100)
+        await _update_overall(zip_code, TASK_PERCENT["location"])
+
+        await _update_task(zip_code, "buyer_migration", "running", 10)
+        buyer_migration = await svc.generate_buyer_migration_intel(zip_code, location_info)
+        await _update_task(zip_code, "buyer_migration", "done", 100)
+        await _update_overall(zip_code, TASK_PERCENT["buyer_migration"])
+
+        placeholder = {"summary": "Pending generation", "analysis_content": "Not generated yet."}
+        intelligence = MarketIntelligence(
+            zip_code=zip_code,
+            buyer_migration=buyer_migration,
+            seo_youtube_trends=placeholder,
+            content_strategy=placeholder,
+            hidden_listings=placeholder,
+            market_hooks={"summary": "Pending generation", "detailed_analysis": "Not generated yet."},
+            content_assets=placeholder,
+        )
+        await db.market_intelligence.insert_one(intelligence.dict())
+        await _complete_status(zip_code, state="done")
+    except Exception as e:
+        logging.error(f"Job failed for {zip_code}: {str(e)}")
+        await db.analysis_status.update_one(
+            {"zip_code": zip_code},
+            {"$set": {"state": "failed", "error": str(e), "updated_at": datetime.utcnow()}},
+        )
+
+# Endpoints
+@api_router.post("/zip-analysis", response_model=MarketIntelligence)
+async def analyze_zip_code(request: ZipAnalysisRequest, background_tasks: BackgroundTasks):
+    try:
+        zip_code = request.zip_code
+        existing = await db.market_intelligence.find_one({
+            "zip_code": zip_code,
+            "created_at": {"$gte": datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)},
+        })
+        if existing:
+            return MarketIntelligence(**existing)
+        svc = ZipIntelligenceService()
+        location_info = await svc.get_location_info(zip_code)
+        buyer_migration = await svc.generate_buyer_migration_intel(zip_code, location_info)
+        placeholder = {"summary": "Pending generation", "analysis_content": "Not generated yet."}
+        intelligence = MarketIntelligence(
+            zip_code=zip_code,
+            buyer_migration=buyer_migration,
+            seo_youtube_trends=placeholder,
+            content_strategy=placeholder,
+            hidden_listings=placeholder,
+            market_hooks={"summary": "Pending generation", "detailed_analysis": "Not generated yet."},
+            content_assets=placeholder,
+        )
+        await db.market_intelligence.insert_one(intelligence.dict())
+        return intelligence
+    except Exception as e:
+        logging.error(f"Error analyzing ZIP code {request.zip_code}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating analysis: {str(e)}")
+
+@api_router.post("/zip-analysis/start")
+async def start_zip_analysis(request: ZipAnalysisRequest):
+    zip_code = request.zip_code
+    existing = await db.market_intelligence.find_one({
+        "zip_code": zip_code,
+        "created_at": {"$gte": datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)},
+    })
+    if existing:
+        await db.analysis_status.update_one(
+            {"zip_code": zip_code},
+            {"$set": {"zip_code": zip_code, "state": "done", "overall_percent": 100, "updated_at": datetime.utcnow()}},
+            upsert=True,
+        )
+        status_doc = await db.analysis_status.find_one({"zip_code": zip_code}, {"_id": 0})
+        return status_doc
+    status_doc = await _init_status(zip_code)
+    asyncio.create_task(_run_zip_job(zip_code))
+    status_doc.pop('_id', None)
+    return status_doc
+
+@api_router.get("/zip-analysis/status/{zip_code}")
+async def get_zip_status(zip_code: str):
+    status_doc = await db.analysis_status.find_one({"zip_code": zip_code})
+    if not status_doc:
+        raise HTTPException(status_code=404, detail="Status not found")
+    status_doc.pop('_id', None)
+    return status_doc
+
+@api_router.get("/zip-analysis/{zip_code}", response_model=MarketIntelligence)
+async def get_zip_analysis(zip_code: str):
+    try:
+        analysis = await db.market_intelligence.find_one({"zip_code": zip_code})
+        if not analysis:
+            raise HTTPException(status_code=404, detail="Analysis not found")
+        return MarketIntelligence(**analysis)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/generate-pdf/{zip_code}")
+async def generate_hidden_listings_pdf(zip_code: str):
+    try:
+        analysis = await db.market_intelligence.find_one({"zip_code": zip_code})
+        if not analysis:
+            raise HTTPException(status_code=404, detail="Analysis not found")
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
+        doc = SimpleDocTemplate(temp_file.name, pagesize=letter)
+        styles = getSampleStyleSheet()
+        story = []
+        title = Paragraph(f"Hidden Listings Analysis - {zip_code}", styles['Title'])
+        story.append(title)
+        story.append(Spacer(1, 12))
+        content = analysis['hidden_listings']['detailed_analysis']
+        for line in content.split('\n'):
+            if line.strip():
+                if line.startswith('#'):
+                    para = Paragraph(line.replace('#', '').strip(), styles['Heading2'])
+                else:
+                    para = Paragraph(line.strip(), styles['Normal'])
+                story.append(para)
+                story.append(Spacer(1, 6))
+        doc.build(story)
+        return FileResponse(
+            temp_file.name,
+            media_type='application/pdf',
+            filename=f"{zip_code}-hidden-listings.pdf",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating PDF: {str(e)}")
+
+@api_router.get("/content-asset/{zip_code}/{asset_type}/{asset_name}")
+async def get_content_asset(zip_code: str, asset_type: str, asset_name: str):
+    try:
+        analysis = await db.market_intelligence.find_one({"zip_code": zip_code})
+        if not analysis:
+            raise HTTPException(status_code=404, detail="Analysis not found")
+        content_assets = analysis['content_assets']
+        if asset_type == "blogs":
+            assets = content_assets['blog_posts']
+        elif asset_type == "emails":
+            assets = content_assets['email_campaigns']
+        elif asset_type == "lead_magnet":
+            return {"content": content_assets['lead_magnet']['content']}
+        else:
+            raise HTTPException(status_code=400, detail="Invalid asset type")
+        for asset in assets:
+            if asset['name'] == asset_name:
+                return {"content": asset['content']}
+        raise HTTPException(status_code=404, detail="Asset not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/")
+async def root():
+    return {"message": "ZIP Intel Generator API v2.0 (focus: buyer migration)"}
+
+# Mount router and middleware
+app.include_router(api_router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
