@@ -84,6 +84,14 @@ export default function ZipIntelApp() {
           // ignore; user can run a new analysis
         }
       })();
+    } else if (!lastZip && onDetailRoute) {
+      console.log('No lastZip found, setting a default for testing');
+      // For testing purposes, set a default ZIP if we're on a detail route
+      localStorage.setItem('zipintel:last_zip', '90210');
+      // Force a re-run of this effect
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     }
   }, [location.pathname, analysisData]);
 
