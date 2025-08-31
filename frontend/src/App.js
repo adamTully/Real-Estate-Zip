@@ -203,7 +203,7 @@ export default function ZipIntelApp() {
         <Route path="/dashboard" element={
           <IntelligenceDashboard
             analysisData={analysisData}
-            loading={!analysisData}
+            loading={loading}
             overallProgress={overallProgress}
             taskProgress={taskProgress}
             onViewDetail={(key) => {
