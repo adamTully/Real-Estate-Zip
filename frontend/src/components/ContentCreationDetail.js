@@ -204,21 +204,18 @@ const ContentCreationDetail = ({ data }) => {
               </Dialog.Close>
             </div>
             <div className="p-4 flex-1 overflow-auto">
-              <pre className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">{previewItem?.content}</pre>
+              <div className="prose max-w-none">
+                <MarkdownRenderer content={previewItem?.content || ''} className="prose-sm" />
+              </div>
             </div>
-            <div className="p-4 border-t border-neutral-200">
+            <div className="p-4 border-t border-neutral-200 flex items-center gap-2">
               <button
                 onClick={() => previewItem && downloadText(previewItem.name, previewItem.content)}
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 mr-2"
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700"
               >
                 <Download className="w-4 h-4" /> Download .txt
               </button>
-              <button
-                onClick={() => navigator.clipboard.writeText(previewItem?.content || '')}
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-neutral-300 hover:bg-neutral-50"
-              >
-                Copy Text
-              </button>
+              <CopyButton text={previewItem?.content || ''} />
             </div>
           </Dialog.Content>
         </Dialog.Portal>
