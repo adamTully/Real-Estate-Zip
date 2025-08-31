@@ -88,25 +88,7 @@ const ContentCreationDetail = ({ data }) => {
             </Tabs.List>
 
             {/* Group download buttons */}
-            <div className="hidden sm:flex items-center gap-2">
-              {activeTab === 'blogs' ? (
-                <button
-                  onClick={() => downloadAll('blogs')}
-                  disabled={!blogs.length}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border border-neutral-300 hover:bg-neutral-50"
-                >
-                  <Download className="w-3 h-3" /> Download Blog Posts (.zip)
-                </button>
-              ) : (
-                <button
-                  onClick={() => downloadAll('emails')}
-                  disabled={!emails.length}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border border-neutral-300 hover:bg-neutral-50"
-                >
-                  <Download className="w-3 h-3" /> Download Emails (.zip)
-                </button>
-              )}
-            </div>
+            <div />
           </div>
 
           <Tabs.Content value="blogs" className="p-4">
