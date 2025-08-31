@@ -4,13 +4,13 @@ import {
   MapPin, 
   Sparkles, 
   Wand2,
-  Download as DownloadIcon,
   ArrowLeft, 
   ExternalLink,
   AlertCircle,
   CheckCircle2
 } from "lucide-react";
 import * as Toast from "@radix-ui/react-toast";
+import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
 import BuyerMigrationDetailView from "./components/BuyerMigrationDetail";
 import SeoYouTubeDetail from "./components/SeoYouTubeDetail";
 import ContentStrategyDetail from "./components/ContentStrategyDetail";
@@ -37,7 +37,7 @@ const Button = ({ className = "", variant = "default", children, disabled, ...pr
 const Input = ({ className = "", error, ...props }) => (<input className={`w-full rounded-xl border px-4 py-3 text-base outline-none focus:ring-4 focus:ring-black/5 ${error ? 'border-red-300 focus:ring-red-100' : 'border-neutral-300'} ${className}`} {...props} />);
 const Alert = ({ variant = "default", children }) => { const variants = { default: "bg-blue-50 border-blue-200 text-blue-800", error: "bg-red-50 border-red-200 text-red-800", success: "bg-green-50 border-green-200 text-green-800" }; return (<div className={`p-4 rounded-xl border ${variants[variant]} flex items-start gap-3`}>{variant === "error" && <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />} {variant === "success" && <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />}<div className="text-sm">{children}</div></div>); };
 
-// Four tasks now: location -> buyer -> seo -> content strategy -> assets
+// Five tasks now: location -> buyer -> seo -> content strategy -> assets
 const TASK_PLAN = [
   { id: "location", title: "Task 1 - ZIP Code Analysis", range: [0, 15] },
   { id: "buyer_migration", title: "Task 2 - Buyer Migration Intelligence", range: [15, 40] },
@@ -48,28 +48,46 @@ const TASK_PLAN = [
 function computeTaskProgress(overall) { const progress = {}; TASK_PLAN.forEach((t) => { const [start, end] = t.range; let pct = 0; if (overall >= end) pct = 100; else if (overall <= start) pct = 0; else pct = Math.round(((overall - start) / (end - start)) * 100); const status = pct === 0 ? "pending" : pct === 100 ? "done" : "running"; progress[t.id] = { percent: Math.max(0, Math.min(100, pct)), status, title: t.title }; }); return progress; }
 
 export default function ZipIntelApp() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [zip, setZip] = useState("");
-  const [stage, setStage] = useState("home");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [analysisData, setAnalysisData] = useState(null);
-  const [detailView, setDetailView] = useState(null);
   const [overallProgress, setOverallProgress] = useState(0);
   const [taskProgress, setTaskProgress] = useState({});
   const progressTimerRef = useRef(null);
 
   useEffect(() => { setTaskProgress(computeTaskProgress(overallProgress)); }, [overallProgress]);
 
+  // Attempt to hydrate analysis from last zip on deep links
+  useEffect(() => {
+    const lastZip = localStorage.getItem('zipintel:last_zip');
+    const onDetailRoute = ["/dashboard","/market-intelligence","/seo-youtube-trends","/content-strategy","/content-assets"].includes(location.pathname);
+    if (!analysisData && lastZip && onDetailRoute) {
+      (async () => {
+        try {
+          const { data } = await axios.get(`${API}/zip-analysis/${lastZip}`);
+          setAnalysisData(data);
+        } catch (e) {
+          // ignore; user can run a new analysis
+        }
+      })();
+    }
+  }, [location.pathname]);
+
   function validateZip(z) { return /^\d{5}(-\d{4})?$/.test(z.trim()); }
 
-  function startProgressSimulation() { setOverallProgress(0); if (progressTimerRef.current) clearInterval(progressTimerRef.current); progressTimerRef.current = setInterval(() => { setOverallProgress((prev) => { if (prev >= 89) return prev; return Math.min(89, prev + 4); }); }, 800); }
+  function startProgressSimulation() { setOverallProgress(0); if (progressTimerRef.current) clearInterval(progressTimerRef.current); progressTimerRef.current = setInterval(() => { setOverallProgress((prev) => { if (prev >= 99) return prev; return Math.min(99, prev + 3); }); }, 800); }
   function stopProgressSimulation(finalValue = 100) { if (progressTimerRef.current) clearInterval(progressTimerRef.current); progressTimerRef.current = null; setOverallProgress(finalValue); }
 
   async function runAnalysis() {
     if (!validateZip(zip)) { setError("Please enter a valid ZIP code (e.g., 12345 or 12345-6789)"); return; }
-    setLoading(true); setError(""); setSuccess(""); setAnalysisData(null); setDetailView(null);
-    setStage("pipeline"); startProgressSimulation();
+    setLoading(true); setError(""); setSuccess(""); setAnalysisData(null);
+    startProgressSimulation();
+    navigate('/dashboard');
     try {
       await axios.post(`${API}/zip-analysis/start`, { zip_code: zip.trim() });
       let done = false;
@@ -81,13 +99,73 @@ export default function ZipIntelApp() {
         if (status.state === 'failed') { throw new Error(status.error || 'Analysis failed'); }
       }
       const response = await axios.get(`${API}/zip-analysis/${zip.trim()}`);
-      setAnalysisData(response.data); stopProgressSimulation(100); setSuccess("Analysis completed successfully!");
+      setAnalysisData(response.data);
+      localStorage.setItem('zipintel:last_zip', zip.trim());
+      stopProgressSimulation(100);
+      setSuccess("Analysis completed successfully!");
     } catch (err) {
       console.error("Analysis error:", err); stopProgressSimulation(overallProgress); setError(err.response?.data?.detail || err.message || "Failed to generate analysis. Please try again.");
     } finally { setLoading(false); }
   }
 
   function onSubmitZip(e) { e.preventDefault(); runAnalysis(); }
+
+  const DetailLayout = ({ activeKey }) => (
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex">
+      <IntelligenceSidebar
+        analysisData={analysisData}
+        activeCategory={activeKey}
+        loading={!analysisData}
+        onNavigate={(type, title, obj) => {
+          if (type === 'overview') navigate('/dashboard');
+          else {
+            const map = {
+              buyer_migration: '/market-intelligence',
+              seo_youtube_trends: '/seo-youtube-trends',
+              content_strategy: '/content-strategy',
+              content_assets: '/content-assets'
+            };
+            navigate(map[obj.key] || '/dashboard');
+          }
+        }}
+        onBackToDashboard={() => navigate('/dashboard')}
+      />
+      <div className="flex-1 p-8">
+        {!analysisData ? (
+          <Card><CardContent><p className="text-sm text-neutral-600">Loading analysis…</p></CardContent></Card>
+        ) : activeKey === 'buyer_migration' ? (
+          <BuyerMigrationDetailView data={analysisData.buyer_migration} />
+        ) : activeKey === 'seo_youtube_trends' ? (
+          <SeoYouTubeDetail data={analysisData.seo_youtube_trends} />
+        ) : activeKey === 'content_strategy' ? (
+          <ContentStrategyDetail data={analysisData.content_strategy} />
+        ) : activeKey === 'content_assets' ? (
+          <ContentCreationDetail data={analysisData.content_assets} />
+        ) : (
+          <Card><CardContent><p className="text-sm text-neutral-600">Select a section from the sidebar.</p></CardContent></Card>
+        )}
+      </div>
+    </div>
+  );
+
+  const HomePage = (
+    <div className="mx-auto max-w-xl px-6 py-20">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold text-neutral-900 mb-4">ZIP Intel Generator</h1>
+        <p className="text-lg text-neutral-600">Generate full intelligence (Buyer Migration, SEO/YouTube, Content Strategy, Assets) for any ZIP code</p>
+      </div>
+      <Card><CardContent>
+        <form onSubmit={onSubmitZip} className="space-y-4">
+          <div>
+            <label htmlFor="zip" className="block text-sm font-medium text-neutral-700 mb-2">ZIP Code</label>
+            <Input id="zip" value={zip} onChange={(e) => setZip(e.target.value)} placeholder="Enter ZIP code (e.g., 90210)" error={!!error} />
+          </div>
+          {error && (<Alert variant="error">{error}</Alert>)}
+          <Button type="submit" disabled={loading || !zip.trim()} className="w-full">{loading ? (<><Loader2 className="animate-spin" size={18} />Analyzing...</>) : (<>Generate Intelligence</>)}</Button>
+        </form>
+      </CardContent></Card>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100">
@@ -97,52 +175,31 @@ export default function ZipIntelApp() {
         <Toast.Viewport className="fixed bottom-0 right-0 p-6 w-96 z-50" />
       </Toast.Provider>
 
-      {stage === "home" && (
-        <div className="mx-auto max-w-xl px-6 py-20">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-neutral-900 mb-4">ZIP Intel Generator</h1>
-            <p className="text-lg text-neutral-600">Generate full intelligence (Buyer Migration, SEO/YouTube, Content Strategy, Assets) for any ZIP code</p>
-          </div>
-          <Card><CardContent>
-            <form onSubmit={onSubmitZip} className="space-y-4">
-              <div>
-                <label htmlFor="zip" className="block text-sm font-medium text-neutral-700 mb-2">ZIP Code</label>
-                <Input id="zip" value={zip} onChange={(e) => setZip(e.target.value)} placeholder="Enter ZIP code (e.g., 90210)" error={!!error} />
-              </div>
-              {error && (<Alert variant="error">{error}</Alert>)}
-              <Button type="submit" disabled={loading || !zip.trim()} className="w-full">{loading ? (<><Loader2 className="animate-spin" size={18} />Analyzing...</>) : (<>Generate Intelligence</>)}</Button>
-            </form>
-          </CardContent></Card>
-        </div>
-      )}
-
-      {stage === "pipeline" && (
-        <IntelligenceDashboard 
-          analysisData={analysisData}
-          loading={!analysisData}
-          overallProgress={overallProgress}
-          taskProgress={taskProgress}
-          onViewDetail={(key, title, data) => { if (!analysisData) return; setDetailView({ key, title, data }); setStage("detail"); }}
-        />
-      )}
-
-      {stage === "detail" && detailView && (
-        <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex">
-          <IntelligenceSidebar
+      <Routes>
+        <Route path="/" element={HomePage} />
+        <Route path="/dashboard" element={
+          <IntelligenceDashboard
             analysisData={analysisData}
-            activeCategory={detailView.key}
-            loading={false}
-            onNavigate={(type, title, obj) => { if (type === 'overview') { setStage("pipeline"); } else { setDetailView(obj); setStage("detail"); } }}
-            onBackToDashboard={() => setStage("pipeline")}
+            loading={!analysisData}
+            overallProgress={overallProgress}
+            taskProgress={taskProgress}
+            onViewDetail={(key) => {
+              const map = {
+                buyer_migration: '/market-intelligence',
+                seo_youtube_trends: '/seo-youtube-trends',
+                content_strategy: '/content-strategy',
+                content_assets: '/content-assets'
+              };
+              navigate(map[key] || '/dashboard');
+            }}
           />
-          <div className="flex-1 p-8">
-            {detailView.key === 'buyer_migration' && <BuyerMigrationDetailView data={detailView.data} />}
-            {detailView.key === 'seo_youtube_trends' && <SeoYouTubeDetail data={detailView.data} />}
-            {detailView.key === 'content_strategy' && <ContentStrategyDetail data={detailView.data} />}
-            {detailView.key === 'content_assets' && <ContentCreationDetail data={detailView.data} />}
-          </div>
-        </div>
-      )}
+        } />
+        <Route path="/market-intelligence" element={<DetailLayout activeKey="buyer_migration" />} />
+        <Route path="/seo-youtube-trends" element={<DetailLayout activeKey="seo_youtube_trends" />} />
+        <Route path="/content-strategy" element={<DetailLayout activeKey="content_strategy" />} />
+        <Route path="/content-assets" element={<DetailLayout activeKey="content_assets" />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </div>
   );
 }
