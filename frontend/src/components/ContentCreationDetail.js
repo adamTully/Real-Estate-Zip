@@ -5,12 +5,9 @@ import React, { useMemo, useState } from "react";
  import { saveAs } from "file-saver";
 import axios from "axios";
  import { Download, Mail, FileText, FolderOpen, X } from "lucide-react";
-@@
--  const blogs = useMemo(() => data.blog_posts || [], [data]);
--  const emails = useMemo(() => data.email_campaigns || [], [data]);
-+  const [blogs, setBlogs] = useState(data.blog_posts || []);
-+  const [emails, setEmails] = useState(data.email_campaigns || []);
-+  const [regenerating, setRegenerating] = useState(false);
+  const [blogs, setBlogs] = useState(data.blog_posts || []);
+  const [emails, setEmails] = useState(data.email_campaigns || []);
+  const [regenerating, setRegenerating] = useState(false);
 @@
    const openPreview = (item) => {
      setPreviewItem(item);
