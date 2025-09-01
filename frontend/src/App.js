@@ -7,7 +7,8 @@ import {
   ArrowLeft, 
   ExternalLink,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Mail
 } from "lucide-react";
 import * as Toast from "@radix-ui/react-toast";
 import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
