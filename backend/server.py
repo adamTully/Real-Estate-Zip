@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks
+from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, Depends, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -6,10 +7,10 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, validator
-from typing import Optional, Dict, Any
+from pydantic import BaseModel, Field, validator, EmailStr
+from typing import Optional, Dict, Any, List
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 import asyncio
 import tempfile
@@ -19,6 +20,9 @@ from reportlab.lib.styles import getSampleStyleSheet
 from geopy.geocoders import Nominatim
 import json
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+import jwt
+from passlib.context import CryptContext
+from passlib.hash import bcrypt
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
