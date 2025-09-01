@@ -13,6 +13,7 @@ class ZipIntelAPITester:
         self.tests_run = 0
         self.tests_passed = 0
         self.test_zip_codes = ["90210", "10001", "60601", "33101"]
+        self.auth_token = None  # Store JWT token for authenticated requests
         
     def log_test(self, name, success, details=""):
         """Log test results"""
