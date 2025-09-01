@@ -486,6 +486,8 @@ export default function ZipIntelApp() {
           }
         }}
         onBackToDashboard={() => navigate('/dashboard')}
+        onShowAnalysisModal={() => setShowAnalysisModal(true)}
+        onShowPreviousZipsModal={() => setShowPreviousZipsModal(true)}
       />
       <div className="flex-1 p-8">
         {loading ? (
@@ -504,11 +506,11 @@ export default function ZipIntelApp() {
                 <MapPin className="mx-auto h-12 w-12 text-neutral-400 mb-4" />
                 <h2 className="text-lg font-semibold text-neutral-900 mb-2">No Analysis Data</h2>
                 <p className="text-sm text-neutral-600 mb-4">
-                  You need to run an analysis first. Go back to the home page to enter a ZIP code.
+                  You need to run an analysis first. Use the "ZIP Code Analysis" tool in the sidebar.
                 </p>
-                <Button onClick={() => navigate('/')} variant="outline">
-                  <ArrowLeft size={16} />
-                  Back to Home
+                <Button onClick={() => setShowAnalysisModal(true)} variant="outline">
+                  <Wand2 size={16} />
+                  Run Analysis
                 </Button>
               </div>
             </CardContent>
