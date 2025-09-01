@@ -501,6 +501,26 @@ class ZipIntelAPITester:
             print("❌ API is not accessible. Stopping tests.")
             return False
         
+        print("\n🔐 Testing Authentication System...")
+        
+        # Test user registration
+        print("\n📝 Testing User Registration...")
+        self.test_auth_register_valid()
+        self.test_auth_register_duplicate_email()
+        self.test_auth_register_weak_password()
+        
+        # Test user login
+        print("\n🔑 Testing User Login...")
+        self.test_auth_login_valid()
+        self.test_auth_login_wrong_password()
+        self.test_auth_login_nonexistent_email()
+        
+        # Test /auth/me endpoint
+        print("\n👤 Testing User Profile Endpoint...")
+        self.test_auth_me_valid_token()
+        self.test_auth_me_invalid_token()
+        self.test_auth_me_no_token()
+        
         print("\n📋 Testing ZIP Code Validation...")
         self.test_invalid_zip_validation()
         
