@@ -666,6 +666,10 @@ export default function ZipIntelApp() {
         <Route path="/content-assets" element={<DetailLayout activeKey="content_assets" />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      
+      {/* Render Modals */}
+      {showAnalysisModal && <ZipAnalysisModal />}
+      {showPreviousZipsModal && <PreviousZipsModal />}
     </div>
   );
 }
