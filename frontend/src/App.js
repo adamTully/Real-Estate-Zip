@@ -1004,29 +1004,48 @@ function AppContent() {
       <Routes>
         <Route path="/" element={LandingPage} />
         <Route path="/check-availability" element={ZipAvailabilityPage} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={
-          <IntelligenceDashboard
-            analysisData={analysisData}
-            loading={loading}
-            overallProgress={overallProgress}
-            taskProgress={taskProgress}
-            onViewDetail={(key) => {
-              const map = {
-                buyer_migration: '/market-intelligence',
-                seo_youtube_trends: '/seo-youtube-trends',
-                content_strategy: '/content-strategy',
-                content_assets: '/content-assets'
-              };
-              navigate(map[key] || '/dashboard');
-            }}
-            onShowAnalysisModal={() => setShowAnalysisModal(true)}
-            onShowPreviousZipsModal={() => setShowPreviousZipsModal(true)}
-          />
+          <ProtectedRoute>
+            <IntelligenceDashboard
+              analysisData={analysisData}
+              loading={loading}
+              overallProgress={overallProgress}
+              taskProgress={taskProgress}
+              onViewDetail={(key) => {
+                const map = {
+                  buyer_migration: '/market-intelligence',
+                  seo_youtube_trends: '/seo-youtube-trends',
+                  content_strategy: '/content-strategy',
+                  content_assets: '/content-assets'
+                };
+                navigate(map[key] || '/dashboard');
+              }}
+              onShowAnalysisModal={() => setShowAnalysisModal(true)}
+              onShowPreviousZipsModal={() => setShowPreviousZipsModal(true)}
+            />
+          </ProtectedRoute>
         } />
-        <Route path="/market-intelligence" element={<DetailLayout activeKey="buyer_migration" />} />
-        <Route path="/seo-youtube-trends" element={<DetailLayout activeKey="seo_youtube_trends" />} />
-        <Route path="/content-strategy" element={<DetailLayout activeKey="content_strategy" />} />
-        <Route path="/content-assets" element={<DetailLayout activeKey="content_assets" />} />
+        <Route path="/market-intelligence" element={
+          <ProtectedRoute>
+            <DetailLayout activeKey="buyer_migration" />
+          </ProtectedRoute>
+        } />
+        <Route path="/seo-youtube-trends" element={
+          <ProtectedRoute>
+            <DetailLayout activeKey="seo_youtube_trends" />
+          </ProtectedRoute>
+        } />
+        <Route path="/content-strategy" element={
+          <ProtectedRoute>
+            <DetailLayout activeKey="content_strategy" />
+          </ProtectedRoute>
+        } />
+        <Route path="/content-assets" element={
+          <ProtectedRoute>
+            <DetailLayout activeKey="content_assets" />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       
