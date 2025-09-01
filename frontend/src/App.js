@@ -404,7 +404,10 @@ export default function ZipIntelApp() {
       
       <div className="text-center mt-8">
         <p className="text-sm text-neutral-500">
-          Already have an account? <button className="text-blue-600 hover:text-blue-700 font-medium">Sign in here</button>
+          Already have an account? <button 
+            className="text-blue-600 hover:text-blue-700 font-medium"
+            onClick={() => navigate('/dashboard')}
+          >Sign in here</button>
         </p>
       </div>
     </div>
