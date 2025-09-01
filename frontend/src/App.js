@@ -59,13 +59,12 @@ export default function ZipIntelApp() {
   const [analysisData, setAnalysisData] = useState(null);
   const [overallProgress, setOverallProgress] = useState(0);
   const [taskProgress, setTaskProgress] = useState({});
-  const [availabilityResult, setAvailabilityResult] = useState(null); // New state for availability
-  const [showAnalysisModal, setShowAnalysisModal] = useState(false); // Modal for ZIP analysis
-  const [showPreviousZipsModal, setShowPreviousZipsModal] = useState(false); // Modal for previous ZIPs
-  const [analysisZip, setAnalysisZip] = useState(""); // Separate ZIP for analysis modal
-  const [analysisLoading, setAnalysisLoading] = useState(false); // Loading for analysis
+  const [availabilityResult, setAvailabilityResult] = useState(null);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [showPreviousZipsModal, setShowPreviousZipsModal] = useState(false);
+  const [analysisZip, setAnalysisZip] = useState("");
+  const [analysisLoading, setAnalysisLoading] = useState(false);
   const [previousZips, setPreviousZips] = useState(() => {
-    // Load previous ZIPs from localStorage
     const stored = localStorage.getItem('zipintel:previous_zips');
     return stored ? JSON.parse(stored) : [];
   });
@@ -92,14 +91,11 @@ export default function ZipIntelApp() {
         } catch (e) {
           console.error('Failed to hydrate data:', e.message);
           console.error('Error details:', e.response?.status, e.response?.statusText);
-          // ignore; user can run a new analysis
         }
       })();
     } else if (!lastZip && onDetailRoute) {
       console.log('No lastZip found, setting a default for testing');
-      // For testing purposes, set a default ZIP if we're on a detail route
       localStorage.setItem('zipintel:last_zip', '90210');
-      // Force a re-run of this effect
       setTimeout(() => {
         window.location.reload();
       }, 100);
@@ -141,7 +137,7 @@ export default function ZipIntelApp() {
       const newPreviousZips = [...previousZips];
       const existingIndex = newPreviousZips.findIndex(z => z.zip === analysisZip.trim());
       if (existingIndex !== -1) {
-        newPreviousZips.splice(existingIndex, 1); // Remove existing
+        newPreviousZips.splice(existingIndex, 1);
       }
       newPreviousZips.unshift({
         zip: analysisZip.trim(),
@@ -149,7 +145,6 @@ export default function ZipIntelApp() {
         date: new Date().toLocaleDateString()
       });
       
-      // Keep only last 10 ZIPs
       if (newPreviousZips.length > 10) {
         newPreviousZips.splice(10);
       }
@@ -201,17 +196,15 @@ export default function ZipIntelApp() {
     setAvailabilityResult(null);
     
     try {
-      // For now, simulate availability check - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Mock availability logic - you'll replace this with actual API
-      const isAvailable = Math.random() > 0.3; // 70% chance available for demo
+      const isAvailable = Math.random() > 0.3;
       
       const result = {
         zipCode: zip.trim(),
         available: isAvailable,
         locationInfo: {
-          city: isAvailable ? "Beverly Hills" : "Manhattan", // Mock data
+          city: isAvailable ? "Beverly Hills" : "Manhattan",
           state: isAvailable ? "CA" : "NY",
           county: isAvailable ? "Los Angeles County" : "New York County"
         },
@@ -813,107 +806,6 @@ export default function ZipIntelApp() {
           </div>
         </div>
       </footer>
-    </div>
-  );
-
-  const ZipAvailabilityPage = (
-    <div className="mx-auto max-w-2xl px-6 py-20">
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-          <MapPin className="w-4 h-4" />
-          Exclusive Territory Licensing
-        </div>
-        <h1 className="text-5xl font-bold text-neutral-900 mb-6">
-          Secure Your <span className="text-blue-600">Exclusive</span> ZIP Code Territory
-        </h1>
-        <p className="text-xl text-neutral-600 leading-relaxed mb-2">
-          Check if your desired ZIP code is available for exclusive real estate marketing rights
-        </p>
-        <p className="text-sm text-neutral-500">
-          Only one agent per ZIP code. Once it's taken, it's gone.
-        </p>
-      </div>
-      
-      <Card className="shadow-xl border-2 border-neutral-100">
-        <CardContent className="p-8">
-          {!availabilityResult ? (
-            <form onSubmit={onSubmitZip} className="space-y-6">
-              <div>
-                <label htmlFor="zip" className="block text-lg font-semibold text-neutral-900 mb-3">
-                  Enter ZIP Code to Check Availability
-                </label>
-                <div className="relative">
-                  <Input 
-                    id="zip" 
-                    value={zip} 
-                    onChange={(e) => setZip(e.target.value)} 
-                    placeholder="Enter ZIP code (e.g., 90210)" 
-                    error={!!error}
-                    className="text-lg py-4 pl-12 pr-4"
-                  />
-                  <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
-                </div>
-              </div>
-              
-              {error && (<Alert variant="error">{error}</Alert>)}
-              
-              <Button 
-                type="submit" 
-                disabled={loading || !zip.trim()} 
-                className="w-full py-4 text-lg font-semibold"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin" size={20} />
-                    Checking Availability...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5" />
-                    Check ZIP Availability
-                  </>
-                )}
-              </Button>
-            </form>
-          ) : (
-            <div>
-              {availabilityResult.available ? (
-                <AvailableResult result={availabilityResult} />
-              ) : (
-                <UnavailableResult result={availabilityResult} />
-              )}
-            </div>
-          )}
-          
-          {!availabilityResult && (
-            <div className="mt-8 pt-6 border-t border-neutral-200">
-              <div className="flex items-center justify-center gap-8 text-sm text-neutral-600">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  Exclusive Rights
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  Market Intelligence
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  Lead Generation Tools
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      <div className="text-center mt-8">
-        <p className="text-sm text-neutral-500">
-          Already have an account? <button 
-            className="text-blue-600 hover:text-blue-700 font-medium"
-            onClick={() => navigate('/dashboard')}
-          >Sign in here</button>
-        </p>
-      </div>
     </div>
   );
 
