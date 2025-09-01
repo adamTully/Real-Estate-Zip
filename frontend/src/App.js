@@ -906,6 +906,17 @@ export default function ZipIntelApp() {
         </CardContent>
       </Card>
       
+      <div className="text-center mt-8">
+        <p className="text-sm text-neutral-500">
+          Already have an account? <button 
+            className="text-blue-600 hover:text-blue-700 font-medium"
+            onClick={() => navigate('/dashboard')}
+          >Sign in here</button>
+        </p>
+      </div>
+    </div>
+  );
+
   const ZipAvailabilityPage = (
     <div className="mx-auto max-w-2xl px-6 py-20">
       <div className="text-center mb-12">
