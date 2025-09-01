@@ -603,7 +603,6 @@ function AppContent() {
                   My Dashboard
                 </Button>
                 <Button variant="ghost" onClick={() => {
-                  const { logout } = useAuth();
                   logout();
                   navigate('/');
                 }}>
