@@ -656,6 +656,8 @@ export default function ZipIntelApp() {
               };
               navigate(map[key] || '/dashboard');
             }}
+            onShowAnalysisModal={() => setShowAnalysisModal(true)}
+            onShowPreviousZipsModal={() => setShowPreviousZipsModal(true)}
           />
         } />
         <Route path="/market-intelligence" element={<DetailLayout activeKey="buyer_migration" />} />
