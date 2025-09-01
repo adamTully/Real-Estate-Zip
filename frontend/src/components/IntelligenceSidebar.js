@@ -5,7 +5,15 @@ const SidebarNavItem = ({ icon: Icon, label, isActive, onClick, status, disabled
   <button onClick={onClick} disabled={disabled} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all duration-200 ${disabled ? 'cursor-not-allowed text-neutral-400' : (isActive ? 'bg-blue-100 text-blue-900 border-blue-200' : 'text-neutral-700 hover:bg-neutral-100')}`}> <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-neutral-500'}`} /><span className="font-medium text-sm flex-1">{label}</span>{status === 'complete' && <CheckCircle2 className="w-4 h-4 text-green-600" />}{status === 'processing' && <Clock className="w-4 h-4 text-orange-500" />}</button>
 );
 
-const IntelligenceSidebar = ({ analysisData, activeCategory = 'overview', onNavigate, onBackToDashboard, loading = false }) => {
+const IntelligenceSidebar = ({ 
+  analysisData, 
+  activeCategory = 'overview', 
+  onNavigate, 
+  onBackToDashboard, 
+  loading = false,
+  onShowAnalysisModal,
+  onShowPreviousZipsModal
+}) => {
   return (
     <div className="w-80 bg-white border-r border-neutral-200 min-h-screen">
       <div className="p-6">
