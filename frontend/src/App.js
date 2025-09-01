@@ -1016,7 +1016,8 @@ export default function ZipIntelApp() {
       </Toast.Provider>
 
       <Routes>
-        <Route path="/" element={HomePage} />
+        <Route path="/" element={LandingPage} />
+        <Route path="/check-availability" element={ZipAvailabilityPage} />
         <Route path="/dashboard" element={
           <IntelligenceDashboard
             analysisData={analysisData}
