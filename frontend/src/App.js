@@ -101,32 +101,54 @@ export default function ZipIntelApp() {
   function startProgressSimulation() { setOverallProgress(0); if (progressTimerRef.current) clearInterval(progressTimerRef.current); progressTimerRef.current = setInterval(() => { setOverallProgress((prev) => { if (prev >= 99) return prev; return Math.min(99, prev + 3); }); }, 800); }
   function stopProgressSimulation(finalValue = 100) { if (progressTimerRef.current) clearInterval(progressTimerRef.current); progressTimerRef.current = null; setOverallProgress(finalValue); }
 
-  async function runAnalysis() {
-    if (!validateZip(zip)) { setError("Please enter a valid ZIP code (e.g., 12345 or 12345-6789)"); return; }
-    setLoading(true); setError(""); setSuccess(""); setAnalysisData(null);
-    startProgressSimulation();
-    navigate('/dashboard');
+  async function checkZipAvailability() {
+    if (!validateZip(zip)) { 
+      setError("Please enter a valid ZIP code (e.g., 12345 or 12345-6789)"); 
+      return; 
+    }
+    
+    setLoading(true); 
+    setError(""); 
+    setSuccess(""); 
+    setAvailabilityResult(null);
+    
     try {
-      await axios.post(`${API}/zip-analysis/start`, { zip_code: zip.trim() });
-      let done = false;
-      while (!done) {
-        await new Promise(res => setTimeout(res, 2000));
-        const { data: status } = await axios.get(`${API}/zip-analysis/status/${zip.trim()}`);
-        setOverallProgress(status.overall_percent || 0);
-        if (status.state === 'done') { done = true; break; }
-        if (status.state === 'failed') { throw new Error(status.error || 'Analysis failed'); }
-      }
-      const response = await axios.get(`${API}/zip-analysis/${zip.trim()}`);
-      setAnalysisData(response.data);
-      localStorage.setItem('zipintel:last_zip', zip.trim());
-      stopProgressSimulation(100);
-      setSuccess("Analysis completed successfully!");
+      // For now, simulate availability check - replace with actual API call
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
+      
+      // Mock availability logic - you'll replace this with actual API
+      const isAvailable = Math.random() > 0.3; // 70% chance available for demo
+      
+      const result = {
+        zipCode: zip.trim(),
+        available: isAvailable,
+        locationInfo: {
+          city: isAvailable ? "Beverly Hills" : "Manhattan", // Mock data
+          state: isAvailable ? "CA" : "NY",
+          county: isAvailable ? "Los Angeles County" : "New York County"
+        },
+        pricing: isAvailable ? {
+          monthlyFee: 299,
+          setupFee: 99,
+          annualDiscount: 0.15
+        } : null,
+        waitlistCount: isAvailable ? null : Math.floor(Math.random() * 50) + 10
+      };
+      
+      setAvailabilityResult(result);
+      
     } catch (err) {
-      console.error("Analysis error:", err); stopProgressSimulation(overallProgress); setError(err.response?.data?.detail || err.message || "Failed to generate analysis. Please try again.");
-    } finally { setLoading(false); }
+      console.error("Availability check error:", err);
+      setError("Failed to check availability. Please try again.");
+    } finally { 
+      setLoading(false); 
+    }
   }
 
-  function onSubmitZip(e) { e.preventDefault(); runAnalysis(); }
+  function onSubmitZip(e) { 
+    e.preventDefault(); 
+    checkZipAvailability(); 
+  }
 
   const DetailLayout = ({ activeKey }) => (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex">
