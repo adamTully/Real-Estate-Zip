@@ -63,6 +63,7 @@ export default function ZipIntelApp() {
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isAuthenticated, assignTerritory } = useAuth();
 
   const [zip, setZip] = useState("");
   const [loading, setLoading] = useState(false);
