@@ -58,6 +58,7 @@ export default function ZipIntelApp() {
   const [analysisData, setAnalysisData] = useState(null);
   const [overallProgress, setOverallProgress] = useState(0);
   const [taskProgress, setTaskProgress] = useState({});
+  const [availabilityResult, setAvailabilityResult] = useState(null); // New state for availability
   const progressTimerRef = useRef(null);
 
   useEffect(() => { setTaskProgress(computeTaskProgress(overallProgress)); }, [overallProgress]);
