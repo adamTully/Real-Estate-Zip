@@ -150,7 +150,105 @@ export default function ZipIntelApp() {
     checkZipAvailability(); 
   }
 
-  const DetailLayout = ({ activeKey }) => (
+  const AvailableResult = ({ result }) => (
+    <Card className="border-2 border-green-200 bg-green-50">
+      <CardContent className="p-8 text-center">
+        <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle2 className="w-8 h-8 text-white" />
+        </div>
+        
+        <h2 className="text-2xl font-bold text-green-900 mb-2">
+          🎉 ZIP {result.zipCode} is Available!
+        </h2>
+        <p className="text-green-700 text-lg mb-6">
+          {result.locationInfo.city}, {result.locationInfo.state} • {result.locationInfo.county}
+        </p>
+        
+        <div className="bg-white rounded-xl p-6 mb-6 border border-green-200">
+          <h3 className="text-lg font-semibold text-neutral-900 mb-4">Exclusive Territory Pricing</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-neutral-600">Monthly License Fee:</span>
+              <span className="text-xl font-bold text-neutral-900">${result.pricing.monthlyFee}/mo</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-neutral-600">Setup Fee:</span>
+              <span className="font-semibold text-neutral-900">${result.pricing.setupFee}</span>
+            </div>
+            <div className="border-t pt-3">
+              <div className="flex justify-between items-center">
+                <span className="text-green-600 font-medium">Annual Plan (Save 15%):</span>
+                <span className="text-xl font-bold text-green-600">
+                  ${Math.round(result.pricing.monthlyFee * 12 * (1 - result.pricing.annualDiscount))}/year
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="space-y-3">
+          <Button className="w-full py-4 text-lg font-semibold bg-green-600 hover:bg-green-700">
+            <Sparkles className="w-5 h-5" />
+            Secure ZIP {result.zipCode} Now
+          </Button>
+          <Button variant="outline" className="w-full py-3" onClick={() => setAvailabilityResult(null)}>
+            Check Another ZIP
+          </Button>
+        </div>
+        
+        <p className="text-xs text-neutral-500 mt-4">
+          ⚡ Limited time: Reserve your territory with no commitment
+        </p>
+      </CardContent>
+    </Card>
+  );
+
+  const UnavailableResult = ({ result }) => (
+    <Card className="border-2 border-orange-200 bg-orange-50">
+      <CardContent className="p-8 text-center">
+        <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+          <AlertCircle className="w-8 h-8 text-white" />
+        </div>
+        
+        <h2 className="text-2xl font-bold text-orange-900 mb-2">
+          Sorry, ZIP {result.zipCode} is Taken
+        </h2>
+        <p className="text-orange-700 text-lg mb-6">
+          {result.locationInfo.city}, {result.locationInfo.state} is already licensed to another agent
+        </p>
+        
+        <div className="bg-white rounded-xl p-6 mb-6 border border-orange-200">
+          <h3 className="text-lg font-semibold text-neutral-900 mb-4">Join the Waitlist</h3>
+          <p className="text-neutral-600 mb-4">
+            Get notified if this territory becomes available. You'll be #{result.waitlistCount} in line.
+          </p>
+          
+          <div className="space-y-3">
+            <Input 
+              placeholder="Enter your email address" 
+              type="email"
+              className="text-center"
+            />
+            <Button className="w-full bg-orange-600 hover:bg-orange-700">
+              <Mail className="w-4 h-4" />
+              Join Waitlist for ZIP {result.zipCode}
+            </Button>
+          </div>
+        </div>
+        
+        <div className="space-y-3">
+          <Button variant="outline" className="w-full py-3" onClick={() => setAvailabilityResult(null)}>
+            <MapPin className="w-4 h-4" />
+            Check Different ZIP Code
+          </Button>
+        </div>
+        
+        <p className="text-xs text-neutral-500 mt-4">
+          💡 Tip: Try nearby ZIP codes - they might be available!
+        </p>
+      </CardContent>
+    </Card>
+  );
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex">
       <IntelligenceSidebar
         analysisData={analysisData}
