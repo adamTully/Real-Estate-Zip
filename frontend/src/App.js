@@ -373,58 +373,94 @@ function AppContent() {
     </div>
   );
 
-  const AvailableResult = ({ result }) => (
-    <Card className="border-2 border-green-200 bg-green-50">
-      <CardContent className="p-8 text-center">
-        <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle2 className="w-8 h-8 text-white" />
-        </div>
-        
-        <h2 className="text-2xl font-bold text-green-900 mb-2">
-          🎉 ZIP {result.zipCode} is Available!
-        </h2>
-        <p className="text-green-700 text-lg mb-6">
-          {result.locationInfo.city}, {result.locationInfo.state} • {result.locationInfo.county}
-        </p>
-        
-        <div className="bg-white rounded-xl p-6 mb-6 border border-green-200">
-          <h3 className="text-lg font-semibold text-neutral-900 mb-4">Exclusive Territory Pricing</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-neutral-600">Monthly License Fee:</span>
-              <span className="text-xl font-bold text-neutral-900">${result.pricing.monthlyFee}/mo</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-neutral-600">Setup Fee:</span>
-              <span className="font-semibold text-neutral-900">${result.pricing.setupFee}</span>
-            </div>
-            <div className="border-t pt-3">
+  const AvailableResult = ({ result }) => {
+    const [showRegistration, setShowRegistration] = useState(false);
+
+    const handleSecureTerritory = () => {
+      if (isAuthenticated) {
+        // User is already logged in, assign territory
+        assignTerritory(result.zipCode);
+        setSuccess(`ZIP ${result.zipCode} has been added to your territories!`);
+        navigate('/dashboard');
+      } else {
+        // Show registration form
+        setShowRegistration(true);
+      }
+    };
+
+    const handleRegistrationSuccess = (userData, zipCode) => {
+      // User successfully registered, assign territory
+      assignTerritory(zipCode);
+      setSuccess(`Welcome ${userData.first_name}! ZIP ${zipCode} is now yours!`);
+      navigate('/dashboard');
+    };
+
+    if (showRegistration) {
+      return (
+        <RegistrationForm
+          zipCode={result.zipCode}
+          onSuccess={handleRegistrationSuccess}
+          onCancel={() => setShowRegistration(false)}
+        />
+      );
+    }
+
+    return (
+      <Card className="border-2 border-green-200 bg-green-50">
+        <CardContent className="p-8 text-center">
+          <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-8 h-8 text-white" />
+          </div>
+          
+          <h2 className="text-2xl font-bold text-green-900 mb-2">
+            🎉 ZIP {result.zipCode} is Available!
+          </h2>
+          <p className="text-green-700 text-lg mb-6">
+            {result.locationInfo.city}, {result.locationInfo.state} • {result.locationInfo.county}
+          </p>
+          
+          <div className="bg-white rounded-xl p-6 mb-6 border border-green-200">
+            <h3 className="text-lg font-semibold text-neutral-900 mb-4">Exclusive Territory Pricing</h3>
+            <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-green-600 font-medium">Annual Plan (Save 15%):</span>
-                <span className="text-xl font-bold text-green-600">
-                  ${Math.round(result.pricing.monthlyFee * 12 * (1 - result.pricing.annualDiscount))}/year
-                </span>
+                <span className="text-neutral-600">Monthly License Fee:</span>
+                <span className="text-xl font-bold text-neutral-900">${result.pricing.monthlyFee}/mo</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-neutral-600">Setup Fee:</span>
+                <span className="font-semibold text-neutral-900">${result.pricing.setupFee}</span>
+              </div>
+              <div className="border-t pt-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-green-600 font-medium">Annual Plan (Save 15%):</span>
+                  <span className="text-xl font-bold text-green-600">
+                    ${Math.round(result.pricing.monthlyFee * 12 * (1 - result.pricing.annualDiscount))}/year
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <div className="space-y-3">
-          <Button className="w-full py-4 text-lg font-semibold bg-green-600 hover:bg-green-700">
-            <Sparkles className="w-5 h-5" />
-            Secure ZIP {result.zipCode} Now
-          </Button>
-          <Button variant="outline" className="w-full py-3" onClick={() => setAvailabilityResult(null)}>
-            Check Another ZIP
-          </Button>
-        </div>
-        
-        <p className="text-xs text-neutral-500 mt-4">
-          ⚡ Limited time: Reserve your territory with no commitment
-        </p>
-      </CardContent>
-    </Card>
-  );
+          
+          <div className="space-y-3">
+            <Button 
+              className="w-full py-4 text-lg font-semibold bg-green-600 hover:bg-green-700"
+              onClick={handleSecureTerritory}
+            >
+              <Sparkles className="w-5 h-5" />
+              {isAuthenticated ? `Add ZIP ${result.zipCode} to My Territories` : `Secure ZIP ${result.zipCode} Now`}
+            </Button>
+            <Button variant="outline" className="w-full py-3" onClick={() => setAvailabilityResult(null)}>
+              Check Another ZIP
+            </Button>
+          </div>
+          
+          <p className="text-xs text-neutral-500 mt-4">
+            ⚡ Limited time: Reserve your territory with no commitment
+          </p>
+        </CardContent>
+      </Card>
+    );
+  };
 
   const UnavailableResult = ({ result }) => (
     <Card className="border-2 border-orange-200 bg-orange-50">
