@@ -530,7 +530,293 @@ export default function ZipIntelApp() {
     </div>
   );
 
-  const HomePage = (
+  const LandingPage = (
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100">
+      {/* Navigation Header */}
+      <nav className="bg-white shadow-sm border-b border-neutral-200">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="text-xl font-bold text-neutral-900">ZIP Territory Pro</div>
+          <div className="flex gap-4">
+            <Button variant="ghost" onClick={() => navigate('/check-availability')}>
+              Check ZIP Availability
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/dashboard')}>
+              Dashboard
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-5xl md:text-6xl font-bold text-neutral-900 mb-6 leading-tight">
+            👉 Lock Down Your <span className="text-blue-600">ZIP Code</span> Before Your Competition Does.
+          </h1>
+          <p className="text-xl md:text-2xl text-neutral-600 mb-8 leading-relaxed">
+            Get an exclusive, done-for-you marketing toolkit tailored to your local market. <br />
+            <span className="font-semibold">One agent per ZIP. Period.</span>
+          </p>
+          <Button 
+            className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold"
+            onClick={() => navigate('/check-availability')}
+          >
+            ✅ Check ZIP Code Availability
+          </Button>
+        </div>
+      </section>
+
+      {/* Problem Section */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl font-bold text-neutral-900 mb-8 text-center">
+            Stop Wasting Money Competing for the Same Leads.
+          </h2>
+          <div className="text-lg text-neutral-700 space-y-4 mb-8">
+            <p>Real estate is crowded. Zillow, Realtor.com, and agencies sell the same leads to multiple agents.</p>
+            <p>You work hard, spend thousands, and still fight for attention.</p>
+            <p><strong>Meanwhile…</strong> your prospects are drowning in generic marketing that looks the same from every agent.</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-6 h-6 text-red-500 mt-1" />
+                <span className="text-neutral-700">Paying $25–$90 per lead with no exclusivity</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-6 h-6 text-red-500 mt-1" />
+                <span className="text-neutral-700">Hours lost trying to write blogs, emails, and social posts</span>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-6 h-6 text-red-500 mt-1" />
+                <span className="text-neutral-700">Competitors copying the same strategies</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-6 h-6 text-red-500 mt-1" />
+                <span className="text-neutral-700">Falling behind agents who dominate local branding</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Solution Section */}
+      <section className="py-16 px-6">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl font-bold text-neutral-900 mb-8 text-center">
+            Your Own Marketing Engine. Built for Your ZIP. <span className="text-green-600">100% Exclusive.</span>
+          </h2>
+          <p className="text-lg text-neutral-700 mb-8">Our toolkits give you everything you need to own your local market:</p>
+          
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-blue-600 font-bold text-sm">1</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-neutral-900">Lead Magnet PDF Seller Guide</h3>
+                  <p className="text-neutral-600">Tailored to your ZIP code</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-blue-600 font-bold text-sm">10</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-neutral-900">SEO-Optimized Blog Posts</h3>
+                  <p className="text-neutral-600">Based on trending local searches</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-blue-600 font-bold text-sm">1</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-neutral-900">Area Market Analysis</h3>
+                  <p className="text-neutral-600">Updated to keep you current</p>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-blue-600 font-bold text-sm">1</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-neutral-900">Lead Generation Strategy</h3>
+                  <p className="text-neutral-600">Neighborhood-specific with social & conversation starters</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-blue-600 font-bold text-sm">8</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-neutral-900">Weekly Email Templates</h3>
+                  <p className="text-neutral-600">For nurturing your list</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-6 rounded-xl border-l-4 border-l-orange-400 mb-8">
+            <p className="text-lg font-semibold text-orange-900 mb-2">👉 And here's the kicker:</p>
+            <p className="text-orange-800">Only one agent per ZIP code can license it. That means no competitor in your territory gets the same content.</p>
+          </div>
+          
+          <div className="text-center">
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold"
+              onClick={() => navigate('/check-availability')}
+            >
+              🚀 Claim Your ZIP Code Now
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl font-bold text-neutral-900 mb-8 text-center">
+            What Happens When You're the <span className="text-green-600">Only Agent</span> with This Content?
+          </h2>
+          
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <CheckCircle2 className="w-6 h-6 text-green-600 mt-1" />
+                <div>
+                  <h3 className="font-semibold text-neutral-900">You're seen as the trusted expert in your ZIP</h3>
+                  <p className="text-neutral-600">Build authority and recognition in your local market</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <CheckCircle2 className="w-6 h-6 text-green-600 mt-1" />
+                <div>
+                  <h3 className="font-semibold text-neutral-900">Weekly presence with content they care about</h3>
+                  <p className="text-neutral-600">Stay top-of-mind with valuable, local information</p>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <CheckCircle2 className="w-6 h-6 text-green-600 mt-1" />
+                <div>
+                  <h3 className="font-semibold text-neutral-900">Stop burning time writing and guessing</h3>
+                  <p className="text-neutral-600">Done-for-you content that actually works</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <CheckCircle2 className="w-6 h-6 text-green-600 mt-1" />
+                <div>
+                  <h3 className="font-semibold text-neutral-900">Build a brand that attracts leads</h3>
+                  <p className="text-neutral-600">Instead of chasing leads, become the obvious choice</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-blue-50 p-6 rounded-xl">
+            <h3 className="font-semibold text-blue-900 mb-4">Key Value Points:</h3>
+            <div className="grid md:grid-cols-2 gap-4 text-blue-800">
+              <div>• Saves 20+ hours/month</div>
+              <div>• Exclusive license = you stand out while others blend in</div>
+              <div>• Content built around real Google/YouTube search data</div>
+              <div>• Priced to compete with SEO retainers — but more effective</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof Section */}
+      <section className="py-16 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold text-neutral-900 mb-8">
+            Agents Are Bombarded with Marketing Pitches… <span className="text-blue-600">This Is Different.</span>
+          </h2>
+          <Card className="p-8 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200">
+            <p className="text-lg text-neutral-700 italic mb-4">
+              "We're trying to build brands, and the best way to do that is to constantly be in front of potential clients' faces with valuable information. I do see the value."
+            </p>
+            <p className="font-semibold text-blue-900">– Local Realtor, Smyrna, GA</p>
+          </Card>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold text-neutral-900 mb-8">
+            One Territory. One Agent. <span className="text-green-600">One Price.</span>
+          </h2>
+          <div className="text-lg text-neutral-700 space-y-4 mb-8">
+            <p>Typical SEO agencies charge <strong>$1,000–$2,500 per month</strong>.</p>
+            <p>Google Ads leads cost <strong>$25–$90 each</strong> — and your competitors buy the same ones.</p>
+          </div>
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-8 rounded-xl border-2 border-green-200 mb-8">
+            <p className="text-xl font-semibold text-neutral-900 mb-2">Our exclusive ZIP toolkit is priced in the same range, but with one huge difference:</p>
+            <p className="text-xl text-green-700 font-bold">👉 You're the only agent in your ZIP who gets it.</p>
+          </div>
+          <Button 
+            className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold"
+            onClick={() => navigate('/check-availability')}
+          >
+            🔒 Check If Your ZIP Is Available
+          </Button>
+        </div>
+      </section>
+
+      {/* Urgency Section */}
+      <section className="py-16 px-6 bg-gradient-to-r from-red-50 to-orange-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold text-neutral-900 mb-6">
+            Once a ZIP Is Gone… <span className="text-red-600">It's Gone.</span>
+          </h2>
+          <div className="text-lg text-neutral-700 space-y-4 mb-8">
+            <p>We only allow <strong>one agent per ZIP code</strong>.</p>
+            <p>If your competitor locks it first, you'll have to wait.</p>
+            <p className="font-semibold">Don't miss the chance to own your market.</p>
+          </div>
+          <Button 
+            className="bg-red-600 hover:bg-red-700 text-white px-12 py-5 text-xl font-bold"
+            onClick={() => navigate('/check-availability')}
+          >
+            🔥 Claim Your ZIP Code Now
+          </Button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-neutral-900 text-white py-12 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h3 className="font-semibold mb-4">How It Works</h3>
+              <p className="text-neutral-300 text-sm">Check availability → Secure your ZIP → Get your marketing toolkit → Dominate your local market</p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Exclusivity Guarantee</h3>
+              <p className="text-neutral-300 text-sm">One agent per ZIP code. 6-month license terms. Full territorial protection.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Support</h3>
+              <p className="text-neutral-300 text-sm">Questions? Contact our team for assistance with your marketing toolkit.</p>
+            </div>
+          </div>
+          <div className="border-t border-neutral-700 pt-8 text-center text-neutral-400 text-sm">
+            <p>&copy; 2025 ZIP Territory Pro. All rights reserved. | Privacy & Terms</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+
+  const ZipAvailabilityPage = (
     <div className="mx-auto max-w-2xl px-6 py-20">
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
