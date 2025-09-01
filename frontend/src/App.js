@@ -53,6 +53,14 @@ const TASK_PLAN = [
 function computeTaskProgress(overall) { const progress = {}; TASK_PLAN.forEach((t) => { const [start, end] = t.range; let pct = 0; if (overall >= end) pct = 100; else if (overall <= start) pct = 0; else pct = Math.round(((overall - start) / (end - start)) * 100); const status = pct === 0 ? "pending" : pct === 100 ? "done" : "running"; progress[t.id] = { percent: Math.max(0, Math.min(100, pct)), status, title: t.title }; }); return progress; }
 
 export default function ZipIntelApp() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+
+function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
 
