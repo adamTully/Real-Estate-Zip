@@ -31,7 +31,7 @@ class ZipIntelAPITester:
             success = response.status_code == 200
             if success:
                 data = response.json()
-                expected_message = "ZIP Intel Generator API v2.0"
+                expected_message = "ZIP Intel Generator API v2.0 (buyer+seo+strategy+assets)"
                 success = data.get("message") == expected_message
                 details = f"Got message: {data.get('message')}" if not success else ""
             else:
