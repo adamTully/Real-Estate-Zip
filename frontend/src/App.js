@@ -60,6 +60,15 @@ export default function ZipIntelApp() {
   const [overallProgress, setOverallProgress] = useState(0);
   const [taskProgress, setTaskProgress] = useState({});
   const [availabilityResult, setAvailabilityResult] = useState(null); // New state for availability
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false); // Modal for ZIP analysis
+  const [showPreviousZipsModal, setShowPreviousZipsModal] = useState(false); // Modal for previous ZIPs
+  const [analysisZip, setAnalysisZip] = useState(""); // Separate ZIP for analysis modal
+  const [analysisLoading, setAnalysisLoading] = useState(false); // Loading for analysis
+  const [previousZips, setPreviousZips] = useState(() => {
+    // Load previous ZIPs from localStorage
+    const stored = localStorage.getItem('zipintel:previous_zips');
+    return stored ? JSON.parse(stored) : [];
+  });
   const progressTimerRef = useRef(null);
 
   useEffect(() => { setTaskProgress(computeTaskProgress(overallProgress)); }, [overallProgress]);
