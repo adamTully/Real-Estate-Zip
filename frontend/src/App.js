@@ -593,13 +593,33 @@ function AppContent() {
       <nav className="bg-white shadow-sm border-b border-neutral-200">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="text-xl font-bold text-neutral-900">ZIP Territory Pro</div>
-          <div className="flex gap-4">
-            <Button variant="ghost" onClick={() => navigate('/check-availability')}>
-              Check ZIP Availability
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/dashboard')}>
-              Dashboard
-            </Button>
+          <div className="flex gap-4 items-center">
+            {isAuthenticated ? (
+              <>
+                <span className="text-sm text-neutral-600">
+                  Welcome, {user?.first_name}
+                </span>
+                <Button variant="outline" onClick={() => navigate('/dashboard')}>
+                  My Dashboard
+                </Button>
+                <Button variant="ghost" onClick={() => {
+                  const { logout } = useAuth();
+                  logout();
+                  navigate('/');
+                }}>
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" onClick={() => navigate('/check-availability')}>
+                  Check ZIP Availability
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/login')}>
+                  Login
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </nav>
