@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-## user_problem_statement: "Frontend needs to render real LLM narrative text (Markdown) instead of simulated structures for detail pages. Integrate markdown renderer on Buyer Migration, SEO/YouTube, Content Strategy, Market Research without breaking existing flows."
+## user_problem_statement: "Test the new authentication system I just implemented: Backend Authentication Endpoints to Test: 1. POST /api/auth/register - User registration, 2. POST /api/auth/login - User login, 3. GET /api/auth/me - Get current user profile. Expected Behavior: Register should return JWT token + user data, Login should return JWT token + user data, /auth/me should return user profile when authenticated, All endpoints should have proper error handling."
 
 ## backend:
   - task: "Real LLM integration via emergentintegrations (GPT-5)"
