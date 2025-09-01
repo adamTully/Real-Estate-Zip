@@ -238,6 +238,135 @@ export default function ZipIntelApp() {
     checkZipAvailability(); 
   }
 
+  const ZipAnalysisModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-neutral-900">ZIP Code Analysis</h2>
+          <button 
+            onClick={() => setShowAnalysisModal(false)}
+            className="text-neutral-400 hover:text-neutral-600"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <form onSubmit={onSubmitAnalysis} className="space-y-6">
+          <div>
+            <label htmlFor="analysis-zip" className="block text-sm font-medium text-neutral-700 mb-2">
+              Enter ZIP Code for Full Analysis
+            </label>
+            <Input 
+              id="analysis-zip" 
+              value={analysisZip} 
+              onChange={(e) => setAnalysisZip(e.target.value)} 
+              placeholder="Enter ZIP code (e.g., 90210)" 
+              error={!!error}
+            />
+          </div>
+          
+          {error && (<Alert variant="error">{error}</Alert>)}
+          
+          <div className="flex gap-3">
+            <Button 
+              type="submit" 
+              disabled={analysisLoading || !analysisZip.trim()} 
+              className="flex-1"
+            >
+              {analysisLoading ? (
+                <>
+                  <Loader2 className="animate-spin" size={18} />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="w-4 h-4" />
+                  Generate Analysis
+                </>
+              )}
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setShowAnalysisModal(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+  const PreviousZipsModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-neutral-900">Previous ZIP Codes</h2>
+          <button 
+            onClick={() => setShowPreviousZipsModal(false)}
+            className="text-neutral-400 hover:text-neutral-600"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        {previousZips.length === 0 ? (
+          <div className="text-center py-8">
+            <MapPin className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+            <p className="text-neutral-500">No previous ZIP codes analyzed yet.</p>
+            <Button 
+              className="mt-4" 
+              onClick={() => {
+                setShowPreviousZipsModal(false);
+                setShowAnalysisModal(true);
+              }}
+            >
+              <Wand2 className="w-4 h-4" />
+              Run Your First Analysis
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-neutral-600 mb-4">
+              Select a previously analyzed ZIP code to load its data:
+            </p>
+            
+            {previousZips.map((zipData, index) => (
+              <div 
+                key={index}
+                className="flex items-center justify-between p-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 cursor-pointer"
+                onClick={() => loadPreviousZip(zipData)}
+              >
+                <div>
+                  <div className="font-semibold text-neutral-900">ZIP {zipData.zip}</div>
+                  <div className="text-sm text-neutral-500">
+                    {zipData.location.city}, {zipData.location.state}
+                  </div>
+                </div>
+                <div className="text-xs text-neutral-400">
+                  {zipData.date}
+                </div>
+              </div>
+            ))}
+            
+            <Button 
+              variant="outline" 
+              className="w-full mt-4" 
+              onClick={() => setShowPreviousZipsModal(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   const AvailableResult = ({ result }) => (
     <Card className="border-2 border-green-200 bg-green-50">
       <CardContent className="p-8 text-center">
