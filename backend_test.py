@@ -255,23 +255,40 @@ class ZipIntelAPITester:
     def test_auth_register_duplicate_email(self):
         """Test user registration with duplicate email"""
         try:
+            # First register a user
+            timestamp = int(time.time())
+            email = f"duplicate{timestamp}@example.com"
             payload = {
-                "email": "test@example.com",  # Use same email as previous test
+                "email": email,
                 "password": "testpass123",
-                "first_name": "Jane",
-                "last_name": "Smith"
+                "first_name": "First",
+                "last_name": "User"
             }
             
-            response = requests.post(f"{self.api_url}/auth/register", json=payload, timeout=10)
+            # First registration should succeed
+            response1 = requests.post(f"{self.api_url}/auth/register", json=payload, timeout=10)
+            if response1.status_code != 200:
+                self.log_test("Auth Register - Duplicate Email", False, f"First registration failed: {response1.status_code}")
+                return False
+            
+            # Second registration with same email should fail
+            payload2 = {
+                "email": email,  # Same email
+                "password": "testpass123",
+                "first_name": "Second",
+                "last_name": "User"
+            }
+            
+            response2 = requests.post(f"{self.api_url}/auth/register", json=payload2, timeout=10)
             # Should return 400 for duplicate email
-            success = response.status_code == 400
+            success = response2.status_code == 400
             
             if success:
-                data = response.json()
+                data = response2.json()
                 success = "already registered" in data.get("detail", "").lower()
                 details = f"Correctly rejected duplicate email: {data.get('detail')}" if success else f"Unexpected error message: {data.get('detail')}"
             else:
-                details = f"Status: {response.status_code}, Expected: 400"
+                details = f"Status: {response2.status_code}, Expected: 400"
             
             self.log_test("Auth Register - Duplicate Email", success, details)
             return success
