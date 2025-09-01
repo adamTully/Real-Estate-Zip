@@ -546,7 +546,94 @@ async def _run_zip_job(zip_code: str):
             {"$set": {"state": "failed", "error": str(e), "updated_at": datetime.utcnow()}},
         )
 
-# Endpoints
+# Authentication Endpoints
+@api_router.post("/auth/register", response_model=TokenResponse)
+async def register_user(user_data: UserCreate):
+    # Check if user already exists
+    existing_user = await users_collection.find_one({"email": user_data.email})
+    if existing_user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+    
+    # Create new user
+    user_id = str(uuid.uuid4())
+    hashed_password = hash_password(user_data.password)
+    
+    new_user = {
+        "_id": user_id,
+        "email": user_data.email,
+        "password_hash": hashed_password,
+        "first_name": user_data.first_name,
+        "last_name": user_data.last_name,
+        "role": "agent",
+        "owned_territories": [],
+        "created_at": datetime.utcnow(),
+        "is_active": True
+    }
+    
+    await users_collection.insert_one(new_user)
+    
+    # Create access token
+    access_token = create_access_token({"user_id": user_id, "email": user_data.email})
+    
+    # Return user data and token
+    user_response = UserResponse(
+        id=user_id,
+        email=user_data.email,
+        first_name=user_data.first_name,
+        last_name=user_data.last_name,
+        role="agent",
+        owned_territories=[],
+        created_at=new_user["created_at"],
+        is_active=True
+    )
+    
+    return TokenResponse(access_token=access_token, token_type="bearer", user=user_response)
+
+@api_router.post("/auth/login", response_model=TokenResponse)
+async def login_user(login_data: UserLogin):
+    # Find user by email
+    user = await users_collection.find_one({"email": login_data.email})
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+    
+    # Verify password
+    if not verify_password(login_data.password, user["password_hash"]):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+    
+    if not user["is_active"]:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account is deactivated")
+    
+    # Create access token
+    access_token = create_access_token({"user_id": user["_id"], "email": user["email"]})
+    
+    # Return user data and token
+    user_response = UserResponse(
+        id=user["_id"],
+        email=user["email"],
+        first_name=user["first_name"],
+        last_name=user["last_name"],
+        role=user["role"],
+        owned_territories=user["owned_territories"],
+        created_at=user["created_at"],
+        is_active=user["is_active"]
+    )
+    
+    return TokenResponse(access_token=access_token, token_type="bearer", user=user_response)
+
+@api_router.get("/auth/me", response_model=UserResponse)
+async def get_current_user_profile(current_user: dict = Depends(get_current_user)):
+    return UserResponse(
+        id=current_user["_id"],
+        email=current_user["email"],
+        first_name=current_user["first_name"],
+        last_name=current_user["last_name"],
+        role=current_user["role"],
+        owned_territories=current_user["owned_territories"],
+        created_at=current_user["created_at"],
+        is_active=current_user["is_active"]
+    )
+
+# ZIP Analysis Endpoints
 @api_router.post("/zip-analysis", response_model=MarketIntelligence)
 async def analyze_zip_code(request: ZipAnalysisRequest, background_tasks: BackgroundTasks):
     try:
