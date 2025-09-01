@@ -572,6 +572,21 @@ function AppContent() {
     </div>
   );
 
+  const LoginPage = () => {
+    const handleLoginSuccess = (userData) => {
+      setSuccess(`Welcome back, ${userData.first_name}!`);
+      navigate('/dashboard');
+    };
+
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex items-center justify-center px-6">
+        <div className="max-w-md w-full">
+          <LoginForm onSuccess={handleLoginSuccess} />
+        </div>
+      </div>
+    );
+  };
+
   const LandingPage = (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100">
       {/* Navigation Header */}
