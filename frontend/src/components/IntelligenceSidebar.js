@@ -31,6 +31,23 @@ const IntelligenceSidebar = ({
           <SidebarNavItem icon={Sparkles} label="SEO & YouTube Trends" isActive={activeCategory === 'seo_youtube_trends'} onClick={() => onNavigate && onNavigate('detail', 'SEO & YouTube Trends', { key: 'seo_youtube_trends', data: analysisData?.seo_youtube_trends })} status={loading ? 'processing' : 'complete'} disabled={loading} />
           <SidebarNavItem icon={Wand2} label="Content Strategy" isActive={activeCategory === 'content_strategy'} onClick={() => onNavigate && onNavigate('detail', 'Content Strategy', { key: 'content_strategy', data: analysisData?.content_strategy })} status={loading ? 'processing' : 'complete'} disabled={loading} />
           <SidebarNavItem icon={Download} label="Content Assets" isActive={activeCategory === 'content_assets'} onClick={() => onNavigate && onNavigate('detail', 'Content Assets', { key: 'content_assets', data: analysisData?.content_assets })} status={loading ? 'processing' : 'complete'} disabled={loading} />
+          
+          {/* New Testing Section */}
+          <div className="pt-4 pb-2"><p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide px-3">Testing Tools</p></div>
+          <SidebarNavItem 
+            icon={Search} 
+            label="ZIP Code Analysis" 
+            isActive={false} 
+            onClick={() => onShowAnalysisModal && onShowAnalysisModal()} 
+            disabled={false} 
+          />
+          <SidebarNavItem 
+            icon={History} 
+            label="Previous ZIP Codes" 
+            isActive={false} 
+            onClick={() => onShowPreviousZipsModal && onShowPreviousZipsModal()} 
+            disabled={false} 
+          />
         </div>
       </div>
     </div>
