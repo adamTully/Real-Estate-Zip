@@ -390,6 +390,17 @@ export default function ZipIntelApp() {
         </CardContent>
       </Card>
       
+      {/* Show availability results */}
+      {availabilityResult && (
+        <div className="mt-8">
+          {availabilityResult.available ? (
+            <AvailableResult result={availabilityResult} />
+          ) : (
+            <UnavailableResult result={availabilityResult} />
+          )}
+        </div>
+      )}
+      
       <div className="text-center mt-8">
         <p className="text-sm text-neutral-500">
           Already have an account? <button className="text-blue-600 hover:text-blue-700 font-medium">Sign in here</button>
