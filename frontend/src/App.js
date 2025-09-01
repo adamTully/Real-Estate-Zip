@@ -111,6 +111,84 @@ export default function ZipIntelApp() {
   function startProgressSimulation() { setOverallProgress(0); if (progressTimerRef.current) clearInterval(progressTimerRef.current); progressTimerRef.current = setInterval(() => { setOverallProgress((prev) => { if (prev >= 99) return prev; return Math.min(99, prev + 3); }); }, 800); }
   function stopProgressSimulation(finalValue = 100) { if (progressTimerRef.current) clearInterval(progressTimerRef.current); progressTimerRef.current = null; setOverallProgress(finalValue); }
 
+  async function runZipAnalysis() {
+    if (!validateZip(analysisZip)) { 
+      setError("Please enter a valid ZIP code (e.g., 12345 or 12345-6789)"); 
+      return; 
+    }
+    
+    setAnalysisLoading(true); 
+    setError(""); 
+    setSuccess(""); 
+    setAnalysisData(null);
+    startProgressSimulation();
+    
+    try {
+      await axios.post(`${API}/zip-analysis/start`, { zip_code: analysisZip.trim() });
+      let done = false;
+      while (!done) {
+        await new Promise(res => setTimeout(res, 2000));
+        const { data: status } = await axios.get(`${API}/zip-analysis/status/${analysisZip.trim()}`);
+        setOverallProgress(status.overall_percent || 0);
+        if (status.state === 'done') { done = true; break; }
+        if (status.state === 'failed') { throw new Error(status.error || 'Analysis failed'); }
+      }
+      const response = await axios.get(`${API}/zip-analysis/${analysisZip.trim()}`);
+      setAnalysisData(response.data);
+      localStorage.setItem('zipintel:last_zip', analysisZip.trim());
+      
+      // Add to previous ZIPs list
+      const newPreviousZips = [...previousZips];
+      const existingIndex = newPreviousZips.findIndex(z => z.zip === analysisZip.trim());
+      if (existingIndex !== -1) {
+        newPreviousZips.splice(existingIndex, 1); // Remove existing
+      }
+      newPreviousZips.unshift({
+        zip: analysisZip.trim(),
+        location: response.data.buyer_migration?.location || { city: 'Unknown', state: 'Unknown' },
+        date: new Date().toLocaleDateString()
+      });
+      
+      // Keep only last 10 ZIPs
+      if (newPreviousZips.length > 10) {
+        newPreviousZips.splice(10);
+      }
+      
+      setPreviousZips(newPreviousZips);
+      localStorage.setItem('zipintel:previous_zips', JSON.stringify(newPreviousZips));
+      
+      stopProgressSimulation(100);
+      setSuccess("Analysis completed successfully!");
+      setShowAnalysisModal(false);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error("Analysis error:", err); 
+      stopProgressSimulation(overallProgress); 
+      setError(err.response?.data?.detail || err.message || "Failed to generate analysis. Please try again.");
+    } finally { 
+      setAnalysisLoading(false); 
+    }
+  }
+
+  function onSubmitAnalysis(e) { 
+    e.preventDefault(); 
+    runZipAnalysis(); 
+  }
+
+  function loadPreviousZip(zipData) {
+    (async () => {
+      try {
+        const response = await axios.get(`${API}/zip-analysis/${zipData.zip}`);
+        setAnalysisData(response.data);
+        localStorage.setItem('zipintel:last_zip', zipData.zip);
+        setShowPreviousZipsModal(false);
+        navigate('/dashboard');
+      } catch (e) {
+        setError('Failed to load previous analysis');
+      }
+    })();
+  }
+
   async function checkZipAvailability() {
     if (!validateZip(zip)) { 
       setError("Please enter a valid ZIP code (e.g., 12345 or 12345-6789)"); 
