@@ -250,6 +250,8 @@ export default function ZipIntelApp() {
       </CardContent>
     </Card>
   );
+
+  const DetailLayout = ({ activeKey }) => (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100 flex">
       <IntelligenceSidebar
         analysisData={analysisData}
