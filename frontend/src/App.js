@@ -189,21 +189,88 @@ export default function ZipIntelApp() {
   );
 
   const HomePage = (
-    <div className="mx-auto max-w-xl px-6 py-20">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-neutral-900 mb-4">ZIP Intel Generator</h1>
-        <p className="text-lg text-neutral-600">Generate full intelligence (Buyer Migration, SEO/YouTube, Content Strategy, Assets) for any ZIP code</p>
+    <div className="mx-auto max-w-2xl px-6 py-20">
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+          <MapPin className="w-4 h-4" />
+          Exclusive Territory Licensing
+        </div>
+        <h1 className="text-5xl font-bold text-neutral-900 mb-6">
+          Secure Your <span className="text-blue-600">Exclusive</span> ZIP Code Territory
+        </h1>
+        <p className="text-xl text-neutral-600 leading-relaxed mb-2">
+          Check if your desired ZIP code is available for exclusive real estate marketing rights
+        </p>
+        <p className="text-sm text-neutral-500">
+          Only one agent per ZIP code. Once it's taken, it's gone.
+        </p>
       </div>
-      <Card><CardContent>
-        <form onSubmit={onSubmitZip} className="space-y-4">
-          <div>
-            <label htmlFor="zip" className="block text-sm font-medium text-neutral-700 mb-2">ZIP Code</label>
-            <Input id="zip" value={zip} onChange={(e) => setZip(e.target.value)} placeholder="Enter ZIP code (e.g., 90210)" error={!!error} />
+      
+      <Card className="shadow-xl border-2 border-neutral-100">
+        <CardContent className="p-8">
+          <form onSubmit={onSubmitZip} className="space-y-6">
+            <div>
+              <label htmlFor="zip" className="block text-lg font-semibold text-neutral-900 mb-3">
+                Enter ZIP Code to Check Availability
+              </label>
+              <div className="relative">
+                <Input 
+                  id="zip" 
+                  value={zip} 
+                  onChange={(e) => setZip(e.target.value)} 
+                  placeholder="Enter ZIP code (e.g., 90210)" 
+                  error={!!error}
+                  className="text-lg py-4 pl-12 pr-4"
+                />
+                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
+              </div>
+            </div>
+            
+            {error && (<Alert variant="error">{error}</Alert>)}
+            
+            <Button 
+              type="submit" 
+              disabled={loading || !zip.trim()} 
+              className="w-full py-4 text-lg font-semibold"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin" size={20} />
+                  Checking Availability...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5" />
+                  Check ZIP Availability
+                </>
+              )}
+            </Button>
+          </form>
+          
+          <div className="mt-8 pt-6 border-t border-neutral-200">
+            <div className="flex items-center justify-center gap-8 text-sm text-neutral-600">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                Exclusive Rights
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                Market Intelligence
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                Lead Generation Tools
+              </div>
+            </div>
           </div>
-          {error && (<Alert variant="error">{error}</Alert>)}
-          <Button type="submit" disabled={loading || !zip.trim()} className="w-full">{loading ? (<><Loader2 className="animate-spin" size={18} />Analyzing...</>) : (<>Generate Intelligence</>)}</Button>
-        </form>
-      </CardContent></Card>
+        </CardContent>
+      </Card>
+      
+      <div className="text-center mt-8">
+        <p className="text-sm text-neutral-500">
+          Already have an account? <button className="text-blue-600 hover:text-blue-700 font-medium">Sign in here</button>
+        </p>
+      </div>
     </div>
   );
 
