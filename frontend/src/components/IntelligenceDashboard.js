@@ -57,11 +57,26 @@ const IntelligenceCard = ({ title, description, summary, onViewDetails, icon: Ic
   </Card>
 );
 
-const IntelligenceDashboard = ({ analysisData, onViewDetail, loading = false, taskProgress = {}, overallProgress = 0 }) => {
+const IntelligenceDashboard = ({ 
+  analysisData, 
+  onViewDetail, 
+  loading = false, 
+  taskProgress = {}, 
+  overallProgress = 0,
+  onShowAnalysisModal,
+  onShowPreviousZipsModal
+}) => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-neutral-100">
       <div className="flex">
-        <IntelligenceSidebar analysisData={analysisData} activeCategory={'overview'} loading={loading} onNavigate={() => {}} />
+        <IntelligenceSidebar 
+          analysisData={analysisData} 
+          activeCategory={'overview'} 
+          loading={loading} 
+          onNavigate={() => {}}
+          onShowAnalysisModal={onShowAnalysisModal}
+          onShowPreviousZipsModal={onShowPreviousZipsModal}
+        />
         <div className="flex-1 p-8 space-y-8">
           <div>
             <h1 className="text-3xl font-bold text-neutral-900 mb-2">Market Intelligence Dashboard</h1>
