@@ -18,6 +18,10 @@ import ContentStrategyDetail from "./components/ContentStrategyDetail";
 import ContentCreationDetail from "./components/ContentCreationDetail";
 import IntelligenceDashboard from "./components/IntelligenceDashboard";
 import IntelligenceSidebar from "./components/IntelligenceSidebar";
+import RegistrationForm from "./components/RegistrationForm";
+import LoginForm from "./components/LoginForm";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import axios from "axios";
 import "./App.css";
 
