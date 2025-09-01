@@ -161,7 +161,7 @@
 
 ## test_plan:
   current_focus:
-    - "Verify frontend can display Markdown narrative for all 4 detail pages"
+    - "JWT Authentication System Implementation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
