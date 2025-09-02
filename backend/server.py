@@ -75,6 +75,19 @@ class UserResponse(BaseModel):
     created_at: datetime
     is_active: bool
 
+class AdminUserResponse(BaseModel):
+    id: str
+    email: str
+    first_name: str
+    last_name: str
+    role: str
+    owned_territories: List[str]
+    created_at: datetime
+    is_active: bool
+    last_login: Optional[datetime] = None
+    total_territories: int
+    account_status: str
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
