@@ -136,6 +136,17 @@
         -working: true
         -agent: "testing"
         -comment: "COMPREHENSIVE AUTHENTICATION TESTING COMPLETED: ✅ POST /api/auth/register - User registration works correctly with valid data (email, password, first_name, last_name), returns JWT token + user data with proper structure (access_token, token_type, user object with id, email, first_name, last_name, role, owned_territories, created_at, is_active). ✅ Duplicate email registration properly rejected with HTTP 400 'Email already registered'. ✅ Weak password validation works - passwords under 6 characters rejected with HTTP 422 validation error. ✅ POST /api/auth/login - Login with correct credentials returns JWT token + user data, wrong password rejected with HTTP 401 'Invalid email or password', non-existent email rejected with HTTP 401. ✅ GET /api/auth/me - Valid JWT token returns complete user profile, invalid token rejected with HTTP 401 'Invalid token', missing authorization header rejected with HTTP 403. ✅ JWT token generation and validation working properly. ✅ Password hashing with bcrypt implemented correctly. ✅ All error handling scenarios work as expected. ✅ Fixed JWT library compatibility issue (jwt.JWTError -> jwt.InvalidTokenError). Authentication system is fully functional and production-ready."
+  - task: "Territory Assignment System Implementation"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "COMPREHENSIVE TERRITORY ASSIGNMENT TESTING COMPLETED: ✅ POST /api/users/assign-territory - Successfully assigns ZIP codes to authenticated users with proper JWT validation. Tested with ZIP '10001' and user 'territory1756780976@example.com'. Returns correct response format with message and zip_code fields. ✅ Duplicate territory assignment properly handled - returns 'Territory already assigned' message instead of error. ✅ GET /api/auth/me - User profile correctly shows owned_territories array populated with assigned ZIP codes. Verified user has ['10001'] in owned_territories after assignment. ✅ Territory data persistence verified - ZIP codes are properly saved to MongoDB users collection and persist across sessions. ✅ Database verification confirmed user 'Territory Test' with email containing 'territory1756780976' exists and has assigned territories. ✅ Admin dashboard functionality verified through database inspection - user shows 1+ territories instead of 0. ✅ Multiple territory assignment works - users can be assigned additional ZIP codes and all are stored in owned_territories array. ✅ JWT authentication properly protects territory assignment endpoint. Territory assignment system is fully functional and production-ready."
 
 ## frontend:
   - task: "Add Markdown renderer and wire to detail components"
