@@ -21,6 +21,7 @@ import IntelligenceSidebar from "./components/IntelligenceSidebar";
 import RegistrationForm from "./components/RegistrationForm";
 import LoginForm from "./components/LoginForm";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminDashboard from "./components/AdminDashboard";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import axios from "axios";
 import "./App.css";
