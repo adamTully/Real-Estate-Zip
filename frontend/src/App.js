@@ -603,6 +603,11 @@ function AppContent() {
                 <Button variant="outline" onClick={() => navigate('/dashboard')}>
                   My Dashboard
                 </Button>
+                {user?.role === 'super_admin' && (
+                  <Button variant="outline" onClick={() => navigate('/admin')}>
+                    Admin Panel
+                  </Button>
+                )}
                 <Button variant="ghost" onClick={() => {
                   logout();
                   navigate('/');
