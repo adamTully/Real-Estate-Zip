@@ -469,16 +469,16 @@ function AppContent() {
         </div>
         
         <h2 className="text-2xl font-bold text-orange-900 mb-2">
-          Sorry, ZIP {result.zipCode} is Taken
+          Sorry, ZIP {result.zip_code} is Taken
         </h2>
         <p className="text-orange-700 text-lg mb-6">
-          {result.locationInfo.city}, {result.locationInfo.state} is already licensed to another agent
+          {result.location_info.city}, {result.location_info.state} is already licensed to another agent
         </p>
         
         <div className="bg-white rounded-xl p-6 mb-6 border border-orange-200">
           <h3 className="text-lg font-semibold text-neutral-900 mb-4">Join the Waitlist</h3>
           <p className="text-neutral-600 mb-4">
-            Get notified if this territory becomes available. You'll be #{result.waitlistCount} in line.
+            Get notified if this territory becomes available. You'll be #{result.waitlist_count} in line.
           </p>
           
           <div className="space-y-3">
@@ -489,7 +489,7 @@ function AppContent() {
             />
             <Button className="w-full bg-orange-600 hover:bg-orange-700">
               <Mail className="w-4 h-4" />
-              Join Waitlist for ZIP {result.zipCode}
+              Join Waitlist for ZIP {result.zip_code}
             </Button>
           </div>
         </div>
