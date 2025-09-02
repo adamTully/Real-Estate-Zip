@@ -668,7 +668,15 @@ async def assign_territory_to_user(
     if not zip_code:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="ZIP code is required")
     
-    # Check if user already owns this territory
+    # **CRITICAL FIX**: Check if ZIP is already assigned to another user
+    existing_owner = await users_collection.find_one({"owned_territories": zip_code})
+    if existing_owner and existing_owner["_id"] != current_user["_id"]:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, 
+            detail=f"ZIP {zip_code} is already assigned to another user ({existing_owner['email']})"
+        )
+    
+    # Check if current user already owns this territory
     if zip_code in current_user["owned_territories"]:
         return {"message": "Territory already assigned", "zip_code": zip_code}
     
