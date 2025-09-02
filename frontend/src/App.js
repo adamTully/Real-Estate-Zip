@@ -604,7 +604,7 @@ function AppContent() {
             {isAuthenticated ? (
               <>
                 <span className="text-sm text-neutral-600">
-                  Welcome, {user?.first_name}
+                  Welcome, {user?.first_name} ({user?.role})
                 </span>
                 <Button variant="outline" onClick={() => navigate('/dashboard')}>
                   My Dashboard
