@@ -98,18 +98,32 @@ export const AuthProvider = ({ children }) => {
 
   const assignTerritory = async (zipCode) => {
     if (user && !user.owned_territories.includes(zipCode)) {
-      const updatedUser = {
-        ...user,
-        owned_territories: [...user.owned_territories, zipCode]
-      };
-      setUser(updatedUser);
-      
-      // Update localStorage to reflect the new ZIP
-      localStorage.setItem('zipintel:last_zip', zipCode);
-      
-      // Clear any previous analysis data so dashboard loads data for the new ZIP
-      localStorage.removeItem('zipintel:analysis_data');
+      try {
+        // Call backend to assign territory
+        await axios.post(`${API}/users/assign-territory`, {
+          zip_code: zipCode
+        });
+        
+        // Update local user state
+        const updatedUser = {
+          ...user,
+          owned_territories: [...user.owned_territories, zipCode]
+        };
+        setUser(updatedUser);
+        
+        // Update localStorage to reflect the new ZIP
+        localStorage.setItem('zipintel:last_zip', zipCode);
+        
+        // Clear any previous analysis data so dashboard loads data for the new ZIP
+        localStorage.removeItem('zipintel:analysis_data');
+        
+        return { success: true };
+      } catch (error) {
+        console.error('Error assigning territory:', error);
+        return { success: false, error: error.response?.data?.detail || 'Failed to assign territory' };
+      }
     }
+    return { success: true }; // Already assigned
   };
 
   const value = {
