@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-## user_problem_statement: "Test the new authentication system I just implemented: Backend Authentication Endpoints to Test: 1. POST /api/auth/register - User registration, 2. POST /api/auth/login - User login, 3. GET /api/auth/me - Get current user profile. Expected Behavior: Register should return JWT token + user data, Login should return JWT token + user data, /auth/me should return user profile when authenticated, All endpoints should have proper error handling."
+## user_problem_statement: "Test the territory assignment functionality I just implemented: Backend Endpoints to Test: 1. POST /api/users/assign-territory - Assign ZIP code to authenticated user, 2. GET /api/admin/users - Check if territories are being saved, 3. GET /api/auth/me - Check current user territories. Expected Behavior: Territory assignment should save ZIP code to database, User's owned_territories array should be updated, Admin dashboard should show user has 1 territory instead of 0. Test Data: ZIP Code: '10001', Look for user with email containing 'territory1756780976'."
 
 ## backend:
   - task: "Real LLM integration via emergentintegrations (GPT-5)"
