@@ -172,7 +172,7 @@
 
 ## test_plan:
   current_focus:
-    - "JWT Authentication System Implementation"
+    - "Territory Assignment System Implementation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
