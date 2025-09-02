@@ -389,10 +389,16 @@ function AppContent() {
       }
     };
 
-    const handleRegistrationSuccess = (userData, zipCode) => {
+    const handleRegistrationSuccess = async (userData, zipCode) => {
       // User successfully registered, assign territory
-      assignTerritory(zipCode);
-      setSuccess(`Welcome ${userData.first_name}! ZIP ${zipCode} is now yours!`);
+      const result = await assignTerritory(zipCode);
+      
+      if (result.success) {
+        setSuccess(`Welcome ${userData.first_name}! ZIP ${zipCode} is now yours!`);
+      } else {
+        setError(`Registration successful, but failed to assign territory: ${result.error}`);
+      }
+      
       navigate('/dashboard');
     };
 
