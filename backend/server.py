@@ -818,34 +818,36 @@ async def check_zip_availability(zip_data: dict):
         state = "Unknown" 
         county = "Unknown County"
         
-        # Common US state abbreviations
+        # Common US state abbreviations and full names
         us_states = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+        us_state_names = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
         
-        # Parse the geocoded address (format varies but usually: City, County, State, Country)
+        # Parse the geocoded address (format: ZIP, City, County, State, Country)
         for i, part in enumerate(address_parts):
             part = part.strip()
             
-            # Look for state (usually near the end)
-            if any(state_abbr in part for state_abbr in us_states):
+            # Look for state (abbreviation or full name)
+            if any(state_abbr in part for state_abbr in us_states) or any(state_name in part for state_name in us_state_names):
                 state = part
+                # Convert full state name to abbreviation for consistency
+                if part == 'Georgia':
+                    state = 'GA'
+                elif part == 'California':
+                    state = 'CA'
+                elif part == 'New York':
+                    state = 'NY'
+                elif part == 'Texas':
+                    state = 'TX'
+                elif part == 'Florida':
+                    state = 'FL'
+                # Add more as needed
+                    
                 # City is usually before state
-                if i > 0:
-                    city = address_parts[i-1].strip()
-                # County might be before city
-                if i > 1 and ('County' in address_parts[i-1] or 'Parish' in address_parts[i-1]):
-                    county = address_parts[i-1].strip()
-                elif i > 2 and ('County' in address_parts[i-2] or 'Parish' in address_parts[i-2]):
-                    county = address_parts[i-2].strip()
+                if i >= 2:  # Skip ZIP code (index 0)
+                    city = address_parts[1].strip()  # Usually index 1 is city
+                    if i >= 3 and ('County' in address_parts[2] or 'Parish' in address_parts[2]):
+                        county = address_parts[2].strip()
                 break
-        
-        # If state parsing failed, try alternative approach
-        if state == "Unknown" and len(address_parts) >= 2:
-            # Sometimes the format is different, try the second-to-last part
-            potential_state = address_parts[-2].strip()
-            if any(state_abbr in potential_state for state_abbr in us_states):
-                state = potential_state
-                if len(address_parts) >= 3:
-                    city = address_parts[-3].strip()
         
         print(f"Parsed location: city={city}, state={state}, county={county}")  # Debug log
         
