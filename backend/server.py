@@ -652,6 +652,28 @@ async def get_current_user_profile(current_user: dict = Depends(get_current_user
     )
 
 # Admin Endpoints
+@api_router.post("/users/assign-territory")
+async def assign_territory_to_user(
+    territory_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Assign a ZIP code territory to the current user"""
+    zip_code = territory_data.get("zip_code")
+    if not zip_code:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="ZIP code is required")
+    
+    # Check if user already owns this territory
+    if zip_code in current_user["owned_territories"]:
+        return {"message": "Territory already assigned", "zip_code": zip_code}
+    
+    # Add territory to user's owned_territories
+    await users_collection.update_one(
+        {"_id": current_user["_id"]},
+        {"$push": {"owned_territories": zip_code}}
+    )
+    
+    return {"message": f"ZIP {zip_code} assigned successfully", "zip_code": zip_code}
+
 @api_router.get("/admin/users", response_model=List[AdminUserResponse])
 async def get_all_users(admin_user: dict = Depends(get_admin_user)):
     """Get all users for admin dashboard"""
