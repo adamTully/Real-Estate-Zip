@@ -507,6 +507,133 @@ class ZipIntelAPITester:
             self.log_test("Auth Me - No Token", False, str(e))
             return False
     
+    def test_territory_assignment(self):
+        """Test territory assignment functionality"""
+        try:
+            # First create a test user with specific email pattern
+            timestamp = 1756780976  # Use the specific timestamp from the request
+            test_email = f"territory{timestamp}@example.com"
+            
+            # Register the test user
+            register_payload = {
+                "email": test_email,
+                "password": "testpass123",
+                "first_name": "Territory",
+                "last_name": "Test"
+            }
+            
+            register_response = requests.post(f"{self.api_url}/auth/register", json=register_payload, timeout=10)
+            if register_response.status_code != 200:
+                self.log_test("Territory Assignment - User Registration", False, f"Failed to register test user: {register_response.status_code}")
+                return False
+            
+            # Get the JWT token
+            register_data = register_response.json()
+            user_token = register_data["access_token"]
+            user_id = register_data["user"]["id"]
+            
+            # Test 1: Assign ZIP code "10001" to the user
+            headers = {"Authorization": f"Bearer {user_token}"}
+            territory_payload = {"zip_code": "10001"}
+            
+            assign_response = requests.post(
+                f"{self.api_url}/users/assign-territory", 
+                json=territory_payload, 
+                headers=headers, 
+                timeout=10
+            )
+            
+            success_assign = assign_response.status_code == 200
+            if success_assign:
+                assign_data = assign_response.json()
+                success_assign = assign_data.get("zip_code") == "10001"
+                assign_details = f"Territory assigned: {assign_data.get('message', 'No message')}" if success_assign else f"Unexpected response: {assign_data}"
+            else:
+                assign_details = f"Status: {assign_response.status_code}, Response: {assign_response.text[:200]}"
+            
+            self.log_test("Territory Assignment - Assign ZIP 10001", success_assign, assign_details)
+            
+            # Test 2: Verify territory appears in user's profile via /auth/me
+            me_response = requests.get(f"{self.api_url}/auth/me", headers=headers, timeout=10)
+            success_me = me_response.status_code == 200
+            
+            if success_me:
+                me_data = me_response.json()
+                owned_territories = me_data.get("owned_territories", [])
+                success_me = "10001" in owned_territories
+                me_details = f"User territories: {owned_territories}" if success_me else f"ZIP 10001 not found in territories: {owned_territories}"
+            else:
+                me_details = f"Status: {me_response.status_code}"
+            
+            self.log_test("Territory Assignment - Verify in User Profile", success_me, me_details)
+            
+            # Test 3: Create super admin to test admin endpoint
+            admin_payload = {
+                "email": f"admin{timestamp}@example.com",
+                "password": "adminpass123",
+                "first_name": "Super",
+                "last_name": "Admin"
+            }
+            
+            admin_response = requests.post(f"{self.api_url}/admin/create-super-admin", json=admin_payload, timeout=10)
+            if admin_response.status_code != 200:
+                self.log_test("Territory Assignment - Admin Creation", False, f"Failed to create admin: {admin_response.status_code}")
+                return False
+            
+            admin_data = admin_response.json()
+            admin_token = admin_data["access_token"]
+            
+            # Test 4: Use admin token to get all users and verify territory
+            admin_headers = {"Authorization": f"Bearer {admin_token}"}
+            users_response = requests.get(f"{self.api_url}/admin/users", headers=admin_headers, timeout=10)
+            
+            success_admin = users_response.status_code == 200
+            if success_admin:
+                users_data = users_response.json()
+                # Find the test user
+                test_user = None
+                for user in users_data:
+                    if "territory1756780976" in user.get("email", ""):
+                        test_user = user
+                        break
+                
+                if test_user:
+                    territories_count = test_user.get("total_territories", 0)
+                    owned_territories = test_user.get("owned_territories", [])
+                    success_admin = territories_count == 1 and "10001" in owned_territories
+                    admin_details = f"Found user with email containing 'territory1756780976': {test_user['email']}, territories: {owned_territories}, count: {territories_count}" if success_admin else f"User found but wrong territory data: territories={owned_territories}, count={territories_count}"
+                else:
+                    success_admin = False
+                    admin_details = f"User with email containing 'territory1756780976' not found in admin list. Available emails: {[u.get('email') for u in users_data[:5]]}"
+            else:
+                admin_details = f"Status: {users_response.status_code}"
+            
+            self.log_test("Territory Assignment - Admin Dashboard Verification", success_admin, admin_details)
+            
+            # Test 5: Test duplicate territory assignment
+            duplicate_response = requests.post(
+                f"{self.api_url}/users/assign-territory", 
+                json=territory_payload, 
+                headers=headers, 
+                timeout=10
+            )
+            
+            success_duplicate = duplicate_response.status_code == 200
+            if success_duplicate:
+                duplicate_data = duplicate_response.json()
+                success_duplicate = "already assigned" in duplicate_data.get("message", "").lower()
+                duplicate_details = f"Correctly handled duplicate assignment: {duplicate_data.get('message')}" if success_duplicate else f"Unexpected response for duplicate: {duplicate_data}"
+            else:
+                duplicate_details = f"Status: {duplicate_response.status_code}"
+            
+            self.log_test("Territory Assignment - Duplicate Assignment Handling", success_duplicate, duplicate_details)
+            
+            return success_assign and success_me and success_admin and success_duplicate
+            
+        except Exception as e:
+            self.log_test("Territory Assignment - General", False, str(e))
+            return False
+    
     def run_comprehensive_test(self):
         """Run all tests"""
         print("🚀 Starting ZIP Intel Generator API Tests")
