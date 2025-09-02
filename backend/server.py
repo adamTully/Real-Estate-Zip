@@ -789,8 +789,72 @@ async def create_super_admin(admin_data: UserCreate):
     
     return TokenResponse(access_token=access_token, token_type="bearer", user=user_response)
 
-# ZIP Analysis Endpoints
-@api_router.post("/zip-analysis", response_model=MarketIntelligence)
+@api_router.post("/zip-availability/check")
+async def check_zip_availability(zip_data: dict):
+    """Check if a ZIP code is available and get real location data"""
+    zip_code = zip_data.get("zip_code", "").strip()
+    
+    if not zip_code:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="ZIP code is required")
+    
+    # Validate ZIP format
+    if not re.match(r'^\d{5}(-\d{4})?$', zip_code):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid ZIP code format")
+    
+    try:
+        # Get real location data using geopy
+        geolocator = Nominatim(user_agent="zip-intel-generator")
+        location = geolocator.geocode(f"{zip_code}, USA")
+        
+        if not location:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ZIP code not found")
+        
+        # Parse location data
+        address_parts = location.address.split(', ')
+        
+        # Extract city, state, and county from the address
+        city = "Unknown"
+        state = "Unknown" 
+        county = "Unknown County"
+        
+        # Parse the geocoded address
+        for i, part in enumerate(address_parts):
+            if any(state_abbr in part for state_abbr in ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']):
+                state = part.strip()
+                if i >= 1:
+                    city = address_parts[i-1].strip()
+                if i >= 2 and 'County' in address_parts[i-1]:
+                    county = address_parts[i-1].strip()
+                break
+        
+        # Mock availability check (70% available for demo)
+        import random
+        random.seed(hash(zip_code))  # Consistent results for same ZIP
+        is_available = random.random() > 0.3
+        
+        result = {
+            "zip_code": zip_code,
+            "available": is_available,
+            "location_info": {
+                "city": city,
+                "state": state, 
+                "county": county,
+                "latitude": location.latitude,
+                "longitude": location.longitude
+            },
+            "pricing": {
+                "monthly_fee": 299,
+                "setup_fee": 99,
+                "annual_discount": 0.15
+            } if is_available else None,
+            "waitlist_count": random.randint(10, 60) if not is_available else None
+        }
+        
+        return result
+        
+    except Exception as e:
+        print(f"Geocoding error: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to lookup ZIP code location")
 async def analyze_zip_code(request: ZipAnalysisRequest, background_tasks: BackgroundTasks):
     try:
         zip_code = request.zip_code
