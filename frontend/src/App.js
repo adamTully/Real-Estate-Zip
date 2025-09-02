@@ -423,17 +423,17 @@ function AppContent() {
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-neutral-600">Monthly License Fee:</span>
-                <span className="text-xl font-bold text-neutral-900">${result.pricing.monthlyFee}/mo</span>
+                <span className="text-xl font-bold text-neutral-900">${result.pricing.monthly_fee}/mo</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-neutral-600">Setup Fee:</span>
-                <span className="font-semibold text-neutral-900">${result.pricing.setupFee}</span>
+                <span className="font-semibold text-neutral-900">${result.pricing.setup_fee}</span>
               </div>
               <div className="border-t pt-3">
                 <div className="flex justify-between items-center">
                   <span className="text-green-600 font-medium">Annual Plan (Save 15%):</span>
                   <span className="text-xl font-bold text-green-600">
-                    ${Math.round(result.pricing.monthlyFee * 12 * (1 - result.pricing.annualDiscount))}/year
+                    ${Math.round(result.pricing.monthly_fee * 12 * (1 - result.pricing.annual_discount))}/year
                   </span>
                 </div>
               </div>
