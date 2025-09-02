@@ -90,31 +90,34 @@ function AppContent() {
   useEffect(() => {
     const lastZip = localStorage.getItem('zipintel:last_zip');
     const onDetailRoute = ["/dashboard","/market-intelligence","/seo-youtube-trends","/content-strategy","/content-assets"].includes(location.pathname);
-    console.log('Hydration check:', { analysisData: !!analysisData, lastZip, onDetailRoute, pathname: location.pathname });
+    console.log('Hydration check:', { analysisData: !!analysisData, lastZip, onDetailRoute, pathname: location.pathname, userTerritories: user?.owned_territories });
     
-    if (!analysisData && lastZip && onDetailRoute) {
-      console.log('Attempting to hydrate data for ZIP:', lastZip);
-      console.log('API URL:', `${API}/zip-analysis/${lastZip}`);
-      (async () => {
-        try {
-          const response = await axios.get(`${API}/zip-analysis/${lastZip}`);
-          console.log('API Response Status:', response.status);
-          console.log('API Response Data Keys:', Object.keys(response.data || {}));
-          console.log('Successfully hydrated data for ZIP:', response.data?.zip_code);
-          setAnalysisData(response.data);
-        } catch (e) {
-          console.error('Failed to hydrate data:', e.message);
-          console.error('Error details:', e.response?.status, e.response?.statusText);
-        }
-      })();
-    } else if (!lastZip && onDetailRoute) {
-      console.log('No lastZip found, setting a default for testing');
-      localStorage.setItem('zipintel:last_zip', '90210');
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
+    if (!analysisData && onDetailRoute && user) {
+      // Priority 1: Use the user's first owned territory if they have one
+      const userZip = user.owned_territories && user.owned_territories.length > 0 ? user.owned_territories[0] : null;
+      // Priority 2: Use lastZip from localStorage
+      const zipToLoad = userZip || lastZip;
+      
+      if (zipToLoad) {
+        console.log('Attempting to hydrate data for ZIP:', zipToLoad, userZip ? '(from user territories)' : '(from localStorage)');
+        console.log('API URL:', `${API}/zip-analysis/${zipToLoad}`);
+        (async () => {
+          try {
+            const response = await axios.get(`${API}/zip-analysis/${zipToLoad}`);
+            console.log('API Response Status:', response.status);
+            console.log('API Response Data Keys:', Object.keys(response.data || {}));
+            console.log('Successfully hydrated data for ZIP:', response.data?.zip_code);
+            setAnalysisData(response.data);
+            // Update localStorage to match loaded data
+            localStorage.setItem('zipintel:last_zip', zipToLoad);
+          } catch (e) {
+            console.error('Failed to hydrate data:', e.message);
+            console.error('Error details:', e.response?.status, e.response?.statusText);
+          }
+        })();
+      }
     }
-  }, [location.pathname, analysisData]);
+  }, [location.pathname, analysisData, user]);
 
   function validateZip(z) { return /^\d{5}(-\d{4})?$/.test(z.trim()); }
 
