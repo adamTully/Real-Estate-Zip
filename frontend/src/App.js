@@ -372,8 +372,8 @@ function AppContent() {
     const handleSecureTerritory = () => {
       if (isAuthenticated) {
         // User is already logged in, assign territory
-        assignTerritory(result.zipCode);
-        setSuccess(`ZIP ${result.zipCode} has been added to your territories!`);
+        assignTerritory(result.zip_code);
+        setSuccess(`ZIP ${result.zip_code} has been added to your territories!`);
         navigate('/dashboard');
       } else {
         // Show registration form
@@ -397,7 +397,7 @@ function AppContent() {
     if (showRegistration) {
       return (
         <RegistrationForm
-          zipCode={result.zipCode}
+          zipCode={result.zip_code}
           onSuccess={handleRegistrationSuccess}
           onCancel={() => setShowRegistration(false)}
         />
