@@ -96,13 +96,19 @@ export const AuthProvider = ({ children }) => {
     delete axios.defaults.headers.common['Authorization'];
   };
 
-  const assignTerritory = (zipCode) => {
+  const assignTerritory = async (zipCode) => {
     if (user && !user.owned_territories.includes(zipCode)) {
       const updatedUser = {
         ...user,
         owned_territories: [...user.owned_territories, zipCode]
       };
       setUser(updatedUser);
+      
+      // Update localStorage to reflect the new ZIP
+      localStorage.setItem('zipintel:last_zip', zipCode);
+      
+      // Clear any previous analysis data so dashboard loads data for the new ZIP
+      localStorage.removeItem('zipintel:analysis_data');
     }
   };
 
