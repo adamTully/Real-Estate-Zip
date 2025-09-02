@@ -1011,6 +1011,11 @@ function AppContent() {
         <Route path="/" element={LandingPage} />
         <Route path="/check-availability" element={ZipAvailabilityPage} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <IntelligenceDashboard
