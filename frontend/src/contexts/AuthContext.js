@@ -14,7 +14,11 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('auth_token'));
+  const [token, setToken] = useState(() => {
+    // Initialize token from localStorage on app start
+    const storedToken = localStorage.getItem('auth_token');
+    return storedToken;
+  });
 
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
   const API = `${BACKEND_URL}/api`;
@@ -41,13 +45,14 @@ export const AuthProvider = ({ children }) => {
           // Token might be expired, remove it
           localStorage.removeItem('auth_token');
           setToken(null);
+          setUser(null);
         }
       }
       setLoading(false);
     };
 
     checkAuth();
-  }, [API]);
+  }, [API]); // Remove token from dependency to prevent loops
 
   const login = async (email, password) => {
     try {
