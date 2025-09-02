@@ -851,10 +851,17 @@ async def check_zip_availability(zip_data: dict):
         
         print(f"Parsed location: city={city}, state={state}, county={county}")  # Debug log
         
-        # Mock availability check (70% available for demo)
-        import random
-        random.seed(hash(zip_code))  # Consistent results for same ZIP
-        is_available = random.random() > 0.3
+        # **CRITICAL FIX**: Check if ZIP is actually taken by checking user database
+        user_with_zip = await users_collection.find_one({"owned_territories": zip_code})
+        is_available = user_with_zip is None  # Available if no user owns it
+        
+        # Get waitlist count if ZIP is taken
+        waitlist_count = None
+        if not is_available:
+            # Count how many people might be on waitlist (mock for now)
+            import random
+            random.seed(hash(zip_code))
+            waitlist_count = random.randint(5, 30)
         
         result = {
             "zip_code": zip_code,
@@ -871,7 +878,8 @@ async def check_zip_availability(zip_data: dict):
                 "setup_fee": 99,
                 "annual_discount": 0.15
             } if is_available else None,
-            "waitlist_count": random.randint(10, 60) if not is_available else None
+            "waitlist_count": waitlist_count,
+            "assigned_to": user_with_zip["email"] if user_with_zip else None  # Debug info
         }
         
         return result
