@@ -749,7 +749,62 @@ async def toggle_user_status(user_id: str, admin_user: dict = Depends(get_admin_
     return {"message": f"User status updated to {'Active' if new_status else 'Inactive'}"}
 
 # Create super admin endpoint (for initial setup)
-@api_router.post("/admin/create-super-admin")
+@api_router.post("/admin/cleanup-duplicate-territories")
+async def cleanup_duplicate_territories(admin_user: dict = Depends(get_admin_user)):
+    """Clean up duplicate territory assignments"""
+    
+    # Find all users with territories
+    users_with_territories = await users_collection.find({"owned_territories": {"$ne": []}}).to_list(length=None)
+    
+    # Track ZIP assignments
+    zip_assignments = {}
+    duplicates_found = []
+    duplicates_removed = 0
+    
+    for user in users_with_territories:
+        for zip_code in user["owned_territories"]:
+            if zip_code in zip_assignments:
+                # Duplicate found!
+                duplicates_found.append({
+                    "zip_code": zip_code,
+                    "first_user": zip_assignments[zip_code]["email"],
+                    "duplicate_user": user["email"],
+                    "first_user_date": zip_assignments[zip_code]["created_at"],
+                    "duplicate_user_date": user["created_at"]
+                })
+                
+                # Remove from the later user (keep first registration)
+                if user["created_at"] > zip_assignments[zip_code]["created_at"]:
+                    # Remove from current user
+                    await users_collection.update_one(
+                        {"_id": user["_id"]},
+                        {"$pull": {"owned_territories": zip_code}}
+                    )
+                    duplicates_removed += 1
+                else:
+                    # Remove from previously tracked user
+                    await users_collection.update_one(
+                        {"_id": zip_assignments[zip_code]["user_id"]},
+                        {"$pull": {"owned_territories": zip_code}}
+                    )
+                    zip_assignments[zip_code] = {
+                        "user_id": user["_id"],
+                        "email": user["email"],
+                        "created_at": user["created_at"]
+                    }
+                    duplicates_removed += 1
+            else:
+                zip_assignments[zip_code] = {
+                    "user_id": user["_id"],
+                    "email": user["email"],
+                    "created_at": user["created_at"]
+                }
+    
+    return {
+        "message": f"Cleanup complete. Removed {duplicates_removed} duplicate assignments.",
+        "duplicates_found": duplicates_found,
+        "total_unique_territories": len(zip_assignments)
+    }
 async def create_super_admin(admin_data: UserCreate):
     """Create the first super admin account"""
     # Check if any super admin already exists
