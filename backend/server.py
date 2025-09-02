@@ -809,23 +809,45 @@ async def check_zip_availability(zip_data: dict):
         if not location:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ZIP code not found")
         
-        # Parse location data
+        # Parse location data from geocoded address
         address_parts = location.address.split(', ')
+        print(f"Geocoded address: {location.address}")  # Debug log
         
-        # Extract city, state, and county from the address
+        # Initialize defaults
         city = "Unknown"
         state = "Unknown" 
         county = "Unknown County"
         
-        # Parse the geocoded address
+        # Common US state abbreviations
+        us_states = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+        
+        # Parse the geocoded address (format varies but usually: City, County, State, Country)
         for i, part in enumerate(address_parts):
-            if any(state_abbr in part for state_abbr in ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']):
-                state = part.strip()
-                if i >= 1:
+            part = part.strip()
+            
+            # Look for state (usually near the end)
+            if any(state_abbr in part for state_abbr in us_states):
+                state = part
+                # City is usually before state
+                if i > 0:
                     city = address_parts[i-1].strip()
-                if i >= 2 and 'County' in address_parts[i-1]:
+                # County might be before city
+                if i > 1 and ('County' in address_parts[i-1] or 'Parish' in address_parts[i-1]):
                     county = address_parts[i-1].strip()
+                elif i > 2 and ('County' in address_parts[i-2] or 'Parish' in address_parts[i-2]):
+                    county = address_parts[i-2].strip()
                 break
+        
+        # If state parsing failed, try alternative approach
+        if state == "Unknown" and len(address_parts) >= 2:
+            # Sometimes the format is different, try the second-to-last part
+            potential_state = address_parts[-2].strip()
+            if any(state_abbr in potential_state for state_abbr in us_states):
+                state = potential_state
+                if len(address_parts) >= 3:
+                    city = address_parts[-3].strip()
+        
+        print(f"Parsed location: city={city}, state={state}, county={county}")  # Debug log
         
         # Mock availability check (70% available for demo)
         import random
