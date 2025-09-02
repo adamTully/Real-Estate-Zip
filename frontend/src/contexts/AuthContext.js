@@ -35,16 +35,19 @@ export const AuthProvider = ({ children }) => {
         try {
           const response = await axios.get(`${API}/auth/me`);
           setUser(response.data);
+          console.log('Auth check successful, user role:', response.data.role);
         } catch (error) {
           console.error('Auth check failed:', error);
-          logout();
+          // Token might be expired, remove it
+          localStorage.removeItem('auth_token');
+          setToken(null);
         }
       }
       setLoading(false);
     };
 
     checkAuth();
-  }, [token, API]);
+  }, [API]);
 
   const login = async (email, password) => {
     try {
