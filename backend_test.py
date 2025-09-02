@@ -665,6 +665,10 @@ class ZipIntelAPITester:
         self.test_auth_me_invalid_token()
         self.test_auth_me_no_token()
         
+        # Test territory assignment functionality
+        print("\n🗺️ Testing Territory Assignment...")
+        self.test_territory_assignment()
+        
         print("\n📋 Testing ZIP Code Validation...")
         self.test_invalid_zip_validation()
         
