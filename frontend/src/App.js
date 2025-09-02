@@ -213,31 +213,20 @@ function AppContent() {
     setAvailabilityResult(null);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call the real ZIP availability API
+      const response = await axios.post(`${API}/zip-availability/check`, {
+        zip_code: zip.trim()
+      });
       
-      const isAvailable = Math.random() > 0.3;
-      
-      const result = {
-        zipCode: zip.trim(),
-        available: isAvailable,
-        locationInfo: {
-          city: isAvailable ? "Beverly Hills" : "Manhattan",
-          state: isAvailable ? "CA" : "NY",
-          county: isAvailable ? "Los Angeles County" : "New York County"
-        },
-        pricing: isAvailable ? {
-          monthlyFee: 299,
-          setupFee: 99,
-          annualDiscount: 0.15
-        } : null,
-        waitlistCount: isAvailable ? null : Math.floor(Math.random() * 50) + 10
-      };
-      
-      setAvailabilityResult(result);
+      setAvailabilityResult(response.data);
       
     } catch (err) {
       console.error("Availability check error:", err);
-      setError("Failed to check availability. Please try again.");
+      if (err.response?.status === 404) {
+        setError("ZIP code not found. Please check that you entered a valid ZIP code.");
+      } else {
+        setError(err.response?.data?.detail || "Failed to check availability. Please try again.");
+      }
     } finally { 
       setLoading(false); 
     }
