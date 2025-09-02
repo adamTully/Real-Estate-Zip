@@ -651,6 +651,116 @@ async def get_current_user_profile(current_user: dict = Depends(get_current_user
         is_active=current_user["is_active"]
     )
 
+# Admin Endpoints
+@api_router.get("/admin/users", response_model=List[AdminUserResponse])
+async def get_all_users(admin_user: dict = Depends(get_admin_user)):
+    """Get all users for admin dashboard"""
+    users_cursor = users_collection.find({})
+    users = await users_cursor.to_list(length=None)
+    
+    admin_users = []
+    for user in users:
+        admin_users.append(AdminUserResponse(
+            id=user["_id"],
+            email=user["email"],
+            first_name=user["first_name"],
+            last_name=user["last_name"],
+            role=user["role"],
+            owned_territories=user["owned_territories"],
+            created_at=user["created_at"],
+            is_active=user["is_active"],
+            last_login=user.get("last_login"),
+            total_territories=len(user["owned_territories"]),
+            account_status="Active" if user["is_active"] else "Inactive"
+        ))
+    
+    return admin_users
+
+@api_router.get("/admin/users/{user_id}", response_model=AdminUserResponse)
+async def get_user_details(user_id: str, admin_user: dict = Depends(get_admin_user)):
+    """Get detailed user information"""
+    user = await users_collection.find_one({"_id": user_id})
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    return AdminUserResponse(
+        id=user["_id"],
+        email=user["email"],
+        first_name=user["first_name"],
+        last_name=user["last_name"],
+        role=user["role"],
+        owned_territories=user["owned_territories"],
+        created_at=user["created_at"],
+        is_active=user["is_active"],
+        last_login=user.get("last_login"),
+        total_territories=len(user["owned_territories"]),
+        account_status="Active" if user["is_active"] else "Inactive"
+    )
+
+@api_router.post("/admin/users/{user_id}/toggle-status")
+async def toggle_user_status(user_id: str, admin_user: dict = Depends(get_admin_user)):
+    """Toggle user active/inactive status"""
+    user = await users_collection.find_one({"_id": user_id})
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    new_status = not user["is_active"]
+    await users_collection.update_one(
+        {"_id": user_id},
+        {"$set": {"is_active": new_status}}
+    )
+    
+    return {"message": f"User status updated to {'Active' if new_status else 'Inactive'}"}
+
+# Create super admin endpoint (for initial setup)
+@api_router.post("/admin/create-super-admin")
+async def create_super_admin(admin_data: UserCreate):
+    """Create the first super admin account"""
+    # Check if any super admin already exists
+    existing_admin = await users_collection.find_one({"role": "super_admin"})
+    if existing_admin:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Super admin already exists")
+    
+    # Check if user already exists
+    existing_user = await users_collection.find_one({"email": admin_data.email})
+    if existing_user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+    
+    # Create super admin
+    user_id = str(uuid.uuid4())
+    hashed_password = hash_password(admin_data.password)
+    
+    new_admin = {
+        "_id": user_id,
+        "email": admin_data.email,
+        "password_hash": hashed_password,
+        "first_name": admin_data.first_name,
+        "last_name": admin_data.last_name,
+        "role": "super_admin",
+        "owned_territories": [],
+        "created_at": datetime.utcnow(),
+        "is_active": True
+    }
+    
+    await users_collection.insert_one(new_admin)
+    
+    # Create access token
+    access_token = create_access_token({"user_id": user_id, "email": admin_data.email})
+    
+    # Return user data and token
+    user_response = UserResponse(
+        id=user_id,
+        email=admin_data.email,
+        first_name=admin_data.first_name,
+        last_name=admin_data.last_name,
+        role="super_admin",
+        owned_territories=[],
+        created_at=new_admin["created_at"],
+        is_active=True
+    )
+    
+    return TokenResponse(access_token=access_token, token_type="bearer", user=user_response)
+
 # ZIP Analysis Endpoints
 @api_router.post("/zip-analysis", response_model=MarketIntelligence)
 async def analyze_zip_code(request: ZipAnalysisRequest, background_tasks: BackgroundTasks):
