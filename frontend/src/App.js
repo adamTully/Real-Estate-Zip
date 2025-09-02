@@ -446,7 +446,7 @@ function AppContent() {
               onClick={handleSecureTerritory}
             >
               <Sparkles className="w-5 h-5" />
-              {isAuthenticated ? `Add ZIP ${result.zipCode} to My Territories` : `Secure ZIP ${result.zipCode} Now`}
+              {isAuthenticated ? `Add ZIP ${result.zip_code} to My Territories` : `Secure ZIP ${result.zip_code} Now`}
             </Button>
             <Button variant="outline" className="w-full py-3" onClick={() => setAvailabilityResult(null)}>
               Check Another ZIP
