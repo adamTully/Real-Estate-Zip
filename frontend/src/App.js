@@ -412,10 +412,10 @@ function AppContent() {
           </div>
           
           <h2 className="text-2xl font-bold text-green-900 mb-2">
-            🎉 ZIP {result.zipCode} is Available!
+            🎉 ZIP {result.zip_code} is Available!
           </h2>
           <p className="text-green-700 text-lg mb-6">
-            {result.locationInfo.city}, {result.locationInfo.state} • {result.locationInfo.county}
+            {result.location_info.city}, {result.location_info.state} • {result.location_info.county}
           </p>
           
           <div className="bg-white rounded-xl p-6 mb-6 border border-green-200">
