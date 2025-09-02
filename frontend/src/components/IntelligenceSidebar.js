@@ -16,9 +16,17 @@ const IntelligenceSidebar = ({
   onShowAnalysisModal,
   onShowPreviousZipsModal
 }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
-    <div className="w-80 bg-white border-r border-neutral-200 min-h-screen">
-      <div className="p-6">
+    <div className="w-80 bg-white border-r border-neutral-200 min-h-screen flex flex-col">
+      <div className="p-6 flex-1">
         {activeCategory !== 'overview' && onBackToDashboard && (<button onClick={onBackToDashboard} className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 text-sm mb-4 transition-colors"><ArrowLeft className="w-4 h-4" />Back to Dashboard</button>)}
         <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
           <div className="flex items-center gap-2 mb-2"><Crown className="w-4 h-4 text-blue-600" /><span className="text-xs font-semibold text-blue-800">EXCLUSIVE TERRITORY</span></div>
@@ -34,7 +42,7 @@ const IntelligenceSidebar = ({
           <SidebarNavItem icon={Wand2} label="Content Strategy" isActive={activeCategory === 'content_strategy'} onClick={() => onNavigate && onNavigate('detail', 'Content Strategy', { key: 'content_strategy', data: analysisData?.content_strategy })} status={loading ? 'processing' : 'complete'} disabled={loading} />
           <SidebarNavItem icon={Download} label="Content Assets" isActive={activeCategory === 'content_assets'} onClick={() => onNavigate && onNavigate('detail', 'Content Assets', { key: 'content_assets', data: analysisData?.content_assets })} status={loading ? 'processing' : 'complete'} disabled={loading} />
           
-          {/* New Testing Section */}
+          {/* Testing Section */}
           <div className="pt-4 pb-2"><p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide px-3">Testing Tools</p></div>
           <SidebarNavItem 
             icon={Search} 
@@ -51,6 +59,31 @@ const IntelligenceSidebar = ({
             disabled={false} 
           />
         </div>
+      </div>
+      
+      {/* User Info and Logout Section */}
+      <div className="p-6 border-t border-neutral-200 bg-neutral-50">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+            <span className="text-white text-sm font-semibold">
+              {user?.first_name?.charAt(0)}{user?.last_name?.charAt(0)}
+            </span>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-neutral-900">
+              {user?.first_name} {user?.last_name}
+            </p>
+            <p className="text-xs text-neutral-500">{user?.email}</p>
+          </div>
+        </div>
+        
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          Log Out
+        </button>
       </div>
     </div>
   );
