@@ -621,6 +621,12 @@ async def login_user(login_data: UserLogin):
     if not user["is_active"]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account is deactivated")
     
+    # Update last login time
+    await users_collection.update_one(
+        {"_id": user["_id"]},
+        {"$set": {"last_login": datetime.utcnow()}}
+    )
+    
     # Create access token
     access_token = create_access_token({"user_id": user["_id"], "email": user["email"]})
     
