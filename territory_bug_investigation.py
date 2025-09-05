@@ -657,17 +657,20 @@ class TerritoryBugInvestigator:
             print(f"\n🏠 Step 4: Skipping Admin Territory Check (no admin access)")
             territory_data = None
         
-        # Step 4: Test registration flow
-        print(f"\n📝 Step 4: Testing Registration Flow with New User")
+        # Step 5: Test registration flow
+        print(f"\n📝 Step 5: Testing Registration Flow with New User")
         self.test_registration_flow()
         
-        # Step 5: Test session/cache issues
-        print(f"\n🔄 Step 5: Testing Session/Cache Issues")
+        # Step 6: Test session/cache issues
+        print(f"\n🔄 Step 6: Testing Session/Cache Issues")
         self.test_session_cache_issues()
         
-        # Step 6: Test admin endpoint
-        print(f"\n👑 Step 6: Testing Admin Users Endpoint")
-        self.test_admin_users_endpoint()
+        # Step 7: Test admin endpoint (if available)
+        if self.admin_token:
+            print(f"\n👑 Step 7: Testing Admin Users Endpoint")
+            self.test_admin_users_endpoint()
+        else:
+            print(f"\n👑 Step 7: Skipping Admin Users Endpoint (no admin access)")
         
         # Summary
         print("\n" + "=" * 80)
