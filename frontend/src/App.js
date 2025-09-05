@@ -1024,7 +1024,7 @@ function AppContent() {
               onViewDetail={(key) => {
                 const map = {
                   buyer_migration: '/market-intelligence',
-                  seo_youtube_trends: '/seo-youtube-trends',
+                  seo_social_trends: '/seo-social-trends',
                   content_strategy: '/content-strategy',
                   content_assets: '/content-assets'
                 };
