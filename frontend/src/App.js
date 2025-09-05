@@ -89,7 +89,7 @@ function AppContent() {
   // Attempt to hydrate analysis from last zip on deep links
   useEffect(() => {
     const lastZip = localStorage.getItem('zipintel:last_zip');
-    const onDetailRoute = ["/dashboard","/market-intelligence","/seo-youtube-trends","/content-strategy","/content-assets"].includes(location.pathname);
+    const onDetailRoute = ["/dashboard","/market-intelligence","/seo-social-trends","/content-strategy","/content-assets"].includes(location.pathname);
     console.log('Hydration check:', { analysisData: !!analysisData, lastZip, onDetailRoute, pathname: location.pathname, userTerritories: user?.owned_territories });
     
     if (!analysisData && onDetailRoute && user) {
