@@ -497,11 +497,12 @@ class TerritoryBugInvestigator:
         print(f"🏠 Actual ZIP: {self.actual_zip}")
         print("=" * 80)
         
-        # Step 1: Create admin user for database access
-        print("\n🔑 Step 1: Creating Admin User for Database Access")
-        if not self.create_admin_user():
-            print("❌ Cannot proceed without admin access")
-            return False
+        # Step 1: Try to find existing admin user
+        print("\n🔑 Step 1: Looking for Existing Admin User")
+        has_admin = self.try_existing_admin_user()
+        
+        if not has_admin:
+            print("⚠️  No admin access available - will test with limited functionality")
         
         # Step 2: Investigate user data
         print(f"\n👤 Step 2: Investigating User Data for {self.bug_user_email}")
