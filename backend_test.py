@@ -7,13 +7,18 @@ from datetime import datetime
 import time
 
 class ZipIntelAPITester:
-    def __init__(self, base_url="http://localhost:8001"):
+    def __init__(self, base_url=None):
+        # Use the production URL from frontend/.env
+        if base_url is None:
+            base_url = "https://territory-hub-2.preview.emergentagent.com"
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
         self.tests_passed = 0
         self.test_zip_codes = ["90210", "10001", "60601", "33101"]
         self.auth_token = None  # Store JWT token for authenticated requests
+        self.test_user_email = "territory1756780976@example.com"
+        self.test_user_password = "testpass123"
         
     def log_test(self, name, success, details=""):
         """Log test results"""
