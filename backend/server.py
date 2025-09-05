@@ -395,39 +395,97 @@ Use geo modifiers ({city_name}, nearby neighborhoods/landmarks). Keep Fair Housi
         state_name = location_info.get('state', 'Unknown')
         try:
             prompt = f"""
-Act as a real estate marketing strategist. I'm a Realtor in {city_name}, {state_name} (ZIP {zip_code}).
+Act as a real estate marketing strategist. Using buyer migration insights, trending searches, and keyword research, create a 6-month content strategy to attract relocation buyers to {city_name}, {state_name} (ZIP {zip_code}).
 
-Return your answer in clean Markdown with this structure and clear typography-friendly sections:
+Return clean Markdown with H2 sections in this EXACT order:
 
-# Content Marketing Strategy – {city_name}, {state_name}
+Global Framework:
+- Theme cycles (4-week rotations): Cost of Living → Neighborhoods → Schools → Lifestyle → Commute → Buying Process
+- All content must be Fair Housing compliant and include {city_name} geo-modifiers
 
-## Strategy Goals
-- 2-3 bullets on primary outcomes (awareness, leads, consultations)
+# Multi-Platform Content Strategy – {city_name}, {state_name}
 
-## 8-Week Roadmap
-### Week 1
-- Short-form: …
-- Long-form: …
-- Lead Magnet: …
-- Email/Retargeting: …
+## blog
+- Objective: [1 line goal]
+- Cadence: 2-3 posts per week over 24 weeks
+- Content types: [3-4 formats - guides, comparisons, market updates, neighborhoods]
+- Topic buckets: [4-5 themes with local angle]
+- Hook patterns: [3 headline approaches]
+- Primary SEO keywords: [5-7 terms]
+- KPIs: [3 metrics - traffic, leads, time on page]
 
-### Week 2
-- Short-form: …
-- Long-form: …
-- Lead Magnet: …
-- Email/Retargeting: …
+## email campaigns  
+- Objective: [1 line goal]
+- Cadence: 1 per week newsletter + 1 per month nurture sequence
+- Campaign types: [3-4 email formats - newsletters, nurture, market updates, buyer guides]
+- Topic buckets: [4-5 themes]
+- Subject line patterns: [3 approaches]
+- KPIs: [3 metrics - open rate, click rate, conversions]
 
-### Week 3
-- …
+## Facebook
+- Objective: [1 line goal]
+- Cadence: 2-3 posts per week over 24 weeks
+- Content types: [3-4 formats - community posts, market updates, photo albums, reels]
+- Topic buckets: [4-5 themes with local community angle]
+- Hook patterns: [3 engagement approaches]
+- Primary hashtags: [5-7 local/geo tags]
+- KPIs: [3 metrics - engagement, reach, leads]
 
-### Week 8
-- …
+## YouTube
+- Objective: [1 line goal]
+- Cadence: 1 video per week over 24 weeks
+- Content types: [3-4 formats - neighborhood tours, market analysis, buyer education, Q&A]
+- Topic buckets: [4-5 themes with visual storytelling]
+- Hook patterns: [3 video opening approaches]
+- Primary SEO keywords: [5-7 YouTube search terms]
+- KPIs: [3 metrics - views, watch time, subscribers]
 
-## Implementation Best Practices
-- Channel distribution, repurposing plan, CTAs, and measurement tips
+## YouTube Shorts
+- Objective: [1 line goal]
+- Cadence: 2-3 shorts per week over 24 weeks
+- Content types: [3-4 formats - quick tips, market snapshots, behind-scenes, trending responses]
+- Topic buckets: [4-5 themes optimized for short-form]
+- Hook patterns: [3 first-2-second approaches]
+- Primary hashtags: [5-7 trending/local tags]
+- KPIs: [3 metrics - views, shares, comments]
 
-## Quick Actions
-- 3-5 next steps to execute this week
+## Instagram
+- Objective: [1 line goal]
+- Cadence: 3 posts + 2 reels per week over 24 weeks
+- Content types: [3-4 formats - carousel posts, single images, reels, stories highlights]
+- Topic buckets: [4-5 visual themes with local lifestyle]
+- Hook patterns: [3 visual/caption approaches]
+- Primary hashtags: [7-10 mix of local + national tags]
+- KPIs: [3 metrics - engagement rate, reach, profile visits]
+
+## TikTok
+- Objective: [1 line goal]
+- Cadence: 2-3 videos per week over 24 weeks
+- Content types: [3-4 formats - talking head, voiceover + b-roll, trend participation, educational]
+- Topic buckets: [4-5 themes optimized for TikTok audience]
+- Hook patterns: [3 first-8-second approaches]
+- Primary hashtags: [5-7 trending + niche tags]
+- KPIs: [3 metrics - views, shares, follows]
+
+## X/Twitter
+- Objective: [1 line goal]
+- Cadence: 3-4 posts per week over 24 weeks
+- Content types: [3-4 formats - single tweets, threads, market updates, community engagement]
+- Topic buckets: [4-5 themes for real-time discussion]
+- Hook patterns: [3 attention-grabbing approaches]
+- Primary hashtags: [3-5 industry + local tags]
+- KPIs: [3 metrics - impressions, engagement, retweets]
+
+## Snapchat
+- Objective: [1 line goal]
+- Cadence: 1-2 clips per week over 24 weeks
+- Content types: [3-4 formats - Spotlight clips, behind-scenes, quick tips, property highlights]
+- Topic buckets: [4-5 themes for younger demographic]
+- Hook patterns: [3 first-2-second approaches]
+- Primary keywords: [3-5 discovery terms]
+- KPIs: [3 metrics - views, time watched, shares]
+
+Keep each bullet point to 1 line. Focus on actionable strategy over detailed tactics.
 """
             response_text = await self._safe_send(prompt)
             return {
