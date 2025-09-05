@@ -1032,7 +1032,7 @@ async def analyze_zip_code(request: ZipAnalysisRequest, background_tasks: Backgr
         intelligence = MarketIntelligence(
             zip_code=zip_code,
             buyer_migration=buyer_migration,
-            seo_youtube_trends=seo,
+            seo_social_trends=seo,
             content_strategy=strategy,
             hidden_listings={"summary": "Pending generation", "analysis_content": "Not generated yet."},
             market_hooks={"summary": "Pending generation", "detailed_analysis": "Not generated yet."},
