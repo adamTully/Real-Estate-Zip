@@ -16,6 +16,7 @@ import BuyerMigrationDetailView from "./components/BuyerMigrationDetail";
 import SeoYouTubeDetail from "./components/SeoYouTubeDetail";
 import ContentStrategyDetail from "./components/ContentStrategyDetail";
 import ContentCreationDetail from "./components/ContentCreationDetail";
+import ContentAssetsPlatform from "./components/ContentAssetsPlatform";
 import IntelligenceDashboard from "./components/IntelligenceDashboard";
 import IntelligenceSidebar from "./components/IntelligenceSidebar";
 import RegistrationForm from "./components/RegistrationForm";
