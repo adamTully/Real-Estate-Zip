@@ -1229,6 +1229,59 @@ async def create_super_admin(admin_data: UserCreate):
     
     return TokenResponse(access_token=access_token, token_type="bearer", user=user_response)
 
+@api_router.post("/admin/fix-territory-assignment")
+async def fix_territory_assignment(fix_data: dict):
+    """Emergency endpoint to fix specific territory assignment issues"""
+    try:
+        from_email = fix_data.get("from_email")
+        to_email = fix_data.get("to_email") 
+        zip_code = fix_data.get("zip_code")
+        
+        if not all([from_email, to_email, zip_code]):
+            raise HTTPException(status_code=400, detail="Missing required fields: from_email, to_email, zip_code")
+        
+        # Find the users
+        from_user = await users_collection.find_one({"email": from_email})
+        to_user = await users_collection.find_one({"email": to_email})
+        
+        if not from_user:
+            raise HTTPException(status_code=404, detail=f"User {from_email} not found")
+        if not to_user:
+            raise HTTPException(status_code=404, detail=f"User {to_email} not found")
+        
+        # Check if from_user actually has the ZIP
+        if zip_code not in from_user.get("owned_territories", []):
+            raise HTTPException(status_code=400, detail=f"User {from_email} does not own ZIP {zip_code}")
+        
+        # Check if to_user already has the ZIP
+        if zip_code in to_user.get("owned_territories", []):
+            return {"message": f"User {to_email} already owns ZIP {zip_code}", "success": True}
+        
+        # Remove ZIP from from_user
+        await users_collection.update_one(
+            {"_id": from_user["_id"]},
+            {"$pull": {"owned_territories": zip_code}}
+        )
+        
+        # Add ZIP to to_user
+        await users_collection.update_one(
+            {"_id": to_user["_id"]},
+            {"$push": {"owned_territories": zip_code}}
+        )
+        
+        return {
+            "message": f"Successfully transferred ZIP {zip_code} from {from_email} to {to_email}",
+            "success": True,
+            "from_user": from_email,
+            "to_user": to_email,
+            "zip_code": zip_code
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fixing territory assignment: {str(e)}")
+
 @api_router.post("/zip-availability/check")
 async def check_zip_availability(zip_data: dict):
     """Check if a ZIP code is available and get real location data"""
