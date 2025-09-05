@@ -641,13 +641,21 @@ class TerritoryBugInvestigator:
         if not has_admin:
             print("⚠️  No admin access available - will test with limited functionality")
         
-        # Step 2: Investigate user data
-        print(f"\n👤 Step 2: Investigating User Data for {self.bug_user_email}")
+        # Step 2: Check ZIP availability first
+        print(f"\n🏠 Step 2: Checking ZIP Availability for {self.expected_zip} and {self.actual_zip}")
+        zip_availability = self.check_zip_availability()
+        
+        # Step 3: Investigate user data
+        print(f"\n👤 Step 3: Investigating User Data for {self.bug_user_email}")
         user_data = self.investigate_user_data()
         
-        # Step 3: Check territory ownership
-        print(f"\n🏠 Step 3: Checking Territory Ownership for ZIPs {self.expected_zip} and {self.actual_zip}")
-        territory_data = self.investigate_territory_ownership()
+        # Step 4: Check territory ownership (if admin access available)
+        if self.admin_token:
+            print(f"\n🏠 Step 4: Checking Territory Ownership via Admin Endpoint")
+            territory_data = self.investigate_territory_ownership()
+        else:
+            print(f"\n🏠 Step 4: Skipping Admin Territory Check (no admin access)")
+            territory_data = None
         
         # Step 4: Test registration flow
         print(f"\n📝 Step 4: Testing Registration Flow with New User")
