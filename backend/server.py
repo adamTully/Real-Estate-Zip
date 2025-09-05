@@ -1180,6 +1180,8 @@ async def cleanup_duplicate_territories(admin_user: dict = Depends(get_admin_use
         "duplicates_found": duplicates_found,
         "total_unique_territories": len(zip_assignments)
     }
+
+@api_router.post("/admin/create-super-admin", response_model=TokenResponse)
 async def create_super_admin(admin_data: UserCreate):
     """Create the first super admin account"""
     # Check if any super admin already exists
