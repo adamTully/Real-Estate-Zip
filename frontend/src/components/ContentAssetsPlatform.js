@@ -1,9 +1,97 @@
 import React, { useState } from 'react';
-import { Card, Button, Badge, Tabs, TabsContent, TabsList, TabsTrigger } from './ui';
 import { Copy, Download, RefreshCw, FileText, Instagram, Facebook, Linkedin, Twitter, Music, Youtube, Hash, PenTool, Mail } from 'lucide-react';
 import axios from 'axios';
 
 const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001/api';
+
+// Simple UI components
+const Card = ({ children, className = "" }) => (
+  <div className={`bg-white rounded-lg border border-neutral-200 shadow-sm ${className}`}>
+    {children}
+  </div>
+);
+
+const Button = ({ children, onClick, disabled, variant = "default", size = "default", className = "" }) => {
+  const baseClasses = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+  const variantClasses = {
+    default: "bg-primary text-primary-foreground hover:bg-primary/90 bg-blue-600 text-white hover:bg-blue-700",
+    outline: "border border-input hover:bg-accent hover:text-accent-foreground border-neutral-300 hover:bg-neutral-50",
+    ghost: "hover:bg-accent hover:text-accent-foreground hover:bg-neutral-100"
+  };
+  const sizeClasses = {
+    default: "h-10 py-2 px-4",
+    sm: "h-8 px-3 text-sm"
+  };
+  
+  return (
+    <button 
+      onClick={onClick}
+      disabled={disabled}
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+    >
+      {children}
+    </button>
+  );
+};
+
+const Badge = ({ children, variant = "default", className = "" }) => {
+  const variantClasses = {
+    default: "bg-primary text-primary-foreground bg-blue-600 text-white",
+    secondary: "bg-secondary text-secondary-foreground bg-neutral-100 text-neutral-800"
+  };
+  
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${variantClasses[variant]} ${className}`}>
+      {children}
+    </span>
+  );
+};
+
+// Simple Tabs implementation  
+const Tabs = ({ children, defaultValue, className = "" }) => {
+  const [activeTab, setActiveTab] = useState(defaultValue);
+  
+  return (
+    <div className={`w-full ${className}`} data-active-tab={activeTab}>
+      {React.Children.map(children, child => 
+        React.cloneElement(child, { activeTab, setActiveTab })
+      )}
+    </div>
+  );
+};
+
+const TabsList = ({ children, className = "", activeTab, setActiveTab }) => (
+  <div className={`inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground bg-neutral-100 ${className}`}>
+    {React.Children.map(children, child => 
+      React.cloneElement(child, { activeTab, setActiveTab })
+    )}
+  </div>
+);
+
+const TabsTrigger = ({ children, value, className = "", activeTab, setActiveTab }) => {
+  const isActive = activeTab === value;
+  return (
+    <button
+      onClick={() => setActiveTab(value)}
+      className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+        isActive 
+          ? 'bg-background text-foreground shadow-sm bg-white text-neutral-900' 
+          : 'hover:bg-background/80 hover:text-foreground hover:bg-white/50'
+      } ${className}`}
+    >
+      {children}
+    </button>
+  );
+};
+
+const TabsContent = ({ children, value, className = "", activeTab }) => {
+  if (activeTab !== value) return null;
+  return (
+    <div className={`mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${className}`}>
+      {children}
+    </div>
+  );
+};
 
 const PlatformIcon = ({ platform }) => {
   const icons = {
