@@ -144,6 +144,47 @@ class ZipIntelAPITester:
             self.log_test(f"ZIP Analysis Creation ({zip_code})", False, str(e))
             return False, None
     
+    def test_zip_analysis_status(self, zip_code):
+        """Test ZIP analysis status endpoint"""
+        try:
+            response = requests.get(f"{self.api_url}/zip-analysis/status/{zip_code}", timeout=10)
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                # Verify status structure
+                required_fields = ["zip_code", "state", "overall_percent", "tasks"]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if missing_fields:
+                    success = False
+                    details = f"Missing fields: {missing_fields}"
+                else:
+                    # Verify tasks include the new field name
+                    tasks = data.get("tasks", {})
+                    expected_tasks = ["location", "buyer_migration", "seo_social_trends", "content_strategy", "content_assets"]
+                    missing_tasks = [task for task in expected_tasks if task not in tasks]
+                    
+                    if missing_tasks:
+                        success = False
+                        details = f"Missing tasks: {missing_tasks}"
+                    else:
+                        # Check that old field name is NOT present
+                        if "seo_youtube_trends" in tasks:
+                            success = False
+                            details = "Old field name 'seo_youtube_trends' still present in tasks"
+                        else:
+                            details = f"Status retrieved: state={data.get('state')}, progress={data.get('overall_percent')}%"
+            else:
+                details = f"Status: {response.status_code}"
+                
+            self.log_test(f"ZIP Analysis Status ({zip_code})", success, details)
+            return success
+            
+        except Exception as e:
+            self.log_test(f"ZIP Analysis Status ({zip_code})", False, str(e))
+            return False
+
     def test_zip_analysis_retrieval(self, zip_code):
         """Test ZIP analysis retrieval"""
         try:
@@ -153,7 +194,30 @@ class ZipIntelAPITester:
             if success:
                 data = response.json()
                 success = data.get("zip_code") == zip_code
-                details = f"Retrieved analysis for {data.get('zip_code')}" if success else "ZIP code mismatch"
+                
+                if success:
+                    # Verify new field name is present and old one is not
+                    if "seo_social_trends" not in data:
+                        success = False
+                        details = "New field 'seo_social_trends' not found in response"
+                    elif "seo_youtube_trends" in data:
+                        success = False
+                        details = "Old field 'seo_youtube_trends' still present in response"
+                    else:
+                        # Verify seo_social_trends has platform-specific content
+                        seo_data = data.get("seo_social_trends", {})
+                        analysis_content = seo_data.get("analysis_content", "")
+                        
+                        # Check for platform-specific mentions
+                        platforms = ["Facebook", "Instagram", "Twitter", "TikTok"]
+                        platform_mentions = [platform for platform in platforms if platform.lower() in analysis_content.lower()]
+                        
+                        if len(platform_mentions) >= 2:  # At least 2 platforms mentioned
+                            details = f"Retrieved analysis with seo_social_trends containing {len(platform_mentions)} platforms: {platform_mentions}"
+                        else:
+                            details = f"Retrieved analysis but seo_social_trends may not have platform-specific content (found: {platform_mentions})"
+                else:
+                    details = "ZIP code mismatch"
             else:
                 details = f"Status: {response.status_code}"
                 
