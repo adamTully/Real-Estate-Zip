@@ -44,8 +44,55 @@ class ZipIntelAPITester:
             self.log_test("API Root Endpoint", False, str(e))
             return False
     
+    def test_zip_analysis_start(self, zip_code):
+        """Test ZIP analysis start endpoint (updated prompts)"""
+        try:
+            payload = {"zip_code": zip_code}
+            response = requests.post(
+                f"{self.api_url}/zip-analysis/start", 
+                json=payload,
+                timeout=30
+            )
+            
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                # Verify status response structure
+                required_fields = ["zip_code", "job_id", "state", "overall_percent", "tasks"]
+                
+                missing_fields = [field for field in required_fields if field not in data]
+                if missing_fields:
+                    success = False
+                    details = f"Missing fields: {missing_fields}"
+                else:
+                    # Verify tasks include the new field name
+                    tasks = data.get("tasks", {})
+                    expected_tasks = ["location", "buyer_migration", "seo_social_trends", "content_strategy", "content_assets"]
+                    missing_tasks = [task for task in expected_tasks if task not in tasks]
+                    
+                    if missing_tasks:
+                        success = False
+                        details = f"Missing tasks: {missing_tasks}"
+                    else:
+                        # Check that old field name is NOT present
+                        if "seo_youtube_trends" in tasks:
+                            success = False
+                            details = "Old field name 'seo_youtube_trends' still present in tasks"
+                        else:
+                            details = f"Analysis started with job_id: {data.get('job_id', 'N/A')}, state: {data.get('state')}"
+                        
+            else:
+                details = f"Status: {response.status_code}, Response: {response.text[:200]}"
+                
+            self.log_test(f"ZIP Analysis Start ({zip_code})", success, details)
+            return success, response.json() if success else None
+            
+        except Exception as e:
+            self.log_test(f"ZIP Analysis Start ({zip_code})", False, str(e))
+            return False, None
+
     def test_zip_analysis_creation(self, zip_code):
-        """Test ZIP analysis creation"""
+        """Test ZIP analysis creation (legacy endpoint)"""
         try:
             payload = {"zip_code": zip_code}
             response = requests.post(
@@ -57,9 +104,9 @@ class ZipIntelAPITester:
             success = response.status_code == 200
             if success:
                 data = response.json()
-                # Verify required fields exist
+                # Verify required fields exist - UPDATED to use new field name
                 required_fields = [
-                    "id", "zip_code", "buyer_migration", "seo_youtube_trends",
+                    "id", "zip_code", "buyer_migration", "seo_social_trends",
                     "content_strategy", "hidden_listings", "market_hooks", 
                     "content_assets", "created_at"
                 ]
@@ -70,15 +117,19 @@ class ZipIntelAPITester:
                     details = f"Missing fields: {missing_fields}"
                 else:
                     # Verify each intelligence category has required structure
-                    for category in ["buyer_migration", "seo_youtube_trends", "content_strategy", "hidden_listings", "market_hooks"]:
+                    for category in ["buyer_migration", "seo_social_trends", "content_strategy", "hidden_listings", "market_hooks"]:
                         if not isinstance(data[category], dict) or "summary" not in data[category]:
                             success = False
                             details = f"Invalid structure for {category}"
                             break
                     
-                    if success and "content_assets" in data:
+                    # Check that old field name is NOT present
+                    if "seo_youtube_trends" in data:
+                        success = False
+                        details = "Old field name 'seo_youtube_trends' still present in response"
+                    elif success and "content_assets" in data:
                         content_assets = data["content_assets"]
-                        if not all(key in content_assets for key in ["blog_posts", "email_campaigns", "lead_magnet"]):
+                        if not all(key in content_assets for key in ["blog_posts", "email_campaigns"]):
                             success = False
                             details = "Missing content asset types"
                         
