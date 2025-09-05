@@ -194,7 +194,79 @@ class TerritoryBugInvestigator:
             self.log_test("Investigate User Data (Login)", False, str(e))
             return None
     
-    def investigate_territory_ownership(self):
+    def check_zip_availability(self):
+        """Check ZIP availability to see who owns the territories"""
+        try:
+            zips_to_check = [self.expected_zip, self.actual_zip]
+            zip_info = {}
+            
+            for zip_code in zips_to_check:
+                response = requests.post(
+                    f"{self.api_url}/zip-availability/check", 
+                    json={"zip_code": zip_code}, 
+                    timeout=10
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    zip_info[zip_code] = {
+                        "available": data.get("available", True),
+                        "assigned_to": data.get("assigned_to", None),
+                        "location": data.get("location_info", {}),
+                        "waitlist_count": data.get("waitlist_count", None)
+                    }
+                else:
+                    zip_info[zip_code] = {
+                        "error": f"Status {response.status_code}",
+                        "available": "unknown"
+                    }
+            
+            details = f"""
+            🏠 ZIP {self.expected_zip} (Expected):
+               Available: {zip_info.get(self.expected_zip, {}).get('available', 'unknown')}
+               Assigned to: {zip_info.get(self.expected_zip, {}).get('assigned_to', 'None')}
+               Location: {zip_info.get(self.expected_zip, {}).get('location', {})}
+               
+            🏠 ZIP {self.actual_zip} (Actual):
+               Available: {zip_info.get(self.actual_zip, {}).get('available', 'unknown')}
+               Assigned to: {zip_info.get(self.actual_zip, {}).get('assigned_to', 'None')}
+               Location: {zip_info.get(self.actual_zip, {}).get('location', {})}
+            """
+            
+            # Analyze the results
+            expected_zip_info = zip_info.get(self.expected_zip, {})
+            actual_zip_info = zip_info.get(self.actual_zip, {})
+            
+            success = True
+            bug_findings = []
+            
+            # Check if expected ZIP is assigned to the bug user
+            if expected_zip_info.get("assigned_to") == self.bug_user_email:
+                bug_findings.append(f"✅ ZIP {self.expected_zip} correctly assigned to {self.bug_user_email}")
+            elif expected_zip_info.get("assigned_to"):
+                bug_findings.append(f"🐛 ZIP {self.expected_zip} assigned to {expected_zip_info.get('assigned_to')} instead of {self.bug_user_email}")
+                success = False
+            else:
+                bug_findings.append(f"⚠️  ZIP {self.expected_zip} appears available (not assigned)")
+            
+            # Check if actual ZIP is assigned to the bug user
+            if actual_zip_info.get("assigned_to") == self.bug_user_email:
+                bug_findings.append(f"🐛 ZIP {self.actual_zip} incorrectly assigned to {self.bug_user_email}")
+                success = False
+            elif actual_zip_info.get("assigned_to"):
+                bug_findings.append(f"ℹ️  ZIP {self.actual_zip} assigned to {actual_zip_info.get('assigned_to')}")
+            else:
+                bug_findings.append(f"ℹ️  ZIP {self.actual_zip} appears available")
+            
+            if bug_findings:
+                details += f"\n🔍 Analysis:\n" + "\n".join(bug_findings)
+            
+            self.log_test("Check ZIP Availability", success, details)
+            return zip_info
+            
+        except Exception as e:
+            self.log_test("Check ZIP Availability", False, str(e))
+            return None
         """TASK 2: Check Territory Ownership - Who owns ZIP 30126 and ZIP 10001?"""
         try:
             if not self.admin_token:
