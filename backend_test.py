@@ -749,7 +749,118 @@ class ZipIntelAPITester:
             self.log_test("Territory Assignment - General", False, str(e))
             return False
     
-    def run_comprehensive_test(self):
+    def test_enhanced_content_strategy(self, zip_code):
+        """Test enhanced content strategy with platform-specific guidance"""
+        try:
+            response = requests.get(f"{self.api_url}/zip-analysis/{zip_code}", timeout=10)
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                content_strategy = data.get("content_strategy", {})
+                analysis_content = content_strategy.get("analysis_content", "")
+                
+                # Check for platform-specific strategies
+                expected_platforms = ["blog", "email", "Facebook", "YouTube", "Instagram", "TikTok", "Twitter", "Snapchat"]
+                platform_mentions = []
+                
+                for platform in expected_platforms:
+                    if platform.lower() in analysis_content.lower():
+                        platform_mentions.append(platform)
+                
+                # Check for strategy elements
+                strategy_elements = ["objective", "cadence", "content types", "topic buckets", "hook patterns", "kpis"]
+                element_mentions = []
+                
+                for element in strategy_elements:
+                    if element.lower() in analysis_content.lower():
+                        element_mentions.append(element)
+                
+                if len(platform_mentions) >= 5:  # At least 5 platforms mentioned
+                    if len(element_mentions) >= 3:  # At least 3 strategy elements
+                        success = True
+                        details = f"Enhanced content strategy found with {len(platform_mentions)} platforms and {len(element_mentions)} strategy elements"
+                    else:
+                        success = False
+                        details = f"Platforms found ({len(platform_mentions)}) but missing strategy elements (found {len(element_mentions)}: {element_mentions})"
+                else:
+                    success = False
+                    details = f"Insufficient platform coverage (found {len(platform_mentions)}: {platform_mentions})"
+            else:
+                details = f"Status: {response.status_code}"
+                
+            self.log_test(f"Enhanced Content Strategy ({zip_code})", success, details)
+            return success
+            
+        except Exception as e:
+            self.log_test(f"Enhanced Content Strategy ({zip_code})", False, str(e))
+            return False
+
+    def run_updated_prompts_test(self):
+        """Run tests specifically for updated prompts and field name changes"""
+        print("🚀 Testing Updated Prompts for ZIP Territory Pro Platform")
+        print(f"📍 Testing against: {self.base_url}")
+        print("=" * 60)
+        
+        # Test with ZIP code 10001 as specified in the review request
+        test_zip = "10001"
+        
+        print(f"\n🔍 Testing updated prompts with ZIP: {test_zip}")
+        
+        # Test 1: POST /api/zip-analysis/start
+        print("\n📝 Testing POST /api/zip-analysis/start...")
+        success_start, start_data = self.test_zip_analysis_start(test_zip)
+        
+        if success_start:
+            # Wait for analysis to complete
+            print("⏳ Waiting for analysis to complete...")
+            max_wait = 120  # 2 minutes max
+            wait_time = 0
+            
+            while wait_time < max_wait:
+                time.sleep(5)
+                wait_time += 5
+                
+                status_response = requests.get(f"{self.api_url}/zip-analysis/status/{test_zip}", timeout=10)
+                if status_response.status_code == 200:
+                    status_data = status_response.json()
+                    if status_data.get("state") == "done":
+                        print(f"✅ Analysis completed in {wait_time} seconds")
+                        break
+                    elif status_data.get("state") == "failed":
+                        print(f"❌ Analysis failed: {status_data.get('error', 'Unknown error')}")
+                        break
+                    else:
+                        print(f"⏳ Progress: {status_data.get('overall_percent', 0)}%")
+                else:
+                    print(f"⚠️ Status check failed: {status_response.status_code}")
+            
+            # Test 2: GET /api/zip-analysis/status/{zip_code}
+            print("\n📊 Testing GET /api/zip-analysis/status...")
+            self.test_zip_analysis_status(test_zip)
+            
+            # Test 3: GET /api/zip-analysis/{zip_code}
+            print("\n📋 Testing GET /api/zip-analysis...")
+            self.test_zip_analysis_retrieval(test_zip)
+            
+            # Test 4: Enhanced Content Strategy
+            print("\n🎯 Testing Enhanced Content Strategy...")
+            self.test_enhanced_content_strategy(test_zip)
+            
+        else:
+            print("❌ Failed to start analysis. Skipping dependent tests.")
+        
+        # Print final results
+        print("\n" + "=" * 60)
+        print(f"📊 Updated Prompts Test Results: {self.tests_passed}/{self.tests_run} tests passed")
+        
+        if self.tests_passed == self.tests_run:
+            print("🎉 All updated prompts tests passed!")
+            return True
+        else:
+            failed_tests = self.tests_run - self.tests_passed
+            print(f"⚠️  {failed_tests} test(s) failed. Please review the issues above.")
+            return False
         """Run all tests"""
         print("🚀 Starting ZIP Intel Generator API Tests")
         print(f"📍 Testing against: {self.base_url}")
