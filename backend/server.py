@@ -146,7 +146,7 @@ class MarketIntelligence(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     zip_code: str
     buyer_migration: Dict[str, Any]
-    seo_youtube_trends: Dict[str, Any]
+    seo_social_trends: Dict[str, Any]
     content_strategy: Dict[str, Any]
     hidden_listings: Dict[str, Any]
     market_hooks: Dict[str, Any]
