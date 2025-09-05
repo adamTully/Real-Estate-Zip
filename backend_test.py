@@ -943,7 +943,11 @@ class ZipIntelAPITester:
 
 def main():
     tester = ZipIntelAPITester()
-    success = tester.run_comprehensive_test()
+    
+    # Run the updated prompts test as requested in the review
+    print("Running Updated Prompts Test as requested in review...")
+    success = tester.run_updated_prompts_test()
+    
     return 0 if success else 1
 
 if __name__ == "__main__":
