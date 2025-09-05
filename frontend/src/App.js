@@ -47,7 +47,7 @@ const Alert = ({ variant = "default", children }) => { const variants = { defaul
 const TASK_PLAN = [
   { id: "location", title: "Task 1 - ZIP Code Analysis", range: [0, 15] },
   { id: "buyer_migration", title: "Task 2 - Buyer Migration Intelligence", range: [15, 40] },
-  { id: "seo_youtube_trends", title: "Task 3 - SEO & YouTube Trends", range: [40, 70] },
+  { id: "seo_social_trends", title: "Task 3 - SEO & Social Media Trends", range: [40, 70] },
   { id: "content_strategy", title: "Task 4 - Content Strategy", range: [70, 90] },
   { id: "content_assets", title: "Task 5 - Content Assets", range: [90, 100] },
 ];
