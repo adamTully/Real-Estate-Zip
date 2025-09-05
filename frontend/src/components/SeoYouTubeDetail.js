@@ -37,7 +37,7 @@ const SeoYouTubeDetail = ({ data }) => {
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Header */}
       <div className="text-center space-y-3">
-        <h1 className="text-3xl font-bold text-neutral-900">SEO & YouTube Trends Analysis</h1>
+        <h1 className="text-3xl font-bold text-neutral-900">SEO & Social Media Trends Analysis</h1>
         <div className="flex items-center justify-center gap-2 text-neutral-600">
           <Search className="w-4 h-4" />
           <span className="text-lg">{data.location?.city}, {data.location?.state} Market Analysis</span>
