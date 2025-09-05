@@ -801,6 +801,275 @@ class ZipIntelAPITester:
             self.log_test(f"Enhanced Content Strategy ({zip_code})", False, str(e))
             return False
 
+    def test_login_existing_user(self):
+        """Login with the existing test user for platform generation tests"""
+        try:
+            login_payload = {
+                "email": self.test_user_email,
+                "password": self.test_user_password
+            }
+            
+            response = requests.post(f"{self.api_url}/auth/login", json=login_payload, timeout=10)
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                self.auth_token = data["access_token"]
+                user_data = data["user"]
+                owned_territories = user_data.get("owned_territories", [])
+                success = "10001" in owned_territories
+                details = f"Login successful for {user_data['email']}, owns ZIP 10001: {'Yes' if success else 'No'}, territories: {owned_territories}"
+            else:
+                details = f"Status: {response.status_code}, Response: {response.text[:200]}"
+            
+            self.log_test("Login Existing Test User", success, details)
+            return success
+            
+        except Exception as e:
+            self.log_test("Login Existing Test User", False, str(e))
+            return False
+
+    def test_platform_generation_no_auth(self):
+        """Test platform generation endpoint without authentication"""
+        try:
+            payload = {"zip_code": "10001"}
+            response = requests.post(
+                f"{self.api_url}/generate-platform-content/instagram", 
+                json=payload,
+                timeout=15
+            )
+            
+            # Should return 401 or 403 for missing authentication
+            success = response.status_code in [401, 403]
+            details = f"Correctly rejected unauthenticated request: {response.status_code}" if success else f"Unexpected status: {response.status_code}"
+            
+            self.log_test("Platform Generation - No Auth", success, details)
+            return success
+            
+        except Exception as e:
+            self.log_test("Platform Generation - No Auth", False, str(e))
+            return False
+
+    def test_platform_generation_invalid_territory(self):
+        """Test platform generation with ZIP user doesn't own"""
+        try:
+            if not self.auth_token:
+                self.log_test("Platform Generation - Invalid Territory", False, "No auth token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            payload = {"zip_code": "90210"}  # User doesn't own this ZIP
+            
+            response = requests.post(
+                f"{self.api_url}/generate-platform-content/instagram", 
+                json=payload,
+                headers=headers,
+                timeout=15
+            )
+            
+            # Should return 403 for territory not owned
+            success = response.status_code == 403
+            if success:
+                data = response.json()
+                success = "don't own" in data.get("detail", "").lower() or "territory" in data.get("detail", "").lower()
+                details = f"Correctly rejected unowned territory: {data.get('detail')}" if success else f"Unexpected error message: {data.get('detail')}"
+            else:
+                details = f"Status: {response.status_code}, Expected: 403"
+            
+            self.log_test("Platform Generation - Invalid Territory", success, details)
+            return success
+            
+        except Exception as e:
+            self.log_test("Platform Generation - Invalid Territory", False, str(e))
+            return False
+
+    def test_instagram_content_generation(self):
+        """Test Instagram content generation specifically"""
+        try:
+            if not self.auth_token:
+                self.log_test("Instagram Content Generation", False, "No auth token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            payload = {"zip_code": "10001"}
+            
+            response = requests.post(
+                f"{self.api_url}/generate-platform-content/instagram", 
+                json=payload,
+                headers=headers,
+                timeout=30
+            )
+            
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                
+                # Verify JSON structure
+                required_fields = ["summary", "instagram_posts"]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if missing_fields:
+                    success = False
+                    details = f"Missing fields: {missing_fields}"
+                else:
+                    instagram_posts = data.get("instagram_posts", [])
+                    if not isinstance(instagram_posts, list) or len(instagram_posts) == 0:
+                        success = False
+                        details = "No instagram_posts array or empty array"
+                    else:
+                        # Check first post structure
+                        first_post = instagram_posts[0]
+                        post_required_fields = ["name", "title", "content", "hashtags"]
+                        missing_post_fields = [field for field in post_required_fields if field not in first_post]
+                        
+                        if missing_post_fields:
+                            success = False
+                            details = f"Missing post fields: {missing_post_fields}"
+                        else:
+                            # Verify content quality
+                            content_length = len(first_post.get("content", ""))
+                            hashtags = first_post.get("hashtags", "")
+                            
+                            if content_length < 50:
+                                success = False
+                                details = f"Content too short: {content_length} characters"
+                            elif not hashtags or len(hashtags) < 10:
+                                success = False
+                                details = f"Missing or insufficient hashtags: '{hashtags}'"
+                            else:
+                                details = f"Generated {len(instagram_posts)} Instagram posts, first post: {content_length} chars, hashtags: {hashtags[:50]}..."
+            else:
+                details = f"Status: {response.status_code}, Response: {response.text[:200]}"
+            
+            self.log_test("Instagram Content Generation", success, details)
+            return success
+            
+        except Exception as e:
+            self.log_test("Instagram Content Generation", False, str(e))
+            return False
+
+    def test_multiple_platform_generation(self):
+        """Test content generation for multiple platforms"""
+        platforms = ["facebook", "tiktok", "linkedin", "youtube-shorts", "twitter", "snapchat", "blog", "email"]
+        
+        if not self.auth_token:
+            self.log_test("Multiple Platform Generation", False, "No auth token available")
+            return False
+        
+        headers = {"Authorization": f"Bearer {self.auth_token}"}
+        payload = {"zip_code": "10001"}
+        
+        successful_platforms = []
+        failed_platforms = []
+        
+        for platform in platforms:
+            try:
+                response = requests.post(
+                    f"{self.api_url}/generate-platform-content/{platform}", 
+                    json=payload,
+                    headers=headers,
+                    timeout=30
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    # Check if response has content
+                    if "summary" in data and any(key for key in data.keys() if "posts" in key or "campaigns" in key):
+                        successful_platforms.append(platform)
+                        self.log_test(f"Platform Generation - {platform}", True, f"Generated content successfully")
+                    else:
+                        failed_platforms.append(platform)
+                        self.log_test(f"Platform Generation - {platform}", False, f"Missing content structure")
+                else:
+                    failed_platforms.append(platform)
+                    self.log_test(f"Platform Generation - {platform}", False, f"Status: {response.status_code}")
+                    
+            except Exception as e:
+                failed_platforms.append(platform)
+                self.log_test(f"Platform Generation - {platform}", False, str(e))
+        
+        # Overall success if at least 6 out of 9 platforms work (including Instagram already tested)
+        overall_success = len(successful_platforms) >= 6
+        details = f"Successful platforms: {successful_platforms}, Failed: {failed_platforms}"
+        
+        self.log_test("Multiple Platform Generation - Overall", overall_success, details)
+        return overall_success
+
+    def test_user_profile_territory_ownership(self):
+        """Test GET /auth/me to verify user owns ZIP 10001"""
+        try:
+            if not self.auth_token:
+                self.log_test("User Profile Territory Ownership", False, "No auth token available")
+                return False
+            
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+            response = requests.get(f"{self.api_url}/auth/me", headers=headers, timeout=10)
+            
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                owned_territories = data.get("owned_territories", [])
+                success = "10001" in owned_territories
+                details = f"User {data.get('email')} owns ZIP 10001: {'Yes' if success else 'No'}, all territories: {owned_territories}"
+            else:
+                details = f"Status: {response.status_code}"
+            
+            self.log_test("User Profile Territory Ownership", success, details)
+            return success
+            
+        except Exception as e:
+            self.log_test("User Profile Territory Ownership", False, str(e))
+            return False
+
+    def run_individual_platform_generation_test(self):
+        """Run tests specifically for individual platform generation system"""
+        print("🚀 Testing Individual Platform Generation System")
+        print(f"📍 Testing against: {self.base_url}")
+        print("=" * 60)
+        
+        # Reset counters for this specific test run
+        initial_tests_run = self.tests_run
+        initial_tests_passed = self.tests_passed
+        
+        print(f"\n🔑 Step 1: Login with test user {self.test_user_email}")
+        if not self.test_login_existing_user():
+            print("❌ Failed to login with test user. Cannot proceed with platform generation tests.")
+            return False
+        
+        print(f"\n👤 Step 2: Verify user owns ZIP 10001")
+        if not self.test_user_profile_territory_ownership():
+            print("❌ User doesn't own ZIP 10001. Cannot proceed with platform generation tests.")
+            return False
+        
+        print(f"\n🚫 Step 3: Test authentication requirements")
+        self.test_platform_generation_no_auth()
+        
+        print(f"\n🏠 Step 4: Test territory ownership validation")
+        self.test_platform_generation_invalid_territory()
+        
+        print(f"\n📱 Step 5: Test Instagram content generation")
+        if not self.test_instagram_content_generation():
+            print("❌ Instagram content generation failed.")
+        
+        print(f"\n🌐 Step 6: Test multiple platform generation")
+        self.test_multiple_platform_generation()
+        
+        # Calculate results for this test run only
+        tests_run_this_session = self.tests_run - initial_tests_run
+        tests_passed_this_session = self.tests_passed - initial_tests_passed
+        
+        # Print final results
+        print("\n" + "=" * 60)
+        print(f"📊 Individual Platform Generation Test Results: {tests_passed_this_session}/{tests_run_this_session} tests passed")
+        
+        if tests_passed_this_session == tests_run_this_session:
+            print("🎉 All individual platform generation tests passed!")
+            return True
+        else:
+            failed_tests = tests_run_this_session - tests_passed_this_session
+            print(f"⚠️  {failed_tests} test(s) failed. Please review the issues above.")
+            return False
+
     def run_updated_prompts_test(self):
         """Run tests specifically for updated prompts and field name changes"""
         print("🚀 Testing Updated Prompts for ZIP Territory Pro Platform")
