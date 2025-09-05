@@ -1225,9 +1225,9 @@ class ZipIntelAPITester:
 def main():
     tester = ZipIntelAPITester()
     
-    # Run the updated prompts test as requested in the review
-    print("Running Updated Prompts Test as requested in review...")
-    success = tester.run_updated_prompts_test()
+    # Run the individual platform generation test as requested in the review
+    print("Running Individual Platform Generation Test as requested in review...")
+    success = tester.run_individual_platform_generation_test()
     
     return 0 if success else 1
 
