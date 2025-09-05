@@ -278,36 +278,100 @@ Be specific, professional, and avoid fluff. Use lists where possible. Keep table
                 "error": str(e),
             }
 
-    async def generate_seo_youtube_trends(self, zip_code: str, location_info: Dict[str, Any]) -> Dict[str, Any]:
+    async def generate_seo_social_trends(self, zip_code: str, location_info: Dict[str, Any]) -> Dict[str, Any]:
         city_name = location_info.get('city', 'Unknown')
         state_name = location_info.get('state', 'Unknown')
         try:
             prompt = f"""
-Act as an SEO expert and YouTube strategist. I'm a Realtor in {city_name}, {state_name} (ZIP {zip_code}).
+Act as an SEO expert and social media strategist. I'm a Realtor in {city_name}, {state_name} (ZIP {zip_code}).
+
+Identify the top trending searches, keywords, and questions buyers are Googling and searching natively on Facebook, Instagram, X/Twitter, and TikTok about moving to or living in {city_name}, {state_name} in the past 90 days.
 
 Return your answer in clean Markdown with clear sections and lists using this structure:
 
-# SEO & YouTube Trends – {city_name}, {state_name}
+# SEO & Social Media Trends – {city_name}, {state_name}
 
 ## Market Search Insights
-- 2-4 sentences summarizing how locals and relocators search for {city_name} topics
+- 2-4 sentences summarizing how locals and relocators search across platforms for {city_name} topics
 
-## High-Volume Local Keywords
-- Bullet list of short phrases with brief intent notes
+## High-Volume Local Keywords (10-15)
+- Bullet list with user intent notes
 
-| Keyword | Intent | Note |
+| Keyword | Intent | Search Volume Indicator |
 | --- | --- | --- |
-| moving to {city_name} | informational | relocation interest |
-| best neighborhoods in {city_name} | research | school/lifestyle fit |
+| moving to {city_name} | informational | High relocation interest |
+| best neighborhoods in {city_name} | research | School/lifestyle fit |
+| {city_name} cost of living | comparison | Budget planning |
 
-## Long-Tail Questions
-- Bullet list of People Also Ask-style questions
+## Long-Tail Questions (8-12)
+- "What neighborhoods in {city_name} have the best schools?"
+- "How much does it cost to live in {city_name} compared to [other cities]?"
+- "What's the job market like in {city_name}?"
 
-## Video Title Ideas
-- Bullet list of YouTube-ready titles optimized for search and CTR
+## Video/Content Title Ideas (10)
+- YouTube and social-ready titles optimized for search and engagement
+- Include geo modifiers and trending angles
+
+## Platform-Specific Breakouts
+
+### Facebook
+**Native Queries/Hashtags (5-10):**
+- Bullet list of Facebook-specific searches and group discussions
+
+**Hook Patterns (3):**
+- Attention-grabbing opening lines that work on Facebook
+
+**Content Angles (3):**
+- Facebook-specific content approaches (community focus, local events, family-oriented)
+
+**Sample Post Titles (3):**
+- Ready-to-use Facebook post headlines
+
+### Instagram  
+**Native Queries/Hashtags (5-10):**
+- Instagram-specific hashtags and search behaviors
+
+**Hook Patterns (3):**
+- Visual-first hooks for feed posts and reels
+
+**Content Angles (3):**
+- Instagram-specific approaches (lifestyle, behind-scenes, aesthetic)
+
+**Sample Post Titles (3):**
+- Caption-ready titles for Instagram posts
+
+### X/Twitter
+**Native Queries/Hashtags (5-10):**
+- Twitter-specific hashtags and real-time search trends
+
+**Hook Patterns (3):**
+- Tweet-length hooks for engagement
+
+**Content Angles (3):**
+- Twitter-specific approaches (news, quick tips, conversations)
+
+**Sample Post Titles (3):**
+- Tweet-ready headlines
+
+### TikTok
+**Native Queries/Hashtags (5-10):**
+- TikTok trending hashtags and search behaviors
+
+**Hook Patterns (3):**
+- 8-second rule hooks for TikTok videos
+
+**Content Angles (3):**
+- TikTok-specific approaches (trends, education, entertainment)
+
+**Sample Post Titles (3):**
+- TikTok video titles and concepts
 
 ## Implementation Tips
-- Actionable on-page SEO and YouTube optimization tips (titles, descriptions, chapters, hooks)
+- Cross-platform keyword usage strategies
+- Platform-specific optimization techniques
+- Content repurposing recommendations
+
+Use geo modifiers ({city_name}, nearby neighborhoods/landmarks). Keep Fair Housing compliant. Be specific and actionable.
 """
             response_text = await self._safe_send(prompt)
             return {
