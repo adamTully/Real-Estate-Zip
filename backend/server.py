@@ -1276,10 +1276,6 @@ async def generate_platform_content(
         logging.error(f"Error generating {platform} content for {zip_code}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error generating {platform} content: {str(e)}")
 
-@api_router.get("/")
-async def root():
-    return {"message": "ZIP Intel Generator API v2.0 (buyer+seo+strategy+assets)"}
-
 # Mount router and middleware
 app.include_router(api_router)
 app.add_middleware(
