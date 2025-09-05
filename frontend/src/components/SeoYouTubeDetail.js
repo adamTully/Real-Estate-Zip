@@ -43,7 +43,7 @@ const SeoYouTubeDetail = ({ data }) => {
           <span className="text-lg">{data.location?.city}, {data.location?.state} Market Analysis</span>
         </div>
         <p className="text-neutral-600 max-w-2xl mx-auto leading-relaxed">
-          Keyword trends, long-tail questions, video title ideas, and implementation tips styled for quick scanning.
+          Multi-platform keyword trends, social media insights, and platform-specific content strategies for maximum reach.
         </p>
       </div>
 
