@@ -1026,7 +1026,7 @@ async def analyze_zip_code(request: ZipAnalysisRequest, background_tasks: Backgr
         svc = ZipIntelligenceService()
         location_info = await svc.get_location_info(zip_code)
         buyer_migration = await svc.generate_buyer_migration_intel(zip_code, location_info)
-        seo = await svc.generate_seo_youtube_trends(zip_code, location_info)
+        seo = await svc.generate_seo_social_trends(zip_code, location_info)
         strategy = await svc.generate_content_strategy(zip_code, location_info)
         assets = await svc.generate_content_assets(zip_code, location_info)
         intelligence = MarketIntelligence(
