@@ -594,7 +594,7 @@ async def _run_zip_job(zip_code: str):
         await asyncio.sleep(0.5)
 
         await _update_task(zip_code, "seo_youtube_trends", "running", 10)
-        seo = await svc.generate_seo_youtube_trends(zip_code, location_info)
+        seo = await svc.generate_seo_social_trends(zip_code, location_info)
         await _update_task(zip_code, "seo_youtube_trends", "done", 100)
         await _update_overall(zip_code, TASK_PERCENT["seo_youtube_trends"])
         await asyncio.sleep(0.5)
