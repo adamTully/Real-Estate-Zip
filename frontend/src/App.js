@@ -564,7 +564,10 @@ function AppContent() {
         ) : activeKey === 'content_strategy' ? (
           <ContentStrategyDetail data={analysisData.content_strategy} />
         ) : activeKey === 'content_assets' ? (
-          <ContentCreationDetail data={analysisData.content_assets} />
+          <ContentAssetsPlatform 
+            zipCode={user?.owned_territories?.[0] || null} 
+            analysisData={analysisData} 
+          />
         ) : (
           <Card><CardContent><p className="text-sm text-neutral-600">Select a section from the sidebar.</p></CardContent></Card>
         )}
