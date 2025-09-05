@@ -230,7 +230,7 @@
 
 ## test_plan:
   current_focus:
-    - "Individual Platform Generation System Implementation"
+    - "Territory Assignment Bug Investigation for adamtest1@gmail.com"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
