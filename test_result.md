@@ -183,7 +183,7 @@
 
 ## test_plan:
   current_focus:
-    - "Territory Assignment System Implementation"
+    - "Updated Prompts Testing - SEO & Social Media Trends Field Rename"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
