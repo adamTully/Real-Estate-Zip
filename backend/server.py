@@ -1218,6 +1218,68 @@ async def regenerate_assets(request: ZipAnalysisRequest):
 async def root():
     return {"message": "ZIP Intel Generator API v2.0 (buyer+seo+strategy+assets)"}
 
+# Individual Platform Generation Endpoints
+@api_router.post("/generate-platform-content/{platform}")
+async def generate_platform_content(
+    platform: str, 
+    request_data: dict, 
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate content for a specific social media platform"""
+    zip_code = request_data.get("zip_code")
+    if not zip_code:
+        raise HTTPException(status_code=400, detail="ZIP code is required")
+    
+    # Verify user owns this territory
+    if zip_code not in current_user.get("owned_territories", []):
+        raise HTTPException(status_code=403, detail="You don't own this territory")
+    
+    # Get stored intelligence data for this ZIP
+    analysis = await db.market_intelligence.find_one({"zip_code": zip_code})
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found for this ZIP code")
+    
+    # Extract intelligence data
+    buyer_migration = analysis.get("buyer_migration", {})
+    seo_social_trends = analysis.get("seo_social_trends", {})
+    content_strategy = analysis.get("content_strategy", {})
+    location_info = buyer_migration.get("location", {})
+    
+    # Platform-specific generation
+    svc = ZipIntelligenceService()
+    
+    try:
+        if platform == "instagram":
+            content = await svc.generate_instagram_content(zip_code, location_info, buyer_migration, seo_social_trends, content_strategy)
+        elif platform == "facebook":
+            content = await svc.generate_facebook_content(zip_code, location_info, buyer_migration, seo_social_trends, content_strategy)  
+        elif platform == "linkedin":
+            content = await svc.generate_linkedin_content(zip_code, location_info, buyer_migration, seo_social_trends, content_strategy)
+        elif platform == "tiktok":
+            content = await svc.generate_tiktok_content(zip_code, location_info, buyer_migration, seo_social_trends, content_strategy)
+        elif platform == "youtube-shorts":
+            content = await svc.generate_youtube_shorts_content(zip_code, location_info, buyer_migration, seo_social_trends, content_strategy)
+        elif platform == "twitter":
+            content = await svc.generate_twitter_content(zip_code, location_info, buyer_migration, seo_social_trends, content_strategy)
+        elif platform == "snapchat":
+            content = await svc.generate_snapchat_content(zip_code, location_info, buyer_migration, seo_social_trends, content_strategy)
+        elif platform == "blog":
+            content = await svc.generate_blog_content(zip_code, location_info, buyer_migration, seo_social_trends, content_strategy)
+        elif platform == "email":
+            content = await svc.generate_email_content(zip_code, location_info, buyer_migration, seo_social_trends, content_strategy)
+        else:
+            raise HTTPException(status_code=400, detail=f"Platform '{platform}' not supported")
+        
+        return content
+        
+    except Exception as e:
+        logging.error(f"Error generating {platform} content for {zip_code}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating {platform} content: {str(e)}")
+
+@api_router.get("/")
+async def root():
+    return {"message": "ZIP Intel Generator API v2.0 (buyer+seo+strategy+assets)"}
+
 # Mount router and middleware
 app.include_router(api_router)
 app.add_middleware(
