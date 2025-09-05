@@ -1040,7 +1040,7 @@ function AppContent() {
             <DetailLayout activeKey="buyer_migration" />
           </ProtectedRoute>
         } />
-        <Route path="/seo-youtube-trends" element={
+        <Route path="/seo-social-trends" element={
           <ProtectedRoute>
             <DetailLayout activeKey="seo_social_trends" />
           </ProtectedRoute>
