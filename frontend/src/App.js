@@ -558,8 +558,8 @@ function AppContent() {
           </Card>
         ) : activeKey === 'buyer_migration' ? (
           <BuyerMigrationDetailView data={analysisData.buyer_migration} />
-        ) : activeKey === 'seo_youtube_trends' ? (
-          <SeoYouTubeDetail data={analysisData.seo_youtube_trends} />
+        ) : activeKey === 'seo_social_trends' ? (
+          <SeoYouTubeDetail data={analysisData.seo_social_trends} />
         ) : activeKey === 'content_strategy' ? (
           <ContentStrategyDetail data={analysisData.content_strategy} />
         ) : activeKey === 'content_assets' ? (
