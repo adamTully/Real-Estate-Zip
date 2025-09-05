@@ -156,7 +156,7 @@ class MarketIntelligence(BaseModel):
 
 # Focus-mode task plan: add Content Assets
 TASK_ORDER = ["location", "buyer_migration", "seo_social_trends", "content_strategy", "content_assets"]
-TASK_PERCENT = {"location": 15, "buyer_migration": 40, "seo_youtube_trends": 70, "content_strategy": 90, "content_assets": 100}
+TASK_PERCENT = {"location": 15, "buyer_migration": 40, "seo_social_trends": 70, "content_strategy": 90, "content_assets": 100}
 
 # Service
 class ZipIntelligenceService:
