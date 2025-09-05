@@ -188,6 +188,17 @@
         -working: true
         -agent: "testing"
         -comment: "COMPREHENSIVE UI TESTING COMPLETED: ✅ Fixed JSX syntax error in MarketResearchDetail.js (missing closing tag). ✅ Home page loads correctly with ZIP input form. ✅ Valid ZIP (94105) successfully generates intelligence within expected timeframe. ✅ Dashboard displays 'Market Intelligence Dashboard' title and all 5 required cards (Buyer Migration Intel, SEO & YouTube Trends, Content Strategy, Market Research, Content Creation). ✅ All 'View Full Analysis' buttons work correctly for first 4 categories. ✅ Detail pages load with proper content rendering - found Markdown elements (h1, h2, h3, p, prose classes) indicating MarkdownRenderer is working. ✅ Sidebar navigation 'Intelligence Overview' successfully returns to dashboard. ✅ Content Creation page loads with 26 download buttons. ✅ Download functionality works - successfully initiated download of '94105-blog-post-1.md'. ✅ Page reload resets state to home correctly. ✅ Invalid ZIP '1234' shows proper error message 'Please enter a valid ZIP code'. All major functionality working as expected. Minor: Backend returns fallback mode data instead of real LLM content, but this doesn't affect core UI functionality."
+  - task: "Update frontend for SEO & Social Media Trends field rename"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js, /app/frontend/src/components/IntelligenceDashboard.js, /app/frontend/src/components/IntelligenceSidebar.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "Updated frontend components to use new field name 'seo_social_trends' instead of 'seo_youtube_trends': 1. Updated App.js routing and data mapping. 2. Updated IntelligenceDashboard card title and field references. 3. Updated IntelligenceSidebar navigation label and field references. 4. Updated route paths from /seo-youtube-trends to /seo-social-trends. All frontend references now consistent with backend field rename."
 
 ## metadata:
   created_by: "main_agent"
