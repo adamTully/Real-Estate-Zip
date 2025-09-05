@@ -601,6 +601,259 @@ Requirements:
                 "error": str(e),
             }
 
+    # Individual Platform Generation Methods
+    async def generate_instagram_content(self, zip_code: str, location_info: Dict[str, Any], buyer_migration: Dict[str, Any], seo_social_trends: Dict[str, Any], content_strategy: Dict[str, Any]) -> Dict[str, Any]:
+        city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        try:
+            # Extract relevant data from stored intelligence
+            buyer_insights = buyer_migration.get('analysis_content', '')[:500]  # First 500 chars
+            instagram_strategy = content_strategy.get('analysis_content', '')
+            seo_data = seo_social_trends.get('analysis_content', '')
+            
+            prompt = f"""
+You are an Instagram content specialist for real estate agents in {city_name}, {state_name} (ZIP {zip_code}).
+
+Using this market intelligence:
+BUYER INSIGHTS: {buyer_insights}...
+INSTAGRAM STRATEGY: Look for Instagram-specific guidance in the content strategy.
+SEO DATA: Extract Instagram hashtags and content angles from the social media trends data.
+
+Generate 4 Instagram posts optimized for real estate agents targeting relocation buyers.
+
+Return ONLY valid JSON:
+{{
+  "summary": "Instagram content for {city_name}, {state_name}",
+  "instagram_posts": [
+    {{
+      "name": "ig-post-1-{zip_code}.txt",
+      "title": "Moving to {city_name}: What You Need to Know",
+      "content": "Complete Instagram post caption text here...",
+      "post_type": "feed",
+      "hashtags": "#MovingTo{city_name.replace(' ', '')} #RealEstate #Relocation",
+      "hook": "🏠 Thinking about moving to {city_name}?",
+      "visual_concept": "Neighborhood aerial shot with key stats overlay"
+    }}
+  ]
+}}
+
+Requirements:
+- 2 feed posts (carousel-style, 150-200 words each)
+- 2 reel scripts (hook + 60-90 second script)
+- Include 15-20 relevant hashtags per post
+- Reference buyer migration insights naturally
+- Use local SEO keywords from the research
+- Fair Housing compliant language
+"""
+            response_text = await self._safe_send(prompt)
+            
+            # Parse JSON response
+            try:
+                import json
+                data = json.loads(response_text)
+                return data
+            except:
+                # Fallback if JSON parsing fails
+                return {
+                    "summary": f"Instagram content for {city_name}, {state_name}",
+                    "instagram_posts": [
+                        {
+                            "name": f"ig-post-1-{zip_code}.txt",
+                            "title": f"Moving to {city_name}: Market Update",
+                            "content": response_text[:500] + "...",
+                            "post_type": "feed",
+                            "hashtags": f"#MovingTo{city_name.replace(' ', '')} #RealEstate",
+                            "hook": f"🏠 Thinking about moving to {city_name}?",
+                            "visual_concept": "Market data infographic"
+                        }
+                    ]
+                }
+        except Exception as e:
+            logging.error(f"Error generating Instagram content: {str(e)}")
+            return {
+                "summary": f"Instagram content (fallback) for {city_name}, {state_name}",
+                "instagram_posts": [],
+                "error": str(e)
+            }
+
+    async def generate_facebook_content(self, zip_code: str, location_info: Dict[str, Any], buyer_migration: Dict[str, Any], seo_social_trends: Dict[str, Any], content_strategy: Dict[str, Any]) -> Dict[str, Any]:
+        city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        try:
+            buyer_insights = buyer_migration.get('analysis_content', '')[:500]
+            facebook_strategy = content_strategy.get('analysis_content', '')
+            
+            prompt = f"""
+You are a Facebook content specialist for real estate agents in {city_name}, {state_name} (ZIP {zip_code}).
+
+Using market intelligence data, generate 4 Facebook posts for community engagement and lead generation.
+
+Return ONLY valid JSON:
+{{
+  "summary": "Facebook content for {city_name}, {state_name}",
+  "facebook_posts": [
+    {{
+      "name": "fb-post-1-{zip_code}.txt",
+      "title": "{city_name} Market Update",
+      "content": "Facebook post content here...",
+      "post_type": "page_post",
+      "engagement_angle": "Community discussion starter",
+      "visual_concept": "Local market statistics graphic"
+    }}
+  ]
+}}
+
+Requirements:
+- 2 page posts (community-focused, 100-150 words)
+- 2 reel concepts (trend-based, 80-120 words)
+- Focus on community engagement and local insights
+- Include calls-to-action for consultation bookings
+- Reference buyer migration patterns for {city_name}
+"""
+            response_text = await self._safe_send(prompt)
+            
+            try:
+                import json
+                return json.loads(response_text)
+            except:
+                return {
+                    "summary": f"Facebook content for {city_name}, {state_name}",
+                    "facebook_posts": [
+                        {
+                            "name": f"fb-post-1-{zip_code}.txt",
+                            "title": f"{city_name} Market Update",
+                            "content": response_text[:400] + "...",
+                            "post_type": "page_post",
+                            "engagement_angle": "Market discussion",
+                            "visual_concept": "Market statistics"
+                        }
+                    ]
+                }
+        except Exception as e:
+            return {
+                "summary": f"Facebook content (fallback) for {city_name}, {state_name}",
+                "facebook_posts": [],
+                "error": str(e)
+            }
+
+    async def generate_tiktok_content(self, zip_code: str, location_info: Dict[str, Any], buyer_migration: Dict[str, Any], seo_social_trends: Dict[str, Any], content_strategy: Dict[str, Any]) -> Dict[str, Any]:
+        city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        try:
+            prompt = f"""
+You are a TikTok content specialist for real estate agents in {city_name}, {state_name} (ZIP {zip_code}).
+
+Generate 4 TikTok video scripts optimized for the real estate vertical.
+
+Return ONLY valid JSON:
+{{
+  "summary": "TikTok content for {city_name}, {state_name}",
+  "tiktok_posts": [
+    {{
+      "name": "tt-video-1-{zip_code}.txt",
+      "title": "Moving to {city_name}? Here's what you need to know",
+      "content": "TikTok script with timing cues...",
+      "hook": "POV: You're thinking about moving to {city_name}",
+      "video_concept": "Quick facts with text overlay",
+      "duration": "30s"
+    }}
+  ]
+}}
+
+Requirements:
+- 4 video scripts (15-30 seconds each)
+- Include 8-second hook rule compliance
+- Trend-aware content angles
+- Local market insights
+- Engaging visual concepts
+"""
+            response_text = await self._safe_send(prompt)
+            
+            try:
+                import json
+                return json.loads(response_text)
+            except:
+                return {
+                    "summary": f"TikTok content for {city_name}, {state_name}",
+                    "tiktok_posts": [
+                        {
+                            "name": f"tt-video-1-{zip_code}.txt",
+                            "title": f"Moving to {city_name}? Here's what you need to know",
+                            "content": response_text[:300] + "...",
+                            "hook": f"POV: You're thinking about moving to {city_name}",
+                            "video_concept": "Market facts overlay",
+                            "duration": "30s"
+                        }
+                    ]
+                }
+        except Exception as e:
+            return {
+                "summary": f"TikTok content (fallback) for {city_name}, {state_name}",
+                "tiktok_posts": [],
+                "error": str(e)
+            }
+
+    # Additional methods for other platforms...
+    async def generate_linkedin_content(self, zip_code: str, location_info: Dict[str, Any], buyer_migration: Dict[str, Any], seo_social_trends: Dict[str, Any], content_strategy: Dict[str, Any]) -> Dict[str, Any]:
+        city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        return {
+            "summary": f"LinkedIn content for {city_name}, {state_name}",
+            "linkedin_posts": [
+                {"name": f"li-post-1-{zip_code}.txt", "title": f"{city_name} Market Analysis", "content": f"Professional market insights for {city_name}, {state_name} real estate trends...", "post_type": "update", "professional_angle": "Industry expertise"}
+            ]
+        }
+
+    async def generate_youtube_shorts_content(self, zip_code: str, location_info: Dict[str, Any], buyer_migration: Dict[str, Any], seo_social_trends: Dict[str, Any], content_strategy: Dict[str, Any]) -> Dict[str, Any]:
+        city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        return {
+            "summary": f"YouTube Shorts content for {city_name}, {state_name}",
+            "youtube_shorts": [
+                {"name": f"ys-short-1-{zip_code}.txt", "title": f"Moving to {city_name}? Watch This!", "content": f"YouTube Shorts script for {city_name} relocation tips...", "hook": f"🏠 Moving to {city_name}?", "thumbnail_text": "MUST KNOW", "video_concept": "Quick tips format"}
+            ]
+        }
+
+    async def generate_twitter_content(self, zip_code: str, location_info: Dict[str, Any], buyer_migration: Dict[str, Any], seo_social_trends: Dict[str, Any], content_strategy: Dict[str, Any]) -> Dict[str, Any]:
+        city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        return {
+            "summary": f"Twitter content for {city_name}, {state_name}",
+            "twitter_posts": [
+                {"name": f"tw-tweet-1-{zip_code}.txt", "title": f"{city_name} Market Update", "content": f"🏠 {city_name} real estate update: [market insights] #RealEstate #{city_name.replace(' ', '')}", "post_type": "tweet", "hashtags": f"#RealEstate #{city_name.replace(' ', '')}"}
+            ]
+        }
+
+    async def generate_snapchat_content(self, zip_code: str, location_info: Dict[str, Any], buyer_migration: Dict[str, Any], seo_social_trends: Dict[str, Any], content_strategy: Dict[str, Any]) -> Dict[str, Any]:
+        city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        return {
+            "summary": f"Snapchat content for {city_name}, {state_name}",
+            "snapchat_posts": [
+                {"name": f"sc-clip-1-{zip_code}.txt", "title": f"{city_name} Property Tour", "content": f"Snapchat Spotlight clip for {city_name} property highlights...", "hook": f"🏡 {city_name} vibes", "video_concept": "Quick property highlights", "duration": "15s"}
+            ]
+        }
+
+    async def generate_blog_content(self, zip_code: str, location_info: Dict[str, Any], buyer_migration: Dict[str, Any], seo_social_trends: Dict[str, Any], content_strategy: Dict[str, Any]) -> Dict[str, Any]:
+        city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        return {
+            "summary": f"Blog content for {city_name}, {state_name}",
+            "blog_posts": [
+                {"name": f"blog-{zip_code}-ultimate-guide.txt", "title": f"Ultimate Guide to Moving to {city_name}, {state_name}", "content": f"Comprehensive guide covering everything you need to know about relocating to {city_name}..."}
+            ]
+        }
+
+    async def generate_email_content(self, zip_code: str, location_info: Dict[str, Any], buyer_migration: Dict[str, Any], seo_social_trends: Dict[str, Any], content_strategy: Dict[str, Any]) -> Dict[str, Any]:
+        city_name = location_info.get('city', 'Unknown')
+        state_name = location_info.get('state', 'Unknown')
+        return {
+            "summary": f"Email content for {city_name}, {state_name}",
+            "email_campaigns": [
+                {"name": f"email-{zip_code}-welcome.txt", "title": f"Welcome to {city_name} Market Updates", "content": f"Welcome email for new subscribers interested in {city_name} real estate..."}
+            ]
+        }
+
 # Status helpers
 async def _init_status(zip_code: str) -> Dict[str, Any]:
     now = datetime.utcnow()
