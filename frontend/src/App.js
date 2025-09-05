@@ -1042,7 +1042,7 @@ function AppContent() {
         } />
         <Route path="/seo-youtube-trends" element={
           <ProtectedRoute>
-            <DetailLayout activeKey="seo_youtube_trends" />
+            <DetailLayout activeKey="seo_social_trends" />
           </ProtectedRoute>
         } />
         <Route path="/content-strategy" element={
