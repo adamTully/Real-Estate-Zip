@@ -107,7 +107,7 @@ class ZIP30126Investigator:
             
             if users_response.status_code != 200:
                 self.log_test("User Database Search", False, f"Failed to get users: {users_response.status_code}")
-                return False
+                return False, []
             
             users_data = users_response.json()
             
