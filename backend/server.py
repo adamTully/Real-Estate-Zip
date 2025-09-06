@@ -1342,6 +1342,32 @@ FALLBACK_ZIP_DATA = {
     }
 }
 
+@api_router.post("/admin/force-zip-release")
+async def force_zip_release(zip_data: dict):
+    """Force release a ZIP code from all users - admin only"""
+    zip_code = zip_data.get("zip_code")
+    if not zip_code:
+        raise HTTPException(status_code=400, detail="ZIP code is required")
+        
+    try:
+        # Remove ZIP from ALL users who have it
+        result = await users_collection.update_many(
+            {"owned_territories": zip_code},
+            {"$pull": {"owned_territories": zip_code}}
+        )
+        
+        modified_count = result.modified_count
+        
+        return {
+            "message": f"ZIP {zip_code} forcefully released from all users",
+            "users_modified": modified_count,
+            "zip_code": zip_code,
+            "success": True
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error releasing ZIP: {str(e)}")
+
 @api_router.post("/zip-availability/check")
 async def check_zip_availability(zip_data: dict):
     """Check if a ZIP code is available and get real location data"""
