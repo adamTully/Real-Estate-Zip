@@ -244,7 +244,7 @@
 
 ## test_plan:
   current_focus:
-    - "ZIP Code Analysis Failure Investigation for adamtest1@gmail.com"
+    - "Complete User Data Cleanup for adamtest1@gmail.com and ZIP 30126"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
