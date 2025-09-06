@@ -156,12 +156,35 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [hasGenerated, setHasGenerated] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressText, setProgressText] = useState('');
 
   const generateContent = async () => {
     setLoading(true);
     setError('');
+    setProgress(0);
+    setProgressText('Initializing...');
     
     try {
+      // Simulate progress updates
+      const progressSteps = [
+        { percent: 10, text: 'Connecting to AI...' },
+        { percent: 25, text: 'Analyzing market data...' },
+        { percent: 50, text: 'Generating content...' },
+        { percent: 75, text: 'Optimizing for platform...' },
+        { percent: 90, text: 'Finalizing posts...' }
+      ];
+
+      // Start progress simulation
+      let currentStep = 0;
+      const progressInterval = setInterval(() => {
+        if (currentStep < progressSteps.length) {
+          setProgress(progressSteps[currentStep].percent);
+          setProgressText(progressSteps[currentStep].text);
+          currentStep++;
+        }
+      }, 800);
+
       const token = localStorage.getItem('token');
       const response = await axios.post(
         `${API}/generate-platform-content/${platform}`,
@@ -170,6 +193,10 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
+      
+      clearInterval(progressInterval);
+      setProgress(100);
+      setProgressText('Content generated successfully!');
       
       // Extract content based on platform
       const platformKey = `${platform}_posts`;
@@ -182,8 +209,16 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
       setContent(prev => [...prev, ...newContent]);
       setHasGenerated(true);
       
+      // Reset progress after short delay
+      setTimeout(() => {
+        setProgress(0);
+        setProgressText('');
+      }, 2000);
+      
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to generate content');
+      setProgress(0);
+      setProgressText('');
     } finally {
       setLoading(false);
     }
@@ -226,6 +261,27 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
           {loading ? 'Generating...' : hasGenerated ? 'Generate More' : 'Generate Content'}
         </Button>
       </div>
+
+      {/* Progress Bar */}
+      {loading && (
+        <Card className="p-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-neutral-600">{progressText}</span>
+              <span className="text-neutral-900 font-medium">{progress}%</span>
+            </div>
+            <div className="w-full bg-neutral-200 rounded-full h-2">
+              <div 
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+            <div className="text-xs text-neutral-500 text-center">
+              ⚡ Generating {platformLabels[platform]} content using AI...
+            </div>
+          </div>
+        </Card>
+      )}
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3">
