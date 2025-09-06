@@ -278,9 +278,9 @@
     -message: "ZIP AVAILABILITY CHECK ISSUE COMPLETELY RESOLVED: 🎉 CRITICAL GEOCODING SERVICE CONNECTIVITY ISSUE FIXED! ✅ ROOT CAUSE IDENTIFIED: Server cannot connect to nominatim.openstreetmap.org due to network/firewall restrictions in Kubernetes environment (Connection refused/timeout errors). ✅ COMPREHENSIVE SOLUTION IMPLEMENTED: Added robust fallback system with FALLBACK_ZIP_DATA dictionary containing accurate location data for common ZIP codes including ZIP 30126 (Kennesaw, GA). ✅ TESTING RESULTS: ZIP 30126 now works perfectly - returns 'Kennesaw, Georgia' with correct coordinates (34.0234, -84.6155). ✅ ALL TEST ZIP CODES WORKING: 10001 (New York, NY), 90210 (Beverly Hills, CA), 60601 (Chicago, IL) all functioning correctly. ✅ USER FLOW RESTORED: Users can now successfully check ZIP availability for 30126 and proceed with registration flow as intended. ✅ SYSTEM RESILIENCE: Fallback system ensures ZIP availability checks work even when external geocoding services are unavailable. The issue that was blocking user registration for ZIP 30126 has been completely resolved."
   - task: "ZIP Availability Check Fix for ZIP 30126"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -290,3 +290,6 @@
         -working: true
         -agent: "testing"
         -comment: "ZIP AVAILABILITY ISSUE SUCCESSFULLY FIXED: ✅ Implemented comprehensive fallback system with manual location data for common ZIP codes. ✅ Added FALLBACK_ZIP_DATA dictionary with accurate coordinates for ZIP 30126 (Kennesaw, GA), 10001 (New York, NY), 90210 (Beverly Hills, CA), 60601 (Chicago, IL), and other major cities. ✅ Modified /api/zip-availability/check endpoint to gracefully handle geocoding service failures by falling back to manual data. ✅ COMPREHENSIVE TESTING COMPLETED: ZIP 30126 now returns correct location info (Kennesaw, Georgia) with coordinates (34.0234, -84.6155). ✅ All test ZIP codes (10001, 90210, 60601) working correctly with fallback data. ✅ System properly handles both available and assigned ZIP codes. ✅ Invalid ZIP format validation still working correctly. ✅ Error handling improved with specific messages for unsupported ZIP codes. ✅ User can now proceed with registration flow for ZIP 30126 as requested. The geocoding fallback system ensures reliable ZIP availability checks even when external services are unavailable."
+        -working: false
+        -agent: "testing"
+        -comment: "🚨 CRITICAL INVESTIGATION COMPLETED: ZIP 30126 shows as TAKEN after cleanup due to database inconsistency. ✅ ROOT CAUSE IDENTIFIED: ZIP 30126 is assigned to user 'temp_cleanup_1757178567@example.com' in the database, preventing new user registration. ✅ COMPREHENSIVE TESTING: POST /api/zip-availability/check correctly returns 'taken' status with assigned user email. ✅ DATABASE VERIFICATION: User exists in database with ZIP 30126 in owned_territories array. ✅ ANALYSIS DATA: No analysis records exist for ZIP 30126 (properly cleaned). ✅ FRESH REGISTRATION TEST: New users receive HTTP 409 conflict error when attempting to claim ZIP 30126. ✅ CONSISTENCY CHECK: API and database are consistent - ZIP is legitimately taken by existing user. ❌ CLEANUP INCOMPLETE: Previous cleanup operations did not fully remove ZIP 30126 from all user accounts. 💡 SOLUTION REQUIRED: Remove ZIP 30126 from user 'temp_cleanup_1757178567@example.com' owned_territories array in MongoDB to make ZIP available for new registration. The availability check is working correctly - the issue is incomplete user data cleanup."
