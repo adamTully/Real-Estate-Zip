@@ -1282,6 +1282,45 @@ async def fix_territory_assignment(fix_data: dict):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fixing territory assignment: {str(e)}")
 
+# Fallback location data for common ZIP codes when geocoding service is unavailable
+FALLBACK_ZIP_DATA = {
+    "30126": {
+        "city": "Kennesaw",
+        "state": "GA",
+        "county": "Cobb County",
+        "latitude": 34.0234,
+        "longitude": -84.6155
+    },
+    "10001": {
+        "city": "New York",
+        "state": "NY", 
+        "county": "New York County",
+        "latitude": 40.7505,
+        "longitude": -73.9934
+    },
+    "90210": {
+        "city": "Beverly Hills",
+        "state": "CA",
+        "county": "Los Angeles County", 
+        "latitude": 34.0901,
+        "longitude": -118.4065
+    },
+    "60601": {
+        "city": "Chicago",
+        "state": "IL",
+        "county": "Cook County",
+        "latitude": 41.8825,
+        "longitude": -87.6441
+    },
+    "94105": {
+        "city": "San Francisco",
+        "state": "CA",
+        "county": "San Francisco County",
+        "latitude": 37.7893,
+        "longitude": -122.3895
+    }
+}
+
 @api_router.post("/zip-availability/check")
 async def check_zip_availability(zip_data: dict):
     """Check if a ZIP code is available and get real location data"""
@@ -1294,92 +1333,115 @@ async def check_zip_availability(zip_data: dict):
     if not re.match(r'^\d{5}(-\d{4})?$', zip_code):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid ZIP code format")
     
+    # Initialize location variables
+    city = "Unknown"
+    state = "Unknown"
+    county = "Unknown County"
+    latitude = 0.0
+    longitude = 0.0
+    geocoding_source = "unknown"
+    
     try:
-        # Get real location data using geopy
-        geolocator = Nominatim(user_agent="zip-intel-generator")
+        # First try geocoding service
+        geolocator = Nominatim(user_agent="zip-intel-generator", timeout=5)
         location = geolocator.geocode(f"{zip_code}, USA")
         
-        if not location:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ZIP code not found")
-        
-        # Parse location data from geocoded address
-        address_parts = location.address.split(', ')
-        print(f"Geocoded address: {location.address}")  # Debug log
-        
-        # Initialize defaults
-        city = "Unknown"
-        state = "Unknown" 
-        county = "Unknown County"
-        
-        # Common US state abbreviations and full names
-        us_states = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
-        us_state_names = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
-        
-        # Parse the geocoded address (format: ZIP, City, County, State, Country)
-        for i, part in enumerate(address_parts):
-            part = part.strip()
+        if location:
+            # Parse location data from geocoded address
+            address_parts = location.address.split(', ')
+            print(f"Geocoded address: {location.address}")  # Debug log
             
-            # Look for state (abbreviation or full name)
-            if any(state_abbr in part for state_abbr in us_states) or any(state_name in part for state_name in us_state_names):
-                state = part
-                # Convert full state name to abbreviation for consistency
-                if part == 'Georgia':
-                    state = 'GA'
-                elif part == 'California':
-                    state = 'CA'
-                elif part == 'New York':
-                    state = 'NY'
-                elif part == 'Texas':
-                    state = 'TX'
-                elif part == 'Florida':
-                    state = 'FL'
-                # Add more as needed
-                    
-                # City is usually before state
-                if i >= 2:  # Skip ZIP code (index 0)
-                    city = address_parts[1].strip()  # Usually index 1 is city
-                    if i >= 3 and ('County' in address_parts[2] or 'Parish' in address_parts[2]):
-                        county = address_parts[2].strip()
-                break
-        
-        print(f"Parsed location: city={city}, state={state}, county={county}")  # Debug log
-        
-        # **CRITICAL FIX**: Check if ZIP is actually taken by checking user database
-        user_with_zip = await users_collection.find_one({"owned_territories": zip_code})
-        is_available = user_with_zip is None  # Available if no user owns it
-        
-        # Get waitlist count if ZIP is taken
-        waitlist_count = None
-        if not is_available:
-            # Count how many people might be on waitlist (mock for now)
-            import random
-            random.seed(hash(zip_code))
-            waitlist_count = random.randint(5, 30)
-        
-        result = {
-            "zip_code": zip_code,
-            "available": is_available,
-            "location_info": {
-                "city": city,
-                "state": state, 
-                "county": county,
-                "latitude": location.latitude,
-                "longitude": location.longitude
-            },
-            "pricing": {
-                "monthly_fee": 299,
-                "setup_fee": 99,
-                "annual_discount": 0.15
-            } if is_available else None,
-            "waitlist_count": waitlist_count,
-            "assigned_to": user_with_zip["email"] if user_with_zip else None  # Debug info
-        }
-        
-        return result
-        
+            # Common US state abbreviations and full names
+            us_states = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+            us_state_names = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
+            
+            # Parse the geocoded address (format: ZIP, City, County, State, Country)
+            for i, part in enumerate(address_parts):
+                part = part.strip()
+                
+                # Look for state (abbreviation or full name)
+                if any(state_abbr in part for state_abbr in us_states) or any(state_name in part for state_name in us_state_names):
+                    state = part
+                    # Convert full state name to abbreviation for consistency
+                    if part == 'Georgia':
+                        state = 'GA'
+                    elif part == 'California':
+                        state = 'CA'
+                    elif part == 'New York':
+                        state = 'NY'
+                    elif part == 'Texas':
+                        state = 'TX'
+                    elif part == 'Florida':
+                        state = 'FL'
+                    # Add more as needed
+                        
+                    # City is usually before state
+                    if i >= 2:  # Skip ZIP code (index 0)
+                        city = address_parts[1].strip()  # Usually index 1 is city
+                        if i >= 3 and ('County' in address_parts[2] or 'Parish' in address_parts[2]):
+                            county = address_parts[2].strip()
+                    break
+            
+            latitude = location.latitude
+            longitude = location.longitude
+            geocoding_source = "nominatim"
+            print(f"Parsed location from Nominatim: city={city}, state={state}, county={county}")
+        else:
+            raise Exception("No results from Nominatim")
+            
     except Exception as e:
         print(f"Geocoding error: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to lookup ZIP code location")
+        
+        # Fallback to manual data if available
+        if zip_code in FALLBACK_ZIP_DATA:
+            fallback_data = FALLBACK_ZIP_DATA[zip_code]
+            city = fallback_data["city"]
+            state = fallback_data["state"]
+            county = fallback_data["county"]
+            latitude = fallback_data["latitude"]
+            longitude = fallback_data["longitude"]
+            geocoding_source = "fallback"
+            print(f"Using fallback data for ZIP {zip_code}: {city}, {state}")
+        else:
+            # If no fallback data available, return error
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                detail=f"Failed to lookup ZIP code location. Geocoding service unavailable and no fallback data for ZIP {zip_code}."
+            )
+    
+    # **CRITICAL FIX**: Check if ZIP is actually taken by checking user database
+    user_with_zip = await users_collection.find_one({"owned_territories": zip_code})
+    is_available = user_with_zip is None  # Available if no user owns it
+    
+    # Get waitlist count if ZIP is taken
+    waitlist_count = None
+    if not is_available:
+        # Count how many people might be on waitlist (mock for now)
+        import random
+        random.seed(hash(zip_code))
+        waitlist_count = random.randint(5, 30)
+    
+    result = {
+        "zip_code": zip_code,
+        "available": is_available,
+        "location_info": {
+            "city": city,
+            "state": state, 
+            "county": county,
+            "latitude": latitude,
+            "longitude": longitude,
+            "geocoding_source": geocoding_source  # Debug info
+        },
+        "pricing": {
+            "monthly_fee": 299,
+            "setup_fee": 99,
+            "annual_discount": 0.15
+        } if is_available else None,
+        "waitlist_count": waitlist_count,
+        "assigned_to": user_with_zip["email"] if user_with_zip else None  # Debug info
+    }
+    
+    return result
 async def analyze_zip_code(request: ZipAnalysisRequest, background_tasks: BackgroundTasks):
     try:
         zip_code = request.zip_code
