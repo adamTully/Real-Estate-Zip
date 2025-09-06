@@ -1318,6 +1318,27 @@ FALLBACK_ZIP_DATA = {
         "county": "San Francisco County",
         "latitude": 37.7893,
         "longitude": -122.3895
+    },
+    "33101": {
+        "city": "Miami Beach",
+        "state": "FL",
+        "county": "Miami-Dade County",
+        "latitude": 25.7907,
+        "longitude": -80.1300
+    },
+    "75201": {
+        "city": "Dallas",
+        "state": "TX",
+        "county": "Dallas County",
+        "latitude": 32.7767,
+        "longitude": -96.7970
+    },
+    "02101": {
+        "city": "Boston",
+        "state": "MA",
+        "county": "Suffolk County",
+        "latitude": 42.3601,
+        "longitude": -71.0589
     }
 }
 
