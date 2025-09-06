@@ -1285,11 +1285,11 @@ async def fix_territory_assignment(fix_data: dict):
 # Fallback location data for common ZIP codes when geocoding service is unavailable
 FALLBACK_ZIP_DATA = {
     "30126": {
-        "city": "Kennesaw",
+        "city": "Mableton",
         "state": "GA",
         "county": "Cobb County",
-        "latitude": 34.0234,
-        "longitude": -84.6155
+        "latitude": 33.8176,
+        "longitude": -84.5816
     },
     "10001": {
         "city": "New York",
