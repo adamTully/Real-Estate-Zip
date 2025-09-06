@@ -99,7 +99,7 @@ class ZIP30126Investigator:
                     admin_token = login_data["access_token"]
                 else:
                     self.log_test("User Database Search", False, "Cannot authenticate to access user data")
-                    return False
+                    return False, []
             
             # Get all users
             admin_headers = {"Authorization": f"Bearer {admin_token}"}
