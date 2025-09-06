@@ -244,7 +244,7 @@
 
 ## test_plan:
   current_focus:
-    - "Territory Assignment Bug Investigation for adamtest1@gmail.com"
+    - "ZIP Code Analysis Failure Investigation for adamtest1@gmail.com"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
