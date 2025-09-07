@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Copy, Download, RefreshCw, FileText, Instagram, Facebook, Linkedin, Twitter, Music, Youtube, Hash, PenTool, Mail } from 'lucide-react';
 import axios from 'axios';
 
-const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001/api';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+const API = `${BACKEND_URL}/api`;
 
 // Simple UI components
 const Card = ({ children, className = "" }) => (
