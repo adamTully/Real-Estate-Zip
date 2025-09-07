@@ -543,10 +543,20 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
               item={item}
               onCopy={onCopy}
               onDownload={onDownload}
+              onClick={() => openDrawer(item)}
             />
           ))}
         </div>
       )}
+
+      {/* Content Drawer */}
+      <ContentDrawer 
+        isOpen={isDrawerOpen}
+        onClose={closeDrawer}
+        item={selectedItem}
+        onCopy={onCopy}
+        platformLabel={platformLabels[platform]}
+      />
     </div>
   );
 };
