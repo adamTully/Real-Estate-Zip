@@ -319,6 +319,8 @@ const ContentDrawer = ({ isOpen, onClose, item, onCopy, platformLabel }) => {
     </div>
   );
 };
+
+const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
