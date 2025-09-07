@@ -160,6 +160,27 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
   const [progress, setProgress] = useState(0);
   const [progressText, setProgressText] = useState('');
 
+  // Load content from localStorage on component mount
+  React.useEffect(() => {
+    const savedContent = localStorage.getItem(`content_${platform}_${zipCode}`);
+    if (savedContent) {
+      try {
+        const parsedContent = JSON.parse(savedContent);
+        setContent(parsedContent);
+        setHasGenerated(parsedContent.length > 0);
+      } catch (error) {
+        console.error('Error loading saved content:', error);
+      }
+    }
+  }, [platform, zipCode]);
+
+  // Save content to localStorage whenever it changes
+  React.useEffect(() => {
+    if (content.length > 0) {
+      localStorage.setItem(`content_${platform}_${zipCode}`, JSON.stringify(content));
+    }
+  }, [content, platform, zipCode]);
+
   const generateContent = async () => {
     setLoading(true);
     setError('');
