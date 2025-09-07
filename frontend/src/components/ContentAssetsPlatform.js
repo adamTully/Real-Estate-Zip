@@ -110,24 +110,32 @@ const PlatformIcon = ({ platform }) => {
   return <Icon className="w-4 h-4" />;
 };
 
-const ContentCard = ({ item, onCopy, onDownload }) => (
-  <Card className="p-4 hover:shadow-md transition-shadow">
+const ContentCard = ({ item, onCopy, onDownload, onClick }) => (
+  <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={onClick}>
     <div className="flex items-start justify-between mb-2">
-      <h4 className="font-medium text-sm text-neutral-800 line-clamp-2">{item.title}</h4>
+      <h4 className="font-medium text-sm text-neutral-800 line-clamp-2 hover:text-blue-600 transition-colors">{item.title}</h4>
       <div className="flex gap-1 ml-2">
         <Button 
           variant="ghost" 
           size="sm"
-          onClick={() => onCopy(item.content)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onCopy(item.content);
+          }}
           className="h-8 w-8 p-0"
+          title="Copy content"
         >
           <Copy className="w-3 h-3" />
         </Button>
         <Button 
           variant="ghost" 
           size="sm"
-          onClick={() => onDownload(item.name, item.content)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDownload(item.name, item.content);
+          }}
           className="h-8 w-8 p-0"
+          title="Download content"
         >
           <Download className="w-3 h-3" />
         </Button>
