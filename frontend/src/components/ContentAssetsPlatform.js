@@ -188,7 +188,7 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
         }
       }, 800);
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
       
       if (!token) {
         clearInterval(progressInterval);
