@@ -187,6 +187,12 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
       }, 800);
 
       const token = localStorage.getItem('token');
+      
+      if (!token) {
+        setError('Authentication required. Please log in again.');
+        return;
+      }
+      
       const response = await axios.post(
         `${API}/generate-platform-content/${platform}`,
         { zip_code: zipCode },
