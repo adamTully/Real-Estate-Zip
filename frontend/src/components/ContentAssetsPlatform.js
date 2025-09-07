@@ -223,7 +223,14 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
       }, 2000);
       
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to generate content');
+      clearInterval(progressInterval);
+      
+      if (err.response?.status === 401) {
+        setError('Your session has expired. Please log out and log back in.');
+      } else {
+        setError(err.response?.data?.detail || 'Failed to generate content');
+      }
+      
       setProgress(0);
       setProgressText('');
     } finally {
