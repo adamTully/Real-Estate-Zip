@@ -189,6 +189,7 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
       const token = localStorage.getItem('token');
       
       if (!token) {
+        clearInterval(progressInterval);
         setError('Authentication required. Please log in again.');
         return;
       }
@@ -223,7 +224,10 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
       }, 2000);
       
     } catch (err) {
-      clearInterval(progressInterval);
+      // Make sure to clear interval on any error
+      if (typeof progressInterval !== 'undefined') {
+        clearInterval(progressInterval);
+      }
       
       if (err.response?.status === 401) {
         setError('Your session has expired. Please log out and log back in.');
