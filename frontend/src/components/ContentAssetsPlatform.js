@@ -327,6 +327,18 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
   const [hasGenerated, setHasGenerated] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressText, setProgressText] = useState('');
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const openDrawer = (item) => {
+    setSelectedItem(item);
+    setIsDrawerOpen(true);
+  };
+
+  const closeDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedItem(null);
+  };
 
   // Load content from localStorage on component mount
   React.useEffect(() => {
