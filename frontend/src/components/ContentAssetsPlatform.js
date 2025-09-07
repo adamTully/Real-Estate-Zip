@@ -160,7 +160,165 @@ const ContentCard = ({ item, onCopy, onDownload, onClick }) => (
   </Card>
 );
 
-const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
+// Content Drawer Component
+const ContentDrawer = ({ isOpen, onClose, item, onCopy, platformLabel }) => {
+  if (!isOpen || !item) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
+        onClick={onClose}
+      />
+      
+      {/* Drawer */}
+      <div className="absolute right-0 top-0 h-full w-full max-w-2xl bg-white shadow-xl transform transition-transform">
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-neutral-200">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <PlatformIcon platform={platformLabel.toLowerCase().replace(/[^a-z]/g, '')} />
+                <h2 className="text-lg font-semibold text-neutral-900">{platformLabel} Content</h2>
+              </div>
+              {item.post_type && (
+                <Badge variant="secondary">{item.post_type}</Badge>
+              )}
+            </div>
+            <Button variant="ghost" onClick={onClose} className="h-8 w-8 p-0">
+              <span className="text-xl">&times;</span>
+            </Button>
+          </div>
+          
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* Title Section */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide">Title</h3>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => onCopy(item.title)}
+                  className="text-xs gap-1 hover:bg-blue-50 hover:text-blue-600"
+                >
+                  <Copy className="w-3 h-3" />
+                  Copy Title
+                </Button>
+              </div>
+              <div 
+                className="p-4 bg-neutral-50 rounded-lg border cursor-pointer hover:bg-blue-50 transition-colors group"
+                onClick={() => onCopy(item.title)}
+                title="Click to copy title"
+              >
+                <p className="text-neutral-900 font-medium group-hover:text-blue-600 transition-colors">
+                  {item.title}
+                </p>
+              </div>
+            </div>
+
+            {/* Content Section */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide">Content</h3>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => onCopy(item.content)}
+                  className="text-xs gap-1 hover:bg-blue-50 hover:text-blue-600"
+                >
+                  <Copy className="w-3 h-3" />
+                  Copy Content
+                </Button>
+              </div>
+              <div 
+                className="p-4 bg-neutral-50 rounded-lg border cursor-pointer hover:bg-blue-50 transition-colors group min-h-[200px]"
+                onClick={() => onCopy(item.content)}
+                title="Click to copy content"
+              >
+                <pre className="text-neutral-900 whitespace-pre-wrap font-sans text-sm leading-relaxed group-hover:text-blue-600 transition-colors">
+                  {item.content}
+                </pre>
+              </div>
+            </div>
+
+            {/* Hashtags/Additional Info */}
+            {item.hashtags && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide">Hashtags</h3>
+                <div 
+                  className="p-4 bg-blue-50 rounded-lg border cursor-pointer hover:bg-blue-100 transition-colors"
+                  onClick={() => onCopy(item.hashtags)}
+                  title="Click to copy hashtags"
+                >
+                  <p className="text-blue-800 text-sm">{item.hashtags}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Hook (for social platforms) */}
+            {item.hook && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide">Hook</h3>
+                <div 
+                  className="p-4 bg-green-50 rounded-lg border cursor-pointer hover:bg-green-100 transition-colors"
+                  onClick={() => onCopy(item.hook)}
+                  title="Click to copy hook"
+                >
+                  <p className="text-green-800 text-sm font-medium">{item.hook}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Visual Concept */}
+            {item.visual_concept && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide">Visual Concept</h3>
+                <div className="p-4 bg-purple-50 rounded-lg border">
+                  <p className="text-purple-800 text-sm">{item.visual_concept}</p>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Footer */}
+          <div className="border-t border-neutral-200 p-6 bg-neutral-50">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-neutral-500">{item.name}</span>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => onCopy(item.content)}
+                  className="gap-2"
+                >
+                  <Copy className="w-4 h-4" />
+                  Copy All
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    const blob = new Blob([item.content], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = item.name;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
