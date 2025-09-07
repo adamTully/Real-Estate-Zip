@@ -288,19 +288,36 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
           )}
         </div>
         
-        <Button 
-          onClick={generateContent}
-          disabled={loading}
-          className="gap-2"
-          variant={hasGenerated ? "outline" : "default"}
-        >
-          {loading ? (
-            <RefreshCw className="w-4 h-4 animate-spin" />
-          ) : (
-            <PlatformIcon platform={platform} />
+        <div className="flex items-center gap-2">
+          {content.length > 0 && (
+            <Button 
+              onClick={() => {
+                setContent([]);
+                setHasGenerated(false);
+                localStorage.removeItem(`content_${platform}_${zipCode}`);
+              }}
+              variant="outline"
+              size="sm"
+              className="text-red-600 hover:text-red-700"
+            >
+              Clear
+            </Button>
           )}
-          {loading ? 'Generating...' : hasGenerated ? 'Generate More' : 'Generate Content'}
-        </Button>
+          
+          <Button 
+            onClick={generateContent}
+            disabled={loading}
+            className="gap-2"
+            variant={hasGenerated ? "outline" : "default"}
+          >
+            {loading ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <PlatformIcon platform={platform} />
+            )}
+            {loading ? 'Generating...' : hasGenerated ? 'Generate More' : 'Generate Content'}
+          </Button>
+        </div>
       </div>
 
       {/* Progress Bar */}
