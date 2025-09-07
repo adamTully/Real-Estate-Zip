@@ -166,6 +166,8 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
     setProgress(0);
     setProgressText('Initializing...');
     
+    let progressInterval;
+    
     try {
       // Simulate progress updates
       const progressSteps = [
@@ -178,7 +180,7 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
 
       // Start progress simulation
       let currentStep = 0;
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         if (currentStep < progressSteps.length) {
           setProgress(progressSteps[currentStep].percent);
           setProgressText(progressSteps[currentStep].text);
@@ -224,8 +226,8 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
       }, 2000);
       
     } catch (err) {
-      // Make sure to clear interval on any error
-      if (typeof progressInterval !== 'undefined') {
+      // Clear interval on any error
+      if (progressInterval) {
         clearInterval(progressInterval);
       }
       
