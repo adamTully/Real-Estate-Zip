@@ -8,9 +8,9 @@ import time
 
 class TikTokContentDebugTester:
     def __init__(self, base_url=None):
-        # Use the production URL from frontend/.env
+        # Use the local backend for testing
         if base_url is None:
-            base_url = "https://territory-hub-2.preview.emergentagent.com"
+            base_url = "http://localhost:8001"
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
