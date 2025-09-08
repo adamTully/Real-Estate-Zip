@@ -568,16 +568,26 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
       )}
 
       {content.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {content.map((item, index) => (
-            <ContentCard 
-              key={`${platform}-${index}`}
-              item={item}
-              onCopy={onCopy}
-              onDownload={onDownload}
-              onClick={() => openDrawer(item)}
-            />
-          ))}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between border-b border-neutral-200 pb-2 mb-4">
+            <h4 className="text-sm font-medium text-neutral-700">Generated Content</h4>
+            <span className="text-xs text-neutral-500">{content.length} items</span>
+          </div>
+          {content.map((item, index) => {
+            console.log(`Rendering item ${index}:`, item); // Debug log
+            return (
+              <ContentRow 
+                key={`${platform}-${index}`}
+                item={item}
+                onCopy={onCopy}
+                onDownload={onDownload}
+                onClick={(clickedItem) => {
+                  console.log('Item clicked in map:', clickedItem); // Debug log
+                  openDrawer(clickedItem);
+                }}
+              />
+            );
+          })}
         </div>
       )}
 
