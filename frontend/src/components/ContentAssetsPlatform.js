@@ -111,7 +111,10 @@ const PlatformIcon = ({ platform }) => {
 };
 
 const ContentCard = ({ item, onCopy, onDownload, onClick }) => (
-  <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={onClick}>
+  <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => {
+    console.log('ContentCard clicked:', item); // Debug log
+    onClick(item);
+  }}>
     <div className="flex items-start justify-between mb-2">
       <h4 className="font-medium text-sm text-neutral-800 line-clamp-2 hover:text-blue-600 transition-colors">{item.title}</h4>
       <div className="flex gap-1 ml-2">
