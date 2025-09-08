@@ -418,11 +418,23 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
       const platformKey = `${platform}_posts`;
       const fallbackKeys = ['instagram_posts', 'facebook_posts', 'tiktok_posts', 'linkedin_posts', 'youtube_shorts', 'twitter_posts', 'snapchat_posts', 'blog_posts', 'email_campaigns'];
       
+      console.log('Platform:', platform); // Debug log
+      console.log('Platform key:', platformKey); // Debug log
+      console.log('Response data keys:', Object.keys(response.data)); // Debug log
+      console.log('Response data:', response.data); // Debug log
+      
       let newContent = response.data[platformKey] || 
                       response.data[fallbackKeys.find(key => response.data[key])] || 
                       [];
       
-      setContent(prev => [...prev, ...newContent]);
+      console.log('Extracted content:', newContent); // Debug log
+      console.log('Content length:', newContent.length); // Debug log
+      
+      setContent(prev => {
+        const updatedContent = [...prev, ...newContent];
+        console.log('Updated content state:', updatedContent); // Debug log
+        return updatedContent;
+      });
       setHasGenerated(true);
       
       // Reset progress after short delay
