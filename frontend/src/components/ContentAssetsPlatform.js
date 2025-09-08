@@ -110,57 +110,72 @@ const PlatformIcon = ({ platform }) => {
   return <Icon className="w-4 h-4" />;
 };
 
-const ContentCard = ({ item, onCopy, onDownload, onClick }) => (
-  <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => {
-    console.log('ContentCard clicked:', item); // Debug log
-    onClick(item);
-  }}>
-    <div className="flex items-start justify-between mb-2">
-      <h4 className="font-medium text-sm text-neutral-800 line-clamp-2 hover:text-blue-600 transition-colors">{item.title}</h4>
-      <div className="flex gap-1 ml-2">
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onCopy(item.content);
-          }}
-          className="h-8 w-8 p-0"
-          title="Copy content"
-        >
-          <Copy className="w-3 h-3" />
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDownload(item.name, item.content);
-          }}
-          className="h-8 w-8 p-0"
-          title="Download content"
-        >
-          <Download className="w-3 h-3" />
-        </Button>
+// Content Row Component (Table Style)
+const ContentRow = ({ item, onCopy, onDownload, onClick }) => (
+  <div className="border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors">
+    <div 
+      className="p-4 cursor-pointer" 
+      onClick={() => {
+        console.log('ContentRow clicked:', item); // Debug log
+        onClick(item);
+      }}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start gap-4">
+            <div className="flex-1">
+              <h4 className="font-medium text-sm text-neutral-900 hover:text-blue-600 transition-colors mb-1">
+                {item.title}
+              </h4>
+              <p className="text-xs text-neutral-600 line-clamp-2 mb-2">
+                {item.content ? item.content.substring(0, 200) + '...' : 'No content preview available'}
+              </p>
+              <div className="flex items-center gap-4 text-xs text-neutral-500">
+                <span>{item.name}</span>
+                {item.post_type && (
+                  <Badge variant="secondary" className="text-xs">
+                    {item.post_type}
+                  </Badge>
+                )}
+                {item.hashtags && (
+                  <span className="text-blue-600">#{item.hashtags.split('#').filter(Boolean).length - 1} tags</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex gap-1 ml-4">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('Copy button clicked'); // Debug log
+              onCopy(item.content);
+            }}
+            className="h-8 w-8 p-0"
+            title="Copy content"
+          >
+            <Copy className="w-3 h-3" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('Download button clicked'); // Debug log
+              onDownload(item.name, item.content);
+            }}
+            className="h-8 w-8 p-0"
+            title="Download content"
+          >
+            <Download className="w-3 h-3" />
+          </Button>
+        </div>
       </div>
     </div>
-    
-    <p className="text-xs text-neutral-600 mb-3 line-clamp-3">
-      {item.content ? item.content.substring(0, 150) + '...' : 'No content preview available'}
-    </p>
-    
-    <div className="flex items-center justify-between">
-      <span className="text-xs text-neutral-500">{item.name}</span>
-      {item.post_type && (
-        <Badge variant="secondary" className="text-xs">
-          {item.post_type}
-        </Badge>
-      )}
-      {item.hashtags && (
-        <span className="text-xs text-blue-600">#{item.hashtags.split('#').filter(Boolean).length - 1} tags</span>
-      )}
-    </div>
-  </Card>
+  </div>
 );
 
 // Content Drawer Component
