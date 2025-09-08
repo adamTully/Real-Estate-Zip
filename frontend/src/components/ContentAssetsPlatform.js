@@ -331,11 +331,13 @@ const PlatformTab = ({ platform, zipCode, onCopy, onDownload }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const openDrawer = (item) => {
+    console.log('Opening drawer for item:', item); // Debug log
     setSelectedItem(item);
     setIsDrawerOpen(true);
   };
 
   const closeDrawer = () => {
+    console.log('Closing drawer'); // Debug log
     setIsDrawerOpen(false);
     setSelectedItem(null);
   };
